@@ -1,0 +1,62 @@
+<!-- Topbar -->
+<nav class='fixed top-0 left-0 right-0 bg-white shadow-md z-40'>
+  <div class='flex items-center justify-between px-4 md:px-6 h-16'>
+    <!-- Sidebar Toggle (Mobile) -->
+    <button
+      id='sidebarToggleTop'
+      class='text-gray-600 md:hidden focus:outline-none'
+    >
+      <i class='fa fa-bars text-xl'></i>
+    </button>
+
+    <!-- User Info -->
+    <div class='relative ml-auto'>
+      <button
+        onclick='toggleUserDropdown()'
+        class='flex items-center focus:outline-none'
+      >
+        {{#if sessionUser}}
+          <span class='hidden md:inline-block text-gray-700 mr-2 text-sm'>
+            {{sessionUser}}
+          </span>
+        {{/if}}
+        <img
+          class='w-8 h-8 rounded-full'
+          src='/img/undraw_profile.svg'
+          alt='User Avatar'
+        />
+      </button>
+      <!-- Dropdown -->
+      <div
+        id='userDropdown'
+        class='absolute right-0 mt-2 w-40 bg-white rounded-md shadow-md py-2 hidden'
+      >
+        <a
+          href='/logout'
+          class='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+        >
+          <i class='fas fa-sign-out-alt mr-2'></i>
+          Logout
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- margin for fixed topbar -->
+<div class='h-16'></div>
+<script>
+  function toggleUserDropdown() {
+    const dropdown = document.getElementById("userDropdown");
+    dropdown.classList.toggle("hidden");
+  }
+
+  // Optional: close dropdown on outside click
+  document.addEventListener("click", function (event) {
+    const dropdown = document.getElementById("userDropdown");
+    const button = event.target.closest("button");
+    if (!dropdown.contains(event.target) && !button?.closest("button")) {
+      dropdown.classList.add("hidden");
+    }
+  });
+</script>

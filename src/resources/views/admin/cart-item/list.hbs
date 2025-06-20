@@ -1,0 +1,42 @@
+<div class='container mx-auto px-4'>
+  <div class='overflow-x-auto'>
+    <table
+      class='min-w-full table-auto border border-gray-200 shadow-sm rounded'
+    >
+      <thead class='bg-gray-100 text-gray-700'>
+        <tr>
+          <th class='px-4 py-2 text-left border-b'>
+            ID
+          </th>
+          <th class='px-4 py-2 text-left border-b'>
+            Username
+          </th>
+          <th class='px-4 py-2 text-left border-b'>
+            Tên sản phẩm
+          </th>
+          <th class='px-4 py-2 text-left border-b'>
+            Số lượng sản phẩm
+          </th>
+        </tr>
+      </thead>
+      <tbody class='text-gray-800'>
+        {{#each cartItems}}
+          <tr class='hover:bg-gray-50'>
+            <td class='px-4 py-2 border-b'>
+              {{this._id}}
+            </td>
+            <td class='px-4 py-2 border-b'>
+              {{this.username}}
+            </td>
+            <td class='px-4 py-2 border-b'>
+              {{this.product_id.name}}
+            </td>
+            <td class='px-4 py-2 border-b'>
+              {{this.quantity}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

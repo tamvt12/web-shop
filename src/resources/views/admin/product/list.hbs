@@ -1,0 +1,106 @@
+<div class='container mx-auto px-4'>
+  <div class='overflow-x-auto'>
+    <table
+      class='min-w-full table-fixed border-collapse border border-gray-200'
+    >
+      <thead>
+        <tr class='bg-gray-100'>
+          <th
+            class='w-1/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
+          >
+            ID
+          </th>
+          <th
+            class='w-2/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
+          >
+            Tên sản phẩm
+          </th>
+          <th
+            class='w-3/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
+          >
+            Mô tả sản phẩm
+          </th>
+          <th
+            class='w-1/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
+          >
+            Giá sản phẩm
+          </th>
+          <th
+            class='w-1/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
+          >
+            Số lượng trong kho
+          </th>
+          <th
+            class='w-2/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
+          >
+            Tên danh mục
+          </th>
+          <th
+            class='w-2/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
+          >
+            Image
+          </th>
+          <th
+            class='w-1/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each products}}
+          <tr class='even:bg-gray-50'>
+            <td
+              class='border border-gray-300 px-2 py-2 text-sm truncate max-w-[100px]'
+            >
+              {{this._id}}
+            </td>
+            <td class='border border-gray-300 px-2 py-2 text-sm'>
+              {{this.name}}
+            </td>
+            <td
+              class='border border-gray-300 px-2 py-2 text-sm truncate max-w-[200px]'
+            >
+              {{this.description}}
+            </td>
+            <td class='border border-gray-300 px-2 py-2 text-sm text-red-600'>
+              {{formatCurrency this.price}}
+            </td>
+            <td class='border border-gray-300 px-2 py-2 text-sm'>
+              {{this.stock}}
+            </td>
+            <td class='border border-gray-300 px-2 py-2 text-sm'>
+              {{this.category_name}}
+            </td>
+            <td class='border border-gray-300 px-2 py-2 text-sm'>
+              <img
+                src="{{this.image_url}}"
+                alt='Product Image'
+                class='max-w-full h-auto rounded'
+              />
+            </td>
+            <td
+              class='border border-gray-300 px-2 py-2 text-sm whitespace-nowrap'
+            >
+              <div class='flex space-x-2'>
+                <a
+                  href="/admin/product/edit/{{this._id}}"
+                  class='bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs'
+                >
+                  Edit
+                </a>
+                <button
+                  type='button'
+                  onclick="removeRow('/admin/product/destroy/{{this._id}}')"
+                  class='bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs'
+                >
+                  Xóa
+                </button>
+              </div>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

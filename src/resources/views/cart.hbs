@@ -1,0 +1,172 @@
+<div class='container mx-auto px-4 py-6 cart-container'>
+  <h1 class='text-2xl font-bold mb-6'>
+    Giỏ hàng của bạn
+  </h1>
+
+  <div class='overflow-x-auto'>
+    <table class='w-full border border-gray-200 rounded-lg text-sm text-left'>
+      <thead class='bg-gray-100'>
+        <tr>
+          <th class='px-4 py-2 border'>
+            Hình ảnh
+          </th>
+          <th class='px-4 py-2 border'>
+            Tên sản phẩm
+          </th>
+          <th class='px-4 py-2 border'>
+            Giá
+          </th>
+          <th class='px-4 py-2 border'>
+            Số lượng
+          </th>
+          <th class='px-4 py-2 border'>
+            Tổng giá trị
+          </th>
+          <th class='px-4 py-2 border'>
+            Hành động
+          </th>
+        </tr>
+      </thead>
+      <tbody id='cart-items'>
+        {{#each cart_items}}
+          {{#if this.product}}
+            <tr class='cart-item border-t'>
+              <td class='p-2 border'>
+                <img
+                  src="{{this.product.image_url}}"
+                  alt="{{this.product.name}}"
+                  class='w-24 h-auto object-contain'
+                />
+              </td>
+              <td class='p-2 border'>
+                {{this.product.name}}
+              </td>
+              <td class='p-2 border text-red-600 font-semibold'>
+                {{formatCurrency this.product.price}}
+              </td>
+              <td class='p-2 border'>
+                <div class='flex items-center gap-2'>
+                  <button
+                    class='px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600'
+                    onclick="updateQuantity('{{this._id}}', {{
+                      this.quantity
+                    }} - 1)"
+                  >
+                    −
+                  </button>
+                  <span class='px-2'>
+                    {{this.quantity}}
+                  </span>
+                  <button
+                    class='px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600'
+                    onclick="updateQuantity('{{this._id}}', {{
+                      this.quantity
+                    }} + 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </td>
+              <td class='p-2 border text-red-600 font-semibold'>
+                {{formatCurrency this.total}}
+              </td>
+              <td class='p-2 border'>
+                <button
+                  class='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
+                  onclick="removeItem('{{this._id}}')"
+                >
+                  Xóa
+                </button>
+              </td>
+            </tr>
+          {{else if this.product_id}}
+            <tr class='cart-item border-t'>
+              <td class='p-2 border'>
+                <img
+                  src="{{this.product_id.image_url}}"
+                  alt="{{this.product_id.name}}"
+                  class='w-24 h-auto object-contain'
+                />
+              </td>
+              <td class='p-2 border'>
+                {{this.product_id.name}}
+              </td>
+              <td class='p-2 border text-red-600 font-semibold'>
+                {{formatCurrency this.product_id.price.$numberDecimal}}
+              </td>
+              <td class='p-2 border'>
+                <div class='flex items-center gap-2'>
+                  <button
+                    class='px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600'
+                    onclick="updateQuantity('{{this._id}}', {{
+                      this.quantity
+                    }} - 1)"
+                  >
+                    −
+                  </button>
+                  <span class='px-2'>
+                    {{this.quantity}}
+                  </span>
+                  <button
+                    class='px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600'
+                    onclick="updateQuantity('{{this._id}}', {{
+                      this.quantity
+                    }} + 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </td>
+              <td class='p-2 border text-red-600 font-semibold'>
+                {{
+                  formatCurrency
+                  (totalPrice
+                    this.product_id.price.$numberDecimal this.quantity
+                  )
+                }}
+              </td>
+              <td class='p-2 border'>
+                <button
+                  class='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
+                  onclick="removeItem('{{this._id}}')"
+                >
+                  Xóa
+                </button>
+              </td>
+            </tr>
+          {{/if}}
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tổng cộng -->
+  <div class='mt-6 text-right text-lg font-semibold'>
+    {{#if total}}
+      Tổng cộng:
+      <span id='cart-total-price' class='text-red-600'>
+        {{formatCurrency total}}
+      </span>
+    {{else}}
+      {{#each cart_items}}
+        Tổng cộng:
+        <span id='cart-total-price' class='text-red-600'>
+          {{
+            formatCurrency
+            (totalPrice this.product_id.price.$numberDecimal this.quantity)
+          }}
+        </span>
+      {{/each}}
+    {{/if}}
+  </div>
+
+  <!-- Nút thanh toán -->
+  <div class='mt-4 text-right'>
+    <button
+      class='px-6 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition'
+      onclick='checkout()'
+    >
+      Thanh toán
+    </button>
+  </div>
+</div>

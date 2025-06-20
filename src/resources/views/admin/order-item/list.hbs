@@ -1,0 +1,54 @@
+<div class='container mx-auto px-4'>
+  <div class='overflow-x-auto'>
+    <table
+      class='min-w-full table-fixed divide-y divide-gray-200 bg-white shadow-md rounded-lg'
+    >
+      <thead class='bg-gray-100 text-gray-700 text-sm font-semibold'>
+        <tr>
+          <th class='px-4 py-2 text-left w-1/6'>
+            ID
+          </th>
+          <th class='px-4 py-2 text-left w-1/6'>
+            Order_ID
+          </th>
+          <th class='px-4 py-2 text-left w-1/4'>
+            Tên sản phẩm
+          </th>
+          <th class='px-4 py-2 text-left w-1/12'>
+            Số lượng
+          </th>
+          <th class='px-4 py-2 text-left w-1/6'>
+            Giá sản phẩm
+          </th>
+          <th class='px-4 py-2 text-left w-1/6'>
+            Thời gian tạo
+          </th>
+        </tr>
+      </thead>
+      <tbody class='divide-y divide-gray-100 text-sm text-gray-800'>
+        {{#each orderItems}}
+          <tr class='hover:bg-gray-50'>
+            <td class='px-4 py-2 truncate'>
+              {{this._id}}
+            </td>
+            <td class='px-4 py-2 truncate'>
+              {{this.order_id}}
+            </td>
+            <td class='px-4 py-2'>
+              {{this.product_id.name}}
+            </td>
+            <td class='px-4 py-2'>
+              {{this.quantity}}
+            </td>
+            <td class='px-4 py-2 text-red-600 font-semibold'>
+              {{formatCurrency this.price}}
+            </td>
+            <td class='px-4 py-2'>
+              {{formatDate this.created_at}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

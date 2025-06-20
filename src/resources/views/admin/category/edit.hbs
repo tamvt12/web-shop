@@ -1,0 +1,36 @@
+<div class='flex justify-center mt-10'>
+  <div class='w-full max-w-2xl bg-white shadow-md rounded p-6'>
+    {{#if messages.error}}
+      <div class='bg-red-100 text-red-700 px-4 py-3 rounded mb-4'>
+        {{messages.error}}
+      </div>
+    {{else if messages.success}}
+      <div class='bg-green-100 text-green-700 px-4 py-3 rounded mb-4'>
+        {{messages.success}}
+      </div>
+    {{/if}}
+
+    <form method='post'>
+      <div class='mb-4'>
+        <label for='name' class='block text-gray-700 font-medium mb-2'>
+          Tên danh mục
+        </label>
+        <input
+          type='text'
+          id='name'
+          name='name'
+          class='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500'
+          placeholder='Nhập tên danh mục'
+          value="{{category.name}}"
+        />
+      </div>
+
+      <button
+        type='submit'
+        class='w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition'
+      >
+        Sửa
+      </button>
+    </form>
+  </div>
+</div>

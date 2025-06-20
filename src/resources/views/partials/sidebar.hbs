@@ -1,0 +1,154 @@
+<!-- Sidebar -->
+<aside
+  class='fixed top-0 left-0 h-screen w-64 bg-blue-700 text-white z-50 overflow-y-auto shadow'
+>
+  <div class='flex items-center justify-center py-6'>
+    <a href='/' class='flex items-center'>
+      <img src='/img/logo.png' alt='Logo' class='w-16 h-auto' />
+    </a>
+  </div>
+  <nav class='space-y-2 px-4'>
+    <!-- Item -->
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 hover:bg-blue-800 rounded focus:outline-none'
+        onclick="toggleCollapse('category')"
+      >
+        <span>
+          <i class='fas fa-th-large mr-2'></i>
+          Thể loại
+        </span>
+        <i class='fas fa-chevron-down text-sm'></i>
+      </button>
+      <div id='category' class='pl-6 mt-1 hidden'>
+        <a href='/admin/category/add' class='block py-1 hover:underline'>
+          Thêm mới
+        </a>
+        <a href='/admin/category/list' class='block py-1 hover:underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 hover:bg-blue-800 rounded'
+        onclick="toggleCollapse('product')"
+      >
+        <span>
+          <i class='fas fa-cubes mr-2'></i>
+          Sản phẩm
+        </span>
+        <i class='fas fa-chevron-down text-sm'></i>
+      </button>
+      <div id='product' class='pl-6 mt-1 hidden'>
+        <a href='/admin/product/add' class='block py-1 hover:underline'>
+          Thêm mới
+        </a>
+        <a href='/admin/product/list' class='block py-1 hover:underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 hover:bg-blue-800 rounded'
+        onclick="toggleCollapse('cart_item')"
+      >
+        <span>
+          <i class='fas fa-shopping-cart mr-2'></i>
+          Giỏ hàng
+        </span>
+        <i class='fas fa-chevron-down text-sm'></i>
+      </button>
+      <div id='cart_item' class='pl-6 mt-1 hidden'>
+        <a href='/admin/cart-item/list' class='block py-1 hover:underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 hover:bg-blue-800 rounded'
+        onclick="toggleCollapse('order')"
+      >
+        <span>
+          <i class='fas fa-file mr-2'></i>
+          Đơn hàng
+        </span>
+        <i class='fas fa-chevron-down text-sm'></i>
+      </button>
+      <div id='order' class='pl-6 mt-1 hidden'>
+        <a href='/admin/order/list' class='block py-1 hover:underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 hover:bg-blue-800 rounded'
+        onclick="toggleCollapse('order_item')"
+      >
+        <span>
+          <i class='fas fa-list-alt mr-2'></i>
+          Chi tiết đơn hàng
+        </span>
+        <i class='fas fa-chevron-down text-sm'></i>
+      </button>
+      <div id='order_item' class='pl-6 mt-1 hidden'>
+        <a href='/admin/order-item/list' class='block py-1 hover:underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 hover:bg-blue-800 rounded'
+        onclick="toggleCollapse('review')"
+      >
+        <span>
+          <i class='fas fa-star mr-2'></i>
+          Đánh giá
+        </span>
+        <i class='fas fa-chevron-down text-sm'></i>
+      </button>
+      <div id='review' class='pl-6 mt-1 hidden'>
+        <a href='/admin/review/list' class='block py-1 hover:underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 hover:bg-blue-800 rounded'
+        onclick="toggleCollapse('news')"
+      >
+        <span>
+          <i class='far fa-newspaper mr-2'></i>
+          Tin tức
+        </span>
+        <i class='fas fa-chevron-down text-sm'></i>
+      </button>
+      <div id='news' class='pl-6 mt-1 hidden'>
+        <a href='/admin/news/add' class='block py-1 hover:underline'>
+          Thêm mới
+        </a>
+        <a href='/admin/news/list' class='block py-1 hover:underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
+  </nav>
+</aside>
+
+<script>
+  function toggleCollapse(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('hidden');
+  }
+</script>

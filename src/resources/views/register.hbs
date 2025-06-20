@@ -1,0 +1,81 @@
+<div class='min-h-screen flex items-center justify-center bg-gray-100'>
+  <div
+    class='w-[70%] mx-auto bg-white shadow-lg rounded-lg overflow-hidden my-10'
+  >
+    <div class='md:flex'>
+      <div
+        class='hidden md:block md:w-5/12 bg-register-image bg-cover bg-center'
+      ></div>
+      <div class='w-full md:w-7/12 p-8'>
+        <div class='text-center mb-6'>
+          <h1 class='text-2xl font-bold text-gray-900'>
+            Create an Account!
+          </h1>
+        </div>
+
+        {{#if messages.error}}
+          <div class='bg-red-100 text-red-700 px-4 py-2 rounded mb-4'>
+            {{messages.error}}
+          </div>
+        {{/if}}
+
+        {{#if messages.success}}
+          <div class='bg-green-100 text-green-700 px-4 py-2 rounded mb-4'>
+            {{messages.success}}
+          </div>
+        {{/if}}
+
+        <form method='post' action='register' class='space-y-4'>
+          <div>
+            <input
+              type='text'
+              name='name'
+              placeholder='Name'
+              class='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-400'
+            />
+          </div>
+
+          <div>
+            <input
+              type='email'
+              name='email'
+              placeholder='Email Address'
+              class='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-400'
+            />
+          </div>
+
+          <div class='flex flex-col md:flex-row gap-4'>
+            <input
+              type='password'
+              name='password'
+              placeholder='Password'
+              class='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-400'
+            />
+            <input
+              type='password'
+              name='repeatPassword'
+              placeholder='Repeat Password'
+              class='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-400'
+            />
+          </div>
+
+          <button
+            type='submit'
+            class='w-full bg-[#049645] hover:bg-[#c1d9cc] text-white font-semibold py-2 rounded-lg transition duration-200'
+          >
+            Register Account
+          </button>
+        </form>
+
+        <div class='text-center mt-4'>
+          <a
+            href='login'
+            class='text-sm text-blue-600 no-underline hover:underline'
+          >
+            Already have an account? Login!
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

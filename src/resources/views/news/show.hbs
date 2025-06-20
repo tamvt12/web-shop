@@ -1,0 +1,27 @@
+{{> header}}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <article class="blog-post">
+                <h1 class="blog-post-title">{{news.title}}</h1>
+                <p class="blog-post-meta">
+                    {{formatDate news.createdAt}} bởi
+                    <a href="#">{{news.author.name}}</a>
+                </p>
+
+                <img src="{{news.image}}" class="img-fluid mb-4" alt="{{news.title}}">
+
+                <div class="blog-post-content">
+                    {{{news.content}}}
+                </div>
+            </article>
+
+            <nav class="blog-pagination mt-4">
+                <a class="btn btn-outline-primary" href="/news">Quay lại danh sách bài viết</a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+{{> footer}}

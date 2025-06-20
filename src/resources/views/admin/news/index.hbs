@@ -1,0 +1,82 @@
+<div class='container mx-auto px-4'>
+  <div class='overflow-x-auto'>
+    <table class='min-w-full border border-gray-200 text-sm text-left'>
+      <thead class='bg-gray-100 text-gray-700'>
+        <tr>
+          <th class='px-2 py-2 w-24 truncate'>
+            ID
+          </th>
+          <th class='px-2 py-2 w-40'>
+            Tiêu đề
+          </th>
+          <th class='px-2 py-2 w-64'>
+            Tóm tắt
+          </th>
+          <th class='px-2 py-2 w-64'>
+            Nội dung
+          </th>
+          <th class='px-2 py-2 w-28'>
+            Tác giả
+          </th>
+          <th class='px-2 py-2 w-32'>
+            Image
+          </th>
+          <th class='px-2 py-2 w-32 text-center'>
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class='divide-y divide-gray-200'>
+        {{#each news}}
+          <tr class='hover:bg-gray-50'>
+            <td class='px-2 py-2 text-gray-800 truncate w-24'>
+              {{this._id}}
+            </td>
+            <td
+              class='px-2 py-2 text-gray-800 w-40 max-w-[10rem] truncate overflow-hidden whitespace-nowrap'
+            >
+              {{this.title}}
+            </td>
+            <td
+              class='px-2 py-2 text-gray-700 w-64 max-w-[16rem] truncate overflow-hidden whitespace-nowrap'
+            >
+              {{this.summary}}
+            </td>
+            <td
+              class='px-2 py-2 text-gray-700 w-64 max-w-[16rem] truncate overflow-hidden whitespace-nowrap'
+            >
+              {{this.content}}
+            </td>
+            <td class='px-2 py-2 text-gray-700 w-28'>
+              {{this.user_name}}
+            </td>
+            <td class='px-2 py-2 w-32'>
+              <img
+                src="{{this.image_url}}"
+                alt='News image'
+                class='w-20 h-auto border rounded'
+              />
+            </td>
+            <td class='px-2 py-2 w-32 text-center'>
+              <div class='flex gap-2 justify-center'>
+                <a
+                  href="/admin/news/edit/{{this._id}}"
+                  class='bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700'
+                >
+                  Edit
+                </a>
+                <button
+                  type='button'
+                  onclick="removeRow('/admin/news/destroy/{{this._id}}')"
+                  class='bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700'
+                >
+                  Xóa
+                </button>
+              </div>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>
