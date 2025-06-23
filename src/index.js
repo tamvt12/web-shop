@@ -35,6 +35,9 @@ const hbs = engine.create({
     gt: helpers.gt,
     lt: helpers.lt,
     array: helpers.array,
+    json: function (context) {
+      return JSON.stringify(context, null, 2)
+    },
   },
   extname: '.hbs',
 })

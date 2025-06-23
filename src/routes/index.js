@@ -6,8 +6,10 @@ const productRouter = require('./product')
 const adminRouter = require('./admin')
 const newsRouter = require('./news')
 const HomeController = require('../app/controllers/HomeController')
+const NewsController = require('../app/controllers/NewsController')
 
 function route(app) {
+  app.use('/news', newsRouter)
   app.use('/admin/category', checkLoggedIn, checkAdmin, categoryRouter)
   app.use('/admin/product', checkLoggedIn, checkAdmin, productRouter)
   app.use('/admin/news', checkLoggedIn, checkAdmin, newsRouter)
@@ -34,6 +36,8 @@ function route(app) {
   app.post('/checkout', HomeController.checkOut)
   app.get('/order', HomeController.showOrder)
   app.post('/rating', HomeController.rating)
+  app.get('/news', NewsController.showList)
+  app.get('/news/:id', NewsController.showDetail)
 }
 
 module.exports = route

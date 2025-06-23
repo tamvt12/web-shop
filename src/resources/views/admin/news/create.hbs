@@ -74,27 +74,6 @@
       'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount',
     toolbar:
       'undo redo | blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | image media | removeformat | help',
-    images_upload_url: '/admin/upload-image',
-    images_upload_handler: function (blobInfo, success, failure) {
-      var xhr = new XMLHttpRequest();
-      xhr.withCredentials = false;
-      xhr.open('POST', '/admin/upload-image');
-      xhr.onload = function () {
-        if (xhr.status != 200) {
-          failure('HTTP Error: ' + xhr.status);
-          return;
-        }
-        const json = JSON.parse(xhr.responseText);
-        if (!json || typeof json.location != 'string') {
-          failure('Invalid JSON: ' + xhr.responseText);
-          return;
-        }
-        success(json.location);
-      };
-      const formData = new FormData();
-      formData.append('file', blobInfo.blob(), blobInfo.filename());
-      xhr.send(formData);
-    },
     file_picker_types: 'image',
     automatic_uploads: true,
     images_reuse_filename: true,

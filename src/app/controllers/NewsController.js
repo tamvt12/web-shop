@@ -119,33 +119,62 @@ class NewsController {
     }
   }
 
-  // Show single article (for public view)
-  async show(req, res) {
+  async showList(req, res) {
     try {
-      const news = await News.findById(req.params.id).populate('author', 'name')
+      const newsList = await News.find({}).sort({ createdAt: -1 }).lean()
+      for (let newsItem of newsList) {
+        const user = await Users.findById(newsItem.author, {
+          name: 1,
+          _id: 0,
+        }).lean()
+        newsItem.user_name = user ? user.name : ''
+      }
+      res.render('news', { newsList })
+    } catch (error) {
+      next(error)
+    }
+  }
 
+  async showDetail(req, res) {
+    try {
+      const news = await News.findById(req.params.id)
       if (!news) {
         return res.status(404).render('404')
       }
 
-      res.render('news/show', { news })
+      news.views = (news.views || 0) + 1
+      await news.save()
+
+      const user = await Users.findById(news.author, {
+        name: 1,
+        _id: 0,
+      }).lean()
+
+      const relatedNews = await News.find({ _id: { $ne: news._id } })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean()
+
+      const excludeIds = [
+        news._id.toString(),
+        ...relatedNews.map((n) => n._id.toString()),
+      ]
+
+      const latestNews = await News.find({ _id: { $nin: excludeIds } })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean()
+
+      const plainNews = news.toObject()
+      plainNews.user_name = user ? user.name : ''
+
+      res.render('news-detail', {
+        new: plainNews,
+        relatedNews,
+        latestNews,
+      })
     } catch (error) {
       res.status(500).render('404')
-    }
-  }
-
-  // Get latest news (for homepage)
-  async getLatestNews(req, res) {
-    try {
-      const latestNews = await News.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .populate('author', 'name')
-
-      return latestNews
-    } catch (error) {
-      console.error('Error fetching latest news:', error)
-      return []
     }
   }
 }

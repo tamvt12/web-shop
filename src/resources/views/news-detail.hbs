@@ -1,0 +1,92 @@
+<div class='container w-[90%] mx-auto px-4 py-8 flex'>
+  <div class='w-3/4'>
+    <div class='bg-white rounded-xl shadow-lg overflow-hidden'>
+      <div class='p-8'>
+        <!-- Tiêu đề -->
+        <h2 class='font-bold text-lg text-black mt-4 mb-2 min-h-[48px]'>
+          {{new.title}}
+        </h2>
+        <!-- Thông tin meta -->
+        <div class='flex items-center text-sm text-gray-500 mb-6'>
+          <span class='mr-1'>
+            📅
+          </span>
+          <span>
+            {{formatDate new.createdAt}}
+          </span>
+          <span class='mx-2'>
+            |
+          </span>
+          <span class='mr-1'>
+            👤
+          </span>
+          <span>
+            {{new.user_name}}
+          </span>
+          <span class='mx-2'>
+            |
+          </span>
+          <span class='mr-1 text-green-600'>
+            👁️
+          </span>
+          <span class='text-green-600'>
+            Views ({{new.views}})
+          </span>
+        </div>
+        <!-- Nội dung chi tiết -->
+        <div class='prose max-w-none'>
+          {{{new.content}}}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Cột phải: Sidebar -->
+  <div class='space-y-8 w-1/4 ml-8'>
+    <!-- 3 bài viết khác -->
+    {{#if relatedNews.length}}
+      <div class='bg-white rounded-lg p-5 shadow-md'>
+        <h3 class='font-semibold text-custom-base pb-5 border-b text-[#7f7f7f]'>
+          TIN TỨC KHÁC
+        </h3>
+        <ul class='space-y-2 p-3'>
+          {{#each relatedNews}}
+            <li class='flex flex-col'>
+              <a
+                href="/news/{{this._id}}"
+                class='text-black hover:underline text-custom-sm font-medium'
+              >
+                {{this.title}}
+              </a>
+              <span class='text-[#666] text-custom-xs'>
+                {{formatDate new.createdAt}}
+              </span>
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+    <!-- 3 bài viết mới nhất -->
+    {{#if latestNews.length}}
+      <div class='bg-white rounded-lg p-5 shadow-md'>
+        <h3 class='font-semibold text-base pb-5 border-b text-[#7f7f7f]'>
+          TIN TỨC MỚI NHẤT
+        </h3>
+        <ul class='space-y-2 p-3'>
+          {{#each latestNews}}
+            <li class='flex flex-col'>
+              <a
+                href="/news/{{this._id}}"
+                class='text-black hover:underline text-custom-sm font-medium'
+              >
+                {{this.title}}
+              </a>
+              <span class='text-[#666] text-custom-xs'>
+                {{formatDate new.createdAt}}
+              </span>
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+  </div>
+</div>
