@@ -1,3 +1,56 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.text-custom-green {
+  color: #01633C !important;
+}
+
+.text-custom-xs {
+	font-size: 13px;
+	font-family: "Roboto";
+	line-height: 20px
+}
+
+.text-custom-sm {
+	font-size: 14px;
+	font-family: "Roboto";
+	line-height: 20px
+}
+
+.text-custom-base {
+	font-size: 16px;
+	font-family: "Roboto";
+	line-height: 20px
+}
+
+.bg-custom-green {
+  background-color: #DFFFE0 !important;
+}
+
+.bg-custom-green-hover:hover {
+  background-color: #4ac950 !important;
+}
+
+.bg-btn {
+	background-color: #049645 !important;
+}
+
+.border-custom {
+	border: 1px solid #049645 !important;
+}
+
+.border-custom-green {
+	border-color: #049645 !important;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Hide spinner buttons for Firefox */
+input[type=number] {
+	-moz-appearance: textfield;
+}

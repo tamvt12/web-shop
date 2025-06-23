@@ -4,9 +4,13 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+	<link
+			href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+			rel="stylesheet">
+	<link
+		rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+	/>
 	<link rel="stylesheet" href="/css/style.css">
 	<link rel="icon" type="image/png" href="/img/logo.png">
 	{{!-- <title>Document</title> --}}
@@ -24,17 +28,16 @@
 			<!-- Content Wrapper -->
 			<div class="flex flex-col w-[calc(100%-250px)] ml-[250px] min-h-screen transition-all duration-300">
 				<!-- Topbar -->
-				<div class="p-5">
+				<div class="pb-8 bg-[#F4F4F4] min-h-screen">
 					{{> topbar }}
 					{{{ body }}}
 				</div>
-				{{> footer }}
 			</div>
 		</div>
 	{{else}}
 		<div class="app">
 			{{> header }}
-			<div class="container min-h-screen">
+			<div class="container max-w-full bg-[#F4F4F4] pt-3 pb-8">
 				{{{ body }}}
 			</div>
 			{{> footer }}

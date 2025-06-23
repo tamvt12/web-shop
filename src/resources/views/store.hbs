@@ -1,0 +1,171 @@
+<!-- Breadcrumbs -->
+<div class='flex items-center text-sm text-gray-600 space-x-2 mx-auto w-[90%] pb-3'>
+  <a href='/' class='text-black hover:underline'>
+    Trang chủ
+  </a>
+  <span>
+    <i class='fas fa-angle-right'></i>
+  </span>
+  <span class='text-green-600'>
+		Gian Hàng
+  </span>
+</div>
+<div class='w-[90%] mx-auto flex gap-6'>
+  {{! Sidebar }}
+  <div class='w-1/4'>
+    <div class='p-4 bg-white rounded-lg shadow-sm'>
+      <h3 class='text-lg font-semibold mb-3 text-custom-green'>Danh mục</h3>
+      <ul>
+        <li>
+          <a
+            href='/store'
+            class='block py-2 px-3 rounded hover:bg-gray-100 {{#unless currentCategory}}font-bold text-custom-green bg-gray-100{{/unless}}'
+          >Tất cả sản phẩm</a>
+        </li>
+        {{#each categories}}
+          <li>
+            <a
+              href='store?category={{this._id}}'
+              class='block py-2 px-3 rounded hover:bg-gray-100 {{#ifCond ../currentCategory._id this._id}}font-bold text-custom-green bg-gray-100{{/ifCond}}'
+            >{{this.name}}</a>
+          </li>
+        {{/each}}
+      </ul>
+			<div class='mt-6'>
+      <h3 class='text-lg font-semibold mb-3'>Chọn khoảng giá</h3>
+      <form id='price-filter-form'>
+        <div class='space-y-2'>
+          <div class="grid grid-cols-2 gap-2">
+            <input
+              type='number'
+              name='minPrice'
+              id='minPrice'
+              placeholder='Từ'
+              class='w-full h-[30px] border rounded px-2 py-1 text-custom-sm focus:outline-none focus:ring-1 focus:ring-green-500'
+              value='{{minPrice}}'
+            />
+            <input
+              type='number'
+              name='maxPrice'
+              id='maxPrice'
+              placeholder='Đến'
+              class='w-full h-[30px] border rounded px-2 py-1 text-custom-sm focus:outline-none focus:ring-1 focus:ring-green-500'
+              value='{{maxPrice}}'
+            />
+          </div>
+        </div>
+        <button
+          type='submit'
+					id="price-filter-form"
+          class='w-full h-[30px] text-black border hover:bg-gray-100 py-2 rounded transition duration-200 mt-3 flex justify-center items-center'
+        >
+          Áp dụng
+        </button>
+				<button
+          type='button'
+					id="reset-price-filter"
+          class='w-full h-[30px] text-white bg-btn bg-custom-green-hover py-2 rounded transition duration-200 mt-3 flex justify-center items-center'
+        >
+          Đặt lại
+        </button>
+      </form>
+    </div>
+    </div>
+  </div>
+
+  {{! Main Content }}
+  <div class='w-3/4'>
+    <div class='p-4 bg-white rounded-lg shadow-sm'>
+      <h2 class='text-xl font-bold mb-4'>
+        {{#if currentCategory}}
+          {{currentCategory.name}}
+        {{else}}
+          Tất cả sản phẩm
+        {{/if}}
+      </h2>
+
+      {{#if products.length}}
+        <div class='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+          {{#each products}}
+            <a
+              href='/products/{{this._id}}'
+              class='block text-inherit hover:no-underline'
+            >
+              <div
+                class='bg-white border rounded-lg shadow-sm h-full flex flex-col hover:shadow-md transition'
+              >
+                <img
+                  src='{{this.image_url}}'
+                  alt='{{this.name}}'
+                  class='object-contain p-2 h-[140px] w-full'
+                />
+                <div class='p-2 flex flex-col flex-grow'>
+                  <h6
+                    class='text-[13px] font-semibold text-gray-900 mb-1 line-clamp-2'
+                  >
+                    {{this.name}}
+                  </h6>
+                  <p class='text-green-600 font-bold mb-1'>
+                    {{formatCurrency this.price}}
+                  </p>
+                  <div class='text-yellow-500 text-xs'>
+                    {{formatAverageRating this.rating}}
+                    <span class='text-gray-600 ml-1 text-xs'>
+                      ({{this.reviewCount}})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          {{/each}}
+        </div>
+      {{else}}
+        <p>Không tìm thấy sản phẩm nào.</p>
+      {{/if}}
+
+      {{! Pagination }}
+      {{#if (gt totalPages 1)}}
+        <div class='flex justify-end items-center mt-8 text-sm text-gray-600 space-x-1'>
+          <span class='mr-3'>Trang {{currentPage}}/{{totalPages}}</span>
+
+          {{#if (gt currentPage 1)}}
+            <a href='?page=1{{#if currentCategory}}&category={{currentCategory._id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+              Đầu
+            </a>
+            <a href='?page={{subtract currentPage 1}}{{#if currentCategory}}&category={{currentCategory._id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+              &laquo;
+            </a>
+          {{/if}}
+
+          {{#each pages}}
+            {{#if (eq this ../currentPage)}}
+              <span class='px-3 py-1 border border-green-600 bg-green-600 text-white rounded'>{{this}}</span>
+            {{else}}
+              <a href='?page={{this}}{{#if ../currentCategory}}&category={{../currentCategory._id}}{{/if}}{{#if ../search}}&search={{../search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+                {{this}}
+              </a>
+            {{/if}}
+          {{/each}}
+
+          {{#if (lt currentPage totalPages)}}
+            <a href='?page={{add currentPage 1}}{{#if currentCategory}}&category={{currentCategory._id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+              &raquo;
+            </a>
+            <a href='?page={{totalPages}}{{#if currentCategory}}&category={{currentCategory._id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+              Cuối
+            </a>
+          {{/if}}
+        </div>
+      {{/if}}
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('reset-price-filter')?.addEventListener('click', function() {
+      document.getElementById('minPrice').value = '';
+      document.getElementById('maxPrice').value = '';
+      document.getElementById('price-filter-form').submit();
+    });
+  });
+</script>

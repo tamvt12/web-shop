@@ -65,14 +65,29 @@ function subtract(a, b) {
 
 function times(n, block) {
   let accum = ''
-  for (let i = 1; i <= n; ++i) {
-    accum += block.fn(i)
+  for (let i = 0; i < n; ++i) {
+    const data = { index: i + 1, ratingValue: 5 - i }
+    accum += block.fn(this, { data: data })
   }
   return accum
 }
 
 function eq(a, b) {
   return a === b
+}
+
+function gt(a, b) {
+  return a > b
+}
+
+function lt(a, b) {
+  return a < b
+}
+
+// Helper tạo mảng từ các tham số truyền vào
+function array() {
+  // Loại bỏ đối tượng options ở cuối arguments
+  return Array.prototype.slice.call(arguments, 0, -1)
 }
 
 module.exports = {
@@ -87,7 +102,10 @@ module.exports = {
   subtract,
   times,
   eq,
+  gt,
+  lt,
   json: function (context) {
     return JSON.stringify(context, null, 2)
   },
+  array,
 }

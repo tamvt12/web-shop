@@ -1,221 +1,276 @@
 <!-- Breadcrumbs -->
-<div class='flex items-center text-sm text-gray-600 space-x-2'>
-  <a href='/' class='text-black hover:underline'>
-    Trang chủ
-  </a>
-  <span>
-    <i class='fas fa-angle-right'></i>
-  </span>
-  <a href='/' class='text-black hover:underline'>
-    {{product.category.name}}
-  </a>
-  <span>
-    <i class='fas fa-angle-right'></i>
-  </span>
-  <span class='text-green-600'>
-    {{product.name}}
-  </span>
+<div class='flex items-center text-sm text-gray-600 space-x-2 mb-3 mx-auto w-[80%]'>
+	<a href='/' class='text-black hover:underline'>
+		Trang chủ
+	</a>
+	<span>
+		<i class='fas fa-angle-right'></i>
+	</span>
+	<a href="/store?category={{product.category._id}}" class='text-black hover:underline'>
+		{{product.category.name}}
+	</a>
+	<span>
+		<i class='fas fa-angle-right'></i>
+	</span>
+	<span class='text-green-600'>
+		{{product.name}}
+	</span>
 </div>
 
 <!-- Main Content -->
-<div class='mt-4 mb-4 p-4 bg-white rounded shadow'>
-  <div class='grid md:grid-cols-2 gap-6'>
-    <!-- Product Images -->
-    <div>
-      <div class='mb-3'>
-        <img
-          src="{{product.image_url}}"
-          alt="{{product.name}}"
-          class='w-full h-[400px] object-contain rounded border'
-          id='mainImage'
-        />
-      </div>
-      <div class='flex gap-2 overflow-x-auto'>
-        <img
-          src="{{product.image_url}}"
-          class='w-20 h-20 object-cover rounded border-2 cursor-pointer active-thumb'
-          onclick='updateMainImage(this)'
-        />
-        {{#if product.gallery}}
-          {{#each product.gallery}}
-            <img
-              src="{{this}}"
-              class='w-20 h-20 object-cover rounded border cursor-pointer'
-              onclick='updateMainImage(this)'
-            />
-          {{/each}}
-        {{/if}}
-      </div>
-    </div>
+<div class='w-[80%] mx-auto'>
+	<div class='grid md:grid-cols-2 gap-6 bg-white rounded-lg p-5'>
+		<!-- Product Images -->
+		<div>
+			<div class='mb-3'>
+				{{#if product.image_url}}
+					{{#each product.image_url}}
+						{{#if @first}}
+							<img src="{{this}}" alt="{{../product.name}}" class='w-full h-[400px] object-cover rounded border'
+								id='mainImage' />
+						{{/if}}
+					{{/each}}
+				{{else}}
+					<img src="{{product.image_url}}" alt="{{product.name}}" class='w-full h-[400px] object-cover rounded border'
+						id='mainImage' />
+				{{/if}}
+			</div>
+			<div class='flex gap-2 overflow-x-auto'>
+				{{#if product.image_url}}
+					{{#each product.image_url}}
+						<img src="{{this}}" class='w-20 h-20 object-cover rounded border cursor-pointer thumbnail-image {{#if @first}}border-green-600 border-2{{else}}border-gray-300{{/if}}'
+							onclick='updateMainImage(this)' alt="Thumbnail {{@index}}" />
+					{{/each}}
+				{{/if}}
+			</div>
+		</div>
 
-    <!-- Product Info -->
-    <div>
-      <div class='flex items-center space-x-2 mb-2'>
-        <span
-          class='inline-block bg-green-100 text-green-800 text-sm px-2 py-1 rounded'
-        >
-          Còn hàng
-        </span>
-        {{#if product.rating}}
-          <div class='text-yellow-500 text-sm'>
-            ★★★★★
-            <span class='text-gray-500'>
-              ({{product.reviewCount}} đánh giá)
-            </span>
-          </div>
-        {{/if}}
-      </div>
+		<!-- Product Info -->
+		<div>
+			<div class="flex justify-between items-start">
+				<h1 class='text-xl font-semibold mb-3 flex items-center gap-2'>
+					<span>{{product.name}}</span>
+				</h1>
+				<a href="#" id="shareButton" onclick="copyUrl(event)"
+					class="text-sm text-[#049645] hover:underline flex items-center gap-1">
+					<i class="fas fa-share-alt"></i> Chia sẻ
+				</a>
+			</div>
 
-      <h1 class='text-xl font-semibold mb-3'>
-        {{product.name}}
-      </h1>
 
-      <div class='space-y-2 text-sm text-gray-600 mb-4'>
-        <div class='flex gap-2'>
-          <span>
-            Gửi từ:
-          </span>
-          <span>
-            {{product.location}}
-          </span>
-        </div>
-        <div class='flex gap-2'>
-          <span>
-            Khu vực giao hàng:
-          </span>
-          <span>
-            Chọn khu vực
-          </span>
-        </div>
-        <div class='flex gap-2'>
-          <span>
-            Vận chuyển:
-          </span>
-          <span>
-            Nhanh
-          </span>
-        </div>
-      </div>
+			<div class='flex items-center space-x-4 mb-4 text-custom-sm'>
+				<div class='text-yellow-500'>
+					<span class=''>{{formatAverageRating product.rating}}</span>
+				</div>
+				<div class="border-l pl-4">
+					<span class="text-gray-500">0 lượt mua</span>
+				</div>
+				<a href="#" class="flex items-center gap-1 ml-auto">
+					<i class="fas fa-exclamation-triangle text-[#FFC107]"></i> Báo cáo
+				</a>
+			</div>
 
-      <div class='mb-4'>
-        <div class='text-sm text-gray-600 mb-2'>
-          Phân loại:
-        </div>
-        <div class='flex gap-2'>
-          {{#each product.variants}}
-            <div
-              class='p-1 border hover:border-green-600 cursor-pointer rounded'
-            >
-              <img
-                src="{{this.image}}"
-                alt="{{this.name}}"
-                class='w-12 h-12 object-cover rounded'
-              />
-            </div>
-          {{/each}}
-        </div>
-      </div>
+			<div class="pt-4 pb-4 border-t rounded-lg space-y-3">
+				<div class='grid grid-cols-3 items-center text-sm'>
+					<span class='text-gray-500'>Gửi từ</span>
+					<span class='col-span-2'>{{product.location}}</span>
+				</div>
+				<div class='grid grid-cols-3 items-center text-sm'>
+					<span class='text-gray-500'>Khu vực giao hàng</span>
+					<span class='col-span-2 flex items-center gap-1'>Chọn khu vực <i class="fas fa-angle-down"></i></span>
+				</div>
+				<div class='grid grid-cols-3 items-center text-sm'>
+					<span class='text-gray-500'>Vận chuyển nhanh</span>
+					<span class='col-span-2'>0</span>
+				</div>
+			</div>
 
-      <div class='mb-4'>
-        <div class='text-sm text-gray-600 mb-2'>
-          Số lượng:
-        </div>
-        <div class='flex items-center w-32'>
-          <button
-            type='button'
-            onclick='decrementQuantity()'
-            class='px-2 py-1 border rounded-l hover:bg-gray-100'
-          >
-            −
-          </button>
-          <input
-            type='number'
-            id='quantity'
-            value='1'
-            min='1'
-            class='w-full text-center border-t border-b focus:outline-none'
-          />
-          <button
-            type='button'
-            onclick='incrementQuantity()'
-            class='px-2 py-1 border rounded-r hover:bg-gray-100'
-          >
-            +
-          </button>
-        </div>
-      </div>
 
-      <div class='mb-4'>
-        <h3 class='text-2xl text-red-600 font-semibold'>
-          {{formatCurrency product.price}}
-        </h3>
-      </div>
+			<div class='my-4'>
+				<div class='grid grid-cols-3 items-center text-sm'>
+					<span class='text-gray-500'>Phân loại 1:</span>
+					<div class='col-span-2 flex gap-2'>
+						{{#if product.gallery}}
+						{{#each product.gallery}}
+						<div class='p-1 border bg-white hover:border-green-600 cursor-pointer rounded'>
+							<img src="{{this}}" alt="variant" class='w-12 h-12 object-cover rounded' />
+						</div>
+						{{/each}}
+						{{/if}}
+					</div>
+				</div>
+			</div>
 
-      <div class='flex gap-2'>
-        <button
-          onclick="addToCart('{{product._id}}')"
-          class='w-full border border-green-600 text-green-600 rounded py-2 hover:bg-green-50'
-        >
-          Thêm vào giỏ hàng
-        </button>
-        <button
-          onclick="buyNow('{{product._id}}')"
-          class='w-full bg-green-600 text-white rounded py-2 hover:bg-green-700'
-        >
-          Mua ngay
-        </button>
-      </div>
-    </div>
-  </div>
+			<div class='my-4'>
+				<div class='grid grid-cols-3 items-center text-sm'>
+					<span class='text-gray-500'>Số lượng:</span>
+					<div class='flex items-center w-32 border rounded'>
+						<button type='button' onclick='decrementQuantity()'
+							class='px-3 py-1 text-gray-500 hover:bg-gray-100'>−</button>
+						<input type='number' id='quantity' value='1' min='1' class='w-full text-center focus:outline-none' />
+						<button type='button' onclick='incrementQuantity()'
+							class='px-3 py-1 text-gray-500 hover:bg-gray-100'>+</button>
+					</div>
+				</div>
+			</div>
 
-  <!-- Tabs -->
-  <div class='mt-6'>
-    <div class='border-b flex space-x-4 text-sm'>
-      <button class='py-2 px-4 border-b-2 border-green-600 font-semibold'>
-        Chi tiết
-      </button>
-      <button class='py-2 px-4 text-gray-600 hover:text-black'>
-        Đánh giá ({{product.reviewCount}})
-      </button>
-    </div>
+			<div class='my-6'>
+				<h3 class='text-3xl text-green-600 font-semibold'>
+					{{formatCurrency product.price}}
+				</h3>
+			</div>
 
-    <div class='mt-4'>
-      <p>
-        {{product.description}}
-      </p>
+			<div class='flex gap-2'>
+				<button onclick="addToCart('{{product._id}}')"
+					class='flex-1 border bg-green-50 text-green-600 rounded py-3 hover:bg-green-100'>
+					Thêm vào giỏ hàng
+				</button>
+				<button onclick="buyNow('{{product._id}}')"
+					class='flex-1 bg-green-600 text-white rounded py-3 hover:bg-green-700'>
+					Mua ngay
+				</button>
+				<button class='border rounded px-4 py-3 hover:bg-gray-100'>
+					<i class="far fa-heart text-gray-600"></i>
+				</button>
+			</div>
+		</div>
+	</div>
 
-      <div class='mt-6'>
-        {{#if product.reviews}}
-          {{#each product.reviews}}
-            <div class='mb-6'>
-              <div class='flex items-center gap-3 mb-2'>
-                <img
-                  src="{{this.user.avatar}}"
-                  class='w-10 h-10 rounded-full object-cover'
-                />
-                <div class='flex-1'>
-                  <h6 class='font-semibold mb-1'>
-                    {{this.user.name}}
-                  </h6>
-                  <div class='text-yellow-500'>
-                    {{formatAverageRating this.rating}}
-                  </div>
-                </div>
-                <small class='text-gray-400'>
-                  {{formatDate this.createdAt}}
-                </small>
-              </div>
-              <p class='text-gray-700'>
-                {{this.comment}}
-              </p>
-            </div>
-          {{/each}}
-        {{else}}
-          <p class='text-gray-400'>
-            Chưa có đánh giá nào cho sản phẩm này.
-          </p>
-        {{/if}}
-      </div>
-    </div>
-  </div>
+	<!-- Tabs -->
+	<div class='mt-6 bg-white rounded-lg p-5'>
+		<div class='border-b flex space-x-4 text-sm'>
+			<button id='tab-details' class='py-2 px-4 border-b-2 border-green-600 font-semibold tab-button active'
+				onclick="switchTab('details')">
+				Chi tiết
+			</button>
+			<button id='tab-reviews' class='py-2 px-4 text-gray-600 hover:text-black tab-button'
+				onclick="switchTab('reviews')">
+				Đánh giá ({{product.reviewCount}})
+			</button>
+		</div>
+
+		<!-- Tab Content -->
+		<div id='tab-content-details' class='mt-4 tab-content active'>
+			<p>
+				{{product.description}}
+			</p>
+		</div>
+
+		<div id='tab-content-reviews' class='mt-4 tab-content hidden'>
+			{{#if product.reviews}}
+			{{#each product.reviews}}
+			<div class='mb-6'>
+				<div class='flex items-center gap-3 mb-2'>
+					<img src="{{#if this.user.avatar}}{{this.user.avatar}}{{else}}/img/undraw_profile.svg{{/if}}"
+						class='w-10 h-10 rounded-full object-cover' onerror="this.src='/img/undraw_profile.svg'" />
+					<div class='flex-1'>
+						<h6 class='font-semibold mb-1'>
+							{{this.user.name}}
+						</h6>
+						<div class='text-yellow-500'>
+							{{formatAverageRating this.rating}}
+						</div>
+					</div>
+					<small class='text-gray-400'>
+						{{formatDate this.createdAt}}
+					</small>
+				</div>
+				<p class='text-gray-700'>
+					{{this.comment}}
+				</p>
+			</div>
+			{{/each}}
+			{{else}}
+			<p class='text-gray-400'>
+				Chưa có đánh giá nào cho sản phẩm này.
+			</p>
+			{{/if}}
+		</div>
+	</div>
+
+	<script>
+		// Add CSS for sharp images
+		const style = document.createElement('style');
+		style.textContent = `
+			#mainImage {
+				image-rendering: -webkit-optimize-contrast;
+				image-rendering: crisp-edges;
+				image-rendering: pixelated;
+				backface-visibility: hidden;
+				transform: translateZ(0);
+			}
+			.thumbnail-image {
+				image-rendering: -webkit-optimize-contrast;
+				image-rendering: crisp-edges;
+				backface-visibility: hidden;
+				transform: translateZ(0);
+			}
+		`;
+		document.head.appendChild(style);
+
+		function updateMainImage(clickedImage) {
+			console.log('Updating main image:', clickedImage.src);
+			const mainImage = document.getElementById('mainImage');
+			if (mainImage) {
+				mainImage.src = clickedImage.src;
+				console.log('Main image updated to:', mainImage.src);
+			} else {
+				console.error('Main image element not found');
+			}
+
+			// Remove active class from all thumbnails
+			const thumbnails = document.querySelectorAll('.thumbnail-image');
+			thumbnails.forEach(thumb => {
+				thumb.classList.remove('border-green-600', 'border-2');
+				thumb.classList.add('border-gray-300');
+			});
+
+			// Add active class to clicked thumbnail
+			clickedImage.classList.remove('border-gray-300');
+			clickedImage.classList.add('border-green-600', 'border-2');
+		}
+
+		function switchTab(tabName) {
+			// Ẩn tất cả tab content
+			const tabContents = document.querySelectorAll('.tab-content');
+			tabContents.forEach(content => {
+				content.classList.add('hidden');
+				content.classList.remove('active');
+			});
+
+			// Bỏ active tất cả tab buttons
+			const tabButtons = document.querySelectorAll('.tab-button');
+			tabButtons.forEach(button => {
+				button.classList.remove('border-b-2', 'border-green-600', 'font-semibold');
+				button.classList.add('text-gray-600');
+			});
+
+			// Hiển thị tab content được chọn
+			const selectedContent = document.getElementById(`tab-content-${tabName}`);
+			selectedContent.classList.remove('hidden');
+			selectedContent.classList.add('active');
+
+			// Active tab button được chọn
+			const selectedButton = document.getElementById(`tab-${tabName}`);
+			selectedButton.classList.add('border-b-2', 'border-green-600', 'font-semibold');
+			selectedButton.classList.remove('text-gray-600');
+		}
+
+		function copyUrl(event) {
+			event.preventDefault();
+			const urlToCopy = window.location.href;
+			const shareButton = document.getElementById('shareButton');
+			const originalHtml = shareButton.innerHTML;
+
+			navigator.clipboard.writeText(urlToCopy).then(() => {
+				shareButton.innerHTML = '<i class="fas fa-check"></i> Đã sao chép!';
+				setTimeout(() => {
+					shareButton.innerHTML = originalHtml;
+				}, 2000);
+			}).catch(err => {
+				console.error('Lỗi khi sao chép URL: ', err);
+				alert('Không thể sao chép liên kết.');
+			});
+		}
+	</script>
 </div>

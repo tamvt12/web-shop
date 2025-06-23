@@ -1,48 +1,30 @@
-<div class='container mx-auto px-4'>
+<div class='container mx-auto p-5 bg-white'>
   <div class='overflow-x-auto'>
-    <table
-      class='min-w-full table-fixed border-collapse border border-gray-200'
-    >
+    <table class='min-w-full table-fixed border-collapse'>
       <thead>
         <tr class='bg-gray-100'>
-          <th
-            class='w-1/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
-          >
+          <th class='w-1/12  px-2 py-2 text-left text-sm font-semibold'>
             ID
           </th>
-          <th
-            class='w-2/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
-          >
+          <th class='w-2/12  px-2 py-2 text-left text-sm font-semibold'>
             Tên sản phẩm
           </th>
-          <th
-            class='w-3/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
-          >
+          <th class='w-3/12  px-2 py-2 text-left text-sm font-semibold'>
             Mô tả sản phẩm
           </th>
-          <th
-            class='w-1/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
-          >
+          <th class='w-1/12  px-2 py-2 text-left text-sm font-semibold'>
             Giá sản phẩm
           </th>
-          <th
-            class='w-1/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
-          >
-            Số lượng trong kho
+          <th class='w-1/12  px-2 py-2 text-left text-sm font-semibold'>
+            Số lượng sản phẩm
           </th>
-          <th
-            class='w-2/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
-          >
+          <th class='w-2/12  px-2 py-2 text-left text-sm font-semibold'>
             Tên danh mục
           </th>
-          <th
-            class='w-2/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
-          >
+          <th class='w-1/12  px-2 py-2 text-left text-sm font-semibold'>
             Image
           </th>
-          <th
-            class='w-1/12 border border-gray-300 px-2 py-2 text-left text-sm font-semibold'
-          >
+          <th class='w-1/12  px-2 py-2 text-left text-sm font-semibold'>
             Actions
           </th>
         </tr>
@@ -50,38 +32,34 @@
       <tbody>
         {{#each products}}
           <tr class='even:bg-gray-50'>
-            <td
-              class='border border-gray-300 px-2 py-2 text-sm truncate max-w-[100px]'
-            >
+            <td class='px-2 py-2 text-sm truncate max-w-[100px]'>
               {{this._id}}
             </td>
-            <td class='border border-gray-300 px-2 py-2 text-sm'>
+            <td class='px-2 py-2 text-sm'>
               {{this.name}}
             </td>
-            <td
-              class='border border-gray-300 px-2 py-2 text-sm truncate max-w-[200px]'
-            >
+            <td class='px-2 py-2 text-sm truncate max-w-[200px]'>
               {{this.description}}
             </td>
-            <td class='border border-gray-300 px-2 py-2 text-sm text-red-600'>
+            <td class='px-2 py-2 text-sm text-red-600'>
               {{formatCurrency this.price}}
             </td>
-            <td class='border border-gray-300 px-2 py-2 text-sm'>
+            <td class='px-2 py-2 text-sm'>
               {{this.stock}}
             </td>
-            <td class='border border-gray-300 px-2 py-2 text-sm'>
+            <td class='px-2 py-2 text-sm'>
               {{this.category_name}}
             </td>
-            <td class='border border-gray-300 px-2 py-2 text-sm'>
-              <img
-                src="{{this.image_url}}"
-                alt='Product Image'
-                class='max-w-full h-auto rounded'
-              />
+            <td class='px-2 py-2 text-sm'>
+              {{#if this.image_url}}
+                <img
+                  src="{{this.image_url}}"
+                  alt='Product Image'
+                  class='w-1/2 h-auto rounded'
+                />
+              {{/if}}
             </td>
-            <td
-              class='border border-gray-300 px-2 py-2 text-sm whitespace-nowrap'
-            >
+            <td class='px-2 py-2 text-sm whitespace-nowrap'>
               <div class='flex space-x-2'>
                 <a
                   href="/admin/product/edit/{{this._id}}"

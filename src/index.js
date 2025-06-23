@@ -32,6 +32,9 @@ const hbs = engine.create({
     subtract: helpers.subtract,
     times: helpers.times,
     eq: helpers.eq,
+    gt: helpers.gt,
+    lt: helpers.lt,
+    array: helpers.array,
   },
   extname: '.hbs',
 })
@@ -83,5 +86,8 @@ app.use((err, req, res, next) => {
 })
 
 route(app)
+app.use('*', (req, res) => {
+  res.status(404).render('404')
+})
 
 app.listen(port, () => console.log(`App listening at http://localhost:${port}`))

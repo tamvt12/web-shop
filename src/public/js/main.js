@@ -37,11 +37,18 @@ $(document).ready(function () {
 })
 
 $('#upload').change(function () {
+  const files = this.files
+  if (files.length === 0) return
+
   const formData = new FormData()
-  formData.append('image', this.files[0])
+
+  // Thêm tất cả các file được chọn vào FormData
+  for (let i = 0; i < files.length; i++) {
+    formData.append('images', files[i])
+  }
 
   $.ajax({
-    url: '/admin/product/upload-image',
+    url: '/admin/upload-image',
     type: 'POST',
     data: formData,
     processData: false,
@@ -49,12 +56,30 @@ $('#upload').change(function () {
     success: function (results) {
       console.log(results)
       if (results.success) {
-        $('#image_show').html(
-          `<a href="${results.imageUrl}" target="_blank">
-						<img src="${results.imageUrl}" width="100px">
-					</a>`,
-        )
-        $('#thumb').val(results.imageUrl)
+        let imageHtml = ''
+
+        // Hiển thị tất cả các ảnh đã upload
+        if (Array.isArray(results.imageUrls)) {
+          results.imageUrls.forEach(function (imageUrl) {
+            imageHtml += `<a href="${imageUrl}" target="_blank" style="display: inline-block; margin: 5px;">
+              <img src="${imageUrl}" width="100px" style="border: 1px solid #ddd;">
+            </a>`
+          })
+        } else if (results.imageUrl) {
+          // Fallback cho trường hợp chỉ có một ảnh
+          imageHtml = `<a href="${results.imageUrl}" target="_blank">
+            <img src="${results.imageUrl}" width="100px">
+          </a>`
+        }
+
+        $('#image_show').html(imageHtml)
+
+        // Cập nhật input hidden với danh sách URL ảnh
+        if (Array.isArray(results.imageUrls)) {
+          $('#thumb').val(results.imageUrls.join(','))
+        } else if (results.imageUrl) {
+          $('#thumb').val(results.imageUrl)
+        }
       } else {
         alert(results.message)
       }
@@ -131,11 +156,21 @@ function buyCart(id) {
 }
 
 function updateMainImage(thumbnail) {
-  document.querySelectorAll('.image-thumbnails img').forEach((img) => {
-    img.classList.remove('active')
+  // Remove active class from all thumbnails
+  document.querySelectorAll('.thumbnail-image').forEach((img) => {
+    img.classList.remove('border-green-600', 'border-2')
+    img.classList.add('border-gray-300')
   })
-  thumbnail.classList.add('active')
-  document.querySelector('.main-image img').src = thumbnail.src
+
+  // Add active class to clicked thumbnail
+  thumbnail.classList.remove('border-gray-300')
+  thumbnail.classList.add('border-green-600', 'border-2')
+
+  // Update main image
+  const mainImage = document.getElementById('mainImage')
+  if (mainImage) {
+    mainImage.src = thumbnail.src
+  }
 }
 
 function incrementQuantity() {
@@ -213,7 +248,6 @@ function buyNow(productId) {
 }
 
 function loadCartItems(cartItems) {
-  console.log(cartItems)
   let total = 0
   $('#cart-items').empty()
   if (cartItems.length === 0) {
@@ -330,12 +364,28 @@ function displayOrders(orders) {
 
 function ratingFormSubmit(e, orderId) {
   e.preventDefault()
-  const formData = {
-    rating: $(`#rating-${orderId} input[name="rating"]:checked`).val(),
-    comment: $('#comment-' + orderId).val(),
-    product_id: $('.productId-' + orderId).val(),
+  const form = e.target
+  const ratingInput = $(form).find('input[name="rating"]:checked')
+  const ratingValue = ratingInput.val()
+
+  if (!ratingValue) {
+    alert('Vui lòng chọn số sao đánh giá.')
+    return
   }
-  console.log(formData)
+
+  const product_ids = $(form)
+    .find('input[name="product_ids[]"]')
+    .map(function () {
+      return $(this).val()
+    })
+    .get()
+
+  const formData = {
+    rating: ratingValue,
+    comment: $(form).find('input[name="comment"]').val(),
+    product_ids: product_ids,
+    order_id: orderId,
+  }
 
   $.ajax({
     url: '/rating',
@@ -344,6 +394,7 @@ function ratingFormSubmit(e, orderId) {
     success: function (response) {
       if (response.success) {
         alert('Đánh giá thành công.')
+        location.reload()
       }
     },
     error: function (error) {

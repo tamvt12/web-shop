@@ -1,4 +1,4 @@
-<div class='flex justify-center mt-12'>
+<div class='flex justify-center mt-8'>
   <div class='w-full max-w-4xl'>
     <div class='bg-white shadow-md rounded-lg p-6'>
       {{#if messages.error}}
@@ -27,10 +27,26 @@
             class='w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
           />
         </div>
+        <div>
+          <label
+            for='upload'
+            class='block text-custom-xs font-medium text-black mb-1'
+          >
+            Hình ảnh
+          </label>
+          <input
+            type='file'
+            name='file'
+            id='upload'
+            class='w-full border rounded px-3 py-2 mb-2'
+          />
+          <div id='image_show' class='mb-2'></div>
+          <input type='hidden' name='image_url' id='thumb' />
+        </div>
 
         <button
           type='submit'
-          class='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition duration-200'
+          class='w-full bg-btn bg-custom-green-hover text-white font-semibold py-2 px-4 rounded transition duration-200'
         >
           Thêm
         </button>

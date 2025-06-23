@@ -23,6 +23,7 @@ function route(app) {
   app.use('/', userRouter)
 
   app.get('/', HomeController.home)
+  app.get('/store', HomeController.showStore)
   app.get('/search', HomeController.search)
   app.get('/products/:id', HomeController.showDetail)
   app.post('/addCart', HomeController.addCart)

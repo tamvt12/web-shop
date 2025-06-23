@@ -12,6 +12,13 @@ class ProductController {
             _id: 0,
           }).lean()
           product.category_name = category.name
+          if (typeof product.image_url === 'string') {
+            const imageArray = product.image_url
+              .split(',')
+              .map((url) => url.trim())
+              .filter((url) => url !== '')
+            product.image_url = imageArray.length > 0 ? imageArray[0] : ''
+          }
         }
         res.render('admin/product/list', { showAdmin: true, products })
         // res.json(products);
@@ -71,8 +78,17 @@ class ProductController {
       const category = await Category.findById(product.category_id, {
         name: 1,
         _id: 0,
-      })
+      }).lean()
       product.category_name = category.name
+
+      // Convert image_url string to array
+      if (typeof product.image_url === 'string') {
+        const imageArray = product.image_url
+          .split(',')
+          .map((url) => url.trim())
+          .filter((url) => url !== '')
+        product.image_url = imageArray
+      }
 
       const categories = await Category.find({}).lean()
       res.render('admin/product/edit', {
@@ -134,21 +150,6 @@ class ProductController {
       res.status(500).json({
         success: false,
         message: 'Có lỗi xảy ra khi xóa',
-      })
-    }
-  }
-
-  upload(req, res) {
-    if (req.file) {
-      res.json({
-        success: true,
-        message: 'Upload thành công',
-        imageUrl: req.file.path,
-      })
-    } else {
-      res.json({
-        success: false,
-        message: 'Upload thất bại',
       })
     }
   }
