@@ -24,7 +24,7 @@ const newsSchema = new Schema({
     // required: true,
   },
   author: {
-    type: Schema.Types.ObjectId,
+    type: Number,
     ref: 'User',
     required: true,
   },

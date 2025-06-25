@@ -4,8 +4,8 @@ const AutoIncrement = require('mongoose-sequence')(mongoose)
 
 const Order_Item = new Schema({
   id: { type: Number, unique: true },
-  order_id: { type: Schema.Types.ObjectId, ref: 'Order' },
-  product_id: { type: Schema.Types.ObjectId, ref: 'Product' },
+  order_id: { type: Number, ref: 'Order' },
+  product_id: { type: Number, ref: 'Product' },
   quantity: Number,
   price: mongoose.Types.Decimal128,
   created_at: { type: Date, default: Date.now },

@@ -4,7 +4,7 @@ const AutoIncrement = require('mongoose-sequence')(mongoose)
 
 const Order = new Schema({
   id: { type: Number, unique: true },
-  user_id: Schema.Types.ObjectId,
+  user_id: Number,
   total: mongoose.Types.Decimal128,
   status: { type: String, length: 50, default: 'Chờ xử lý' },
   created_at: { type: Date, default: Date.now },

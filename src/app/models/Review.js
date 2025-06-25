@@ -4,9 +4,9 @@ const AutoIncrement = require('mongoose-sequence')(mongoose)
 
 const Review = new Schema({
   id: { type: Number, unique: true },
-  user_id: Schema.Types.ObjectId,
-  product_id: Schema.Types.ObjectId,
-  order_id: Schema.Types.ObjectId,
+  user_id: Number,
+  product_id: Number,
+  order_id: Number,
   rating: Number,
   comment: String,
   created_at: { type: Date, default: Date.now },

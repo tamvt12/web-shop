@@ -8,7 +8,7 @@ const Product = new Schema({
   description: String,
   price: mongoose.Types.Decimal128,
   stock: Number,
-  category_id: Schema.Types.ObjectId,
+  category_id: Number,
   image_url: String,
 })
 

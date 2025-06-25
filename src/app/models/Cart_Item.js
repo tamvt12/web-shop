@@ -4,8 +4,8 @@ const AutoIncrement = require('mongoose-sequence')(mongoose)
 
 const Cart_Item = new Schema({
   id: { type: Number, unique: true },
-  user_id: Schema.Types.ObjectId,
-  product_id: { type: Schema.Types.ObjectId, ref: 'Product' },
+  user_id: Number,
+  product_id: { type: Number, ref: 'Product' },
   quantity: Number,
 })
 

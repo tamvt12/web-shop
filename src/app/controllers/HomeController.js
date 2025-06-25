@@ -707,7 +707,9 @@ class HomeController {
       }
 
       // Get category
-      const category = await Category.findById(product.category_id).lean()
+      const category = await Category.findOne({
+        id: product.category_id,
+      }).lean()
       product.category = category
 
       // Convert image_url string to array
