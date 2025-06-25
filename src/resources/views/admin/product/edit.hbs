@@ -26,8 +26,8 @@
           </option>
           {{#each categories}}
             <option
-              value="{{this._id}}"
-              {{#ifCond this._id ../product.category_id}}selected{{/ifCond}}
+              value="{{this.id}}"
+              {{#ifCond this.id ../product.category_id}}selected{{/ifCond}}
             >
               {{this.name}}
             </option>

@@ -3,7 +3,7 @@
     <table class='min-w-full table-auto text-sm text-left text-gray-700'>
       <thead class='bg-gray-100'>
         <tr>
-          <th class='w-2/6 px-4 py-3 font-semibold text-gray-600'>
+          <th class='w-20 max-w-[4rem] px-4 py-3 font-semibold text-gray-600'>
             ID
           </th>
           <th class='w-2/6 px-4 py-3 font-semibold text-gray-600'>
@@ -20,8 +20,8 @@
       <tbody>
         {{#each categories}}
           <tr class='hover:bg-gray-50'>
-            <td class='px-4 py-2'>
-              {{this._id}}
+            <td class='px-4 py-2 w-20 max-w-[4rem]'>
+              {{this.id}}
             </td>
             <td class='px-4 py-2'>
               {{this.name}}
@@ -36,13 +36,13 @@
             <td class='px-4 py-2'>
               <div class='flex space-x-2'>
                 <a
-                  href="/admin/category/edit/{{this._id}}"
+                  href="/admin/category/edit/{{this.id}}"
                   class='inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition'
                 >
                   Sửa
                 </a>
                 <button
-                  onclick="removeRow('/admin/category/destroy/{{this._id}}')"
+                  onclick="removeRow('/admin/category/destroy/{{this.id}}')"
                   class='inline-block px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition'
                 >
                   Xóa

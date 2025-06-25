@@ -5,7 +5,7 @@
     >
       <thead class='bg-gray-100 text-gray-700 text-sm font-semibold'>
         <tr>
-          <th class='px-4 py-2 text-left w-1/6'>
+          <th class='px-4 py-2 text-left max-w-[4rem] w-20'>
             ID
           </th>
           <th class='px-4 py-2 text-left w-1/6'>
@@ -28,8 +28,8 @@
       <tbody class='divide-y divide-gray-100 text-sm text-gray-800'>
         {{#each orderItems}}
           <tr class='hover:bg-gray-50'>
-            <td class='px-4 py-2 truncate'>
-              {{this._id}}
+            <td class='px-4 py-2 truncate w-20 max-w-[4rem]'>
+              {{this.id}}
             </td>
             <td class='px-4 py-2 truncate'>
               {{this.order_id}}

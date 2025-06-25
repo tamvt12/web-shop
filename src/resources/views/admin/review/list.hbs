@@ -3,7 +3,9 @@
     <table class='min-w-full table-fixed rounded-lg'>
       <thead class='bg-gray-100'>
         <tr>
-          <th class='w-1/12 px-2 py-2  text-left text-custom-xs font-semibold'>
+          <th
+            class='max-w-[4rem] w-20 px-2 py-2  text-left text-custom-xs font-semibold'
+          >
             ID
           </th>
           <th class='w-2/12 px-2 py-2  text-left text-custom-xs font-semibold'>
@@ -26,8 +28,8 @@
       <tbody>
         {{#each reviews}}
           <tr class='even:bg-gray-50'>
-            <td class='px-2 py-2  text-sm truncate max-w-[100px]'>
-              {{this._id}}
+            <td class='px-2 py-2 text-sm truncate max-w-[4rem] w-20'>
+              {{this.id}}
             </td>
             <td class='px-2 py-2  text-sm'>
               {{this.username}}

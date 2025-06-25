@@ -6,7 +6,7 @@
         {{#each newsList}}
           <div class='p-4 flex flex-col'>
             <a
-              href="/news/{{this._id}}"
+              href="/news/{{this.id}}"
               class='text-gray-900 hover:text-blue-600 flex flex-col h-full'
             >
               <img
@@ -17,7 +17,7 @@
             </a>
             <div class='flex-1 flex flex-col'>
               <a
-                href="/news/{{this._id}}"
+                href="/news/{{this.id}}"
                 class='text-gray-900 hover:text-blue-600 flex flex-col h-full'
               >
                 <h5 class='font-bold text-lg mt-4 mb-2 min-h-[48px]'>
@@ -58,7 +58,7 @@
           {{#each relatedNews}}
             <li>
               <a
-                href="/news/{{this._id}}"
+                href="/news/{{this.id}}"
                 class='text-blue-600 hover:underline font-semibold'
               >
                 {{this.title}}
@@ -75,7 +75,7 @@
           {{#each latestNews}}
             <li>
               <a
-                href="/news/{{this._id}}"
+                href="/news/{{this.id}}"
                 class='text-blue-600 hover:underline font-semibold'
               >
                 {{this.title}}

@@ -3,7 +3,7 @@
     <table class='min-w-full text-sm text-left'>
       <thead class='bg-gray-100 text-gray-700'>
         <tr>
-          <th class='px-2 py-2 w-24 truncate'>
+          <th class='px-2 py-2 w-20 max-w-[4rem] truncate'>
             ID
           </th>
           <th class='px-2 py-2 w-40'>
@@ -29,8 +29,8 @@
       <tbody class=''>
         {{#each news}}
           <tr class='hover:bg-gray-50'>
-            <td class='px-2 py-2 text-gray-800 truncate w-24'>
-              {{this._id}}
+            <td class='px-2 py-2 text-gray-800 truncate w-20 max-w-[4rem]'>
+              {{this.id}}
             </td>
             <td
               class='px-2 py-2 text-gray-800 w-40 max-w-[10rem] truncate overflow-hidden whitespace-nowrap'
@@ -60,14 +60,14 @@
             <td class='px-2 py-2 w-32 text-center'>
               <div class='flex gap-2 justify-center'>
                 <a
-                  href="/admin/news/edit/{{this._id}}"
+                  href="/admin/news/edit/{{this.id}}"
                   class='bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700'
                 >
                   Edit
                 </a>
                 <button
                   type='button'
-                  onclick="removeRow('/admin/news/destroy/{{this._id}}')"
+                  onclick="removeRow('/admin/news/destroy/{{this.id}}')"
                   class='bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700'
                 >
                   Xóa

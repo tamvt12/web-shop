@@ -41,10 +41,13 @@ class CategoryController {
 
   async show(req, res) {
     try {
-      const category = await Category.findById(req.params.id, {
-        name: 1,
-        _id: 0,
-      }).lean()
+      const category = await Category.findOne(
+        { id: req.params.id },
+        {
+          name: 1,
+          _id: 0,
+        },
+      ).lean()
       res.render('admin/category/edit', {
         category,
         showAdmin: true,
@@ -65,10 +68,13 @@ class CategoryController {
         const referer = req.get('Referer')
         res.redirect(referer)
       }
-      const updatedCategory = await Category.findByIdAndUpdate(id, {
-        name,
-        image_url,
-      })
+      const updatedCategory = await Category.findOneAndUpdate(
+        { id },
+        {
+          name,
+          image_url,
+        },
+      )
       if (updatedCategory) {
         res.redirect('/admin/category/list')
       } else {
@@ -86,7 +92,7 @@ class CategoryController {
   async destroy(req, res) {
     try {
       const id = req.params.id
-      await Category.findByIdAndDelete(id)
+      await Category.findOneAndDelete({ id })
       res.json({ success: true, message: 'Xóa thành công' })
     } catch (error) {
       res.status(500).json({

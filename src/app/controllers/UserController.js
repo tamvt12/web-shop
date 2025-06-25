@@ -83,10 +83,10 @@ class UserController {
         return res.redirect('/login')
       }
 
-      const token = jwt.sign({ id: user._id }, 'your_secret_key', {
+      const token = jwt.sign({ id: user.id }, 'your_secret_key', {
         expiresIn: '1h',
       })
-      req.session.userId = user._id
+      req.session.userId = user.id
       req.session.username = user.name
       req.session.phone = user.phone
       req.session.email = user.email

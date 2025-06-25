@@ -34,13 +34,13 @@ class HomeController {
     const categories = []
     for (let cat of categoriesRaw) {
       // Lấy tối đa 10 sản phẩm thuộc danh mục này
-      let products = await Product.find({ category_id: cat._id })
+      let products = await Product.find({ category_id: cat.id })
         .limit(10)
         .lean()
       // Tính rating cho từng sản phẩm
       for (let product of products) {
         const ratingData = await Review.aggregate([
-          { $match: { product_id: product._id } },
+          { $match: { product_id: product.id } },
           {
             $group: {
               _id: '$product_id',
@@ -62,7 +62,7 @@ class HomeController {
           ratingData.length > 0 ? ratingData[0].reviewCount : 0
       }
       categories.push({
-        _id: cat._id,
+        id: cat.id,
         name: cat.name,
         image_url: cat.image_url,
         products,
@@ -96,7 +96,7 @@ class HomeController {
 
     const productQuery = {}
     if (categoryId) {
-      productQuery.category_id = categoryId
+      productQuery.category_id = parseInt(categoryId)
     }
     if (minPrice || maxPrice) {
       productQuery.price = {}
@@ -142,7 +142,7 @@ class HomeController {
 
     for (let product of products) {
       const ratingData = await Review.aggregate([
-        { $match: { product_id: product._id } },
+        { $match: { product_id: product.id } },
         {
           $group: {
             _id: '$product_id',
@@ -164,7 +164,9 @@ class HomeController {
     }
 
     if (categoryId) {
-      currentCategory = await Category.findById(categoryId).lean()
+      currentCategory = await Category.findOne({
+        id: parseInt(categoryId),
+      }).lean()
     }
 
     res.render('store', {
@@ -229,7 +231,7 @@ class HomeController {
     for (let product of products) {
       const ratingData = await Review.aggregate([
         {
-          $match: { product_id: product._id },
+          $match: { product_id: product.id },
         },
         {
           $group: {
@@ -438,7 +440,7 @@ class HomeController {
     try {
       let message = ''
       const cartItem = await Cart_Item.findOne({
-        _id: id,
+        id,
         user_id,
       })
 
@@ -516,8 +518,8 @@ class HomeController {
       const orderItems = []
       for (const cartItem of cartItems) {
         const orderItem = new Order_Item({
-          order_id: savedOrder._id,
-          product_id: cartItem.product_id._id,
+          order_id: savedOrder.id,
+          product_id: cartItem.product_id.id,
           quantity: cartItem.quantity,
           price: cartItem.product_id.price,
         })
@@ -527,14 +529,14 @@ class HomeController {
       const orders = await Order.find({ user_id }).lean()
 
       for (const order of orders) {
-        const items = await Order_Item.find({ order_id: order._id })
+        const items = await Order_Item.find({ order_id: order.id })
           .populate('product_id')
           .lean()
 
         // Load existing rating for this order
         const existingReview = await Review.findOne({
           user_id: user_id,
-          order_id: order._id,
+          order_id: order.id,
         }).lean()
 
         // Assign review data to order level
@@ -562,7 +564,7 @@ class HomeController {
       }
 
       for (const item of cartItems) {
-        await Product.findByIdAndUpdate(item.product_id._id, {
+        await Product.findByIdAndUpdate(item.product_id.id, {
           $inc: { stock: -item.quantity },
         })
       }
@@ -596,13 +598,13 @@ class HomeController {
         .lean()
 
       for (const order of orders) {
-        const items = await Order_Item.find({ order_id: order._id })
+        const items = await Order_Item.find({ order_id: order.id })
           .populate('product_id')
           .lean()
 
         const existingReview = await Review.findOne({
           user_id: user_id,
-          order_id: order._id,
+          order_id: order.id,
         }).lean()
 
         // Assign review data to order level

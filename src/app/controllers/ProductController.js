@@ -7,11 +7,14 @@ class ProductController {
       .lean()
       .then(async (products) => {
         for (let product of products) {
-          const category = await Category.findById(product.category_id, {
-            name: 1,
-            _id: 0,
-          }).lean()
-          product.category_name = category.name
+          const category = await Category.findOne(
+            { id: product.category_id },
+            {
+              name: 1,
+              _id: 0,
+            },
+          ).lean()
+          product.category_name = category ? category.name : ''
           if (typeof product.image_url === 'string') {
             const imageArray = product.image_url
               .split(',')
@@ -71,15 +74,21 @@ class ProductController {
 
   async show(req, res) {
     try {
-      const product = await Product.findById(req.params.id, {
-        _id: 0,
-        __v: 0,
-      }).lean()
-      const category = await Category.findById(product.category_id, {
-        name: 1,
-        _id: 0,
-      }).lean()
-      product.category_name = category.name
+      const product = await Product.findOne(
+        { id: req.params.id },
+        {
+          _id: 0,
+          __v: 0,
+        },
+      ).lean()
+      const category = await Category.findOne(
+        { id: product.category_id },
+        {
+          name: 1,
+          _id: 0,
+        },
+      ).lean()
+      product.category_name = category ? category.name : ''
 
       // Convert image_url string to array
       if (typeof product.image_url === 'string') {
@@ -119,14 +128,17 @@ class ProductController {
         const referer = req.get('Referer')
         res.redirect(referer)
       }
-      const updatedProduct = await Product.findByIdAndUpdate(id, {
-        name,
-        description,
-        price,
-        stock,
-        category_id,
-        image_url,
-      })
+      const updatedProduct = await Product.findOneAndUpdate(
+        { id },
+        {
+          name,
+          description,
+          price,
+          stock,
+          category_id,
+          image_url,
+        },
+      )
       if (updatedProduct) {
         res.redirect('/admin/product/list')
       } else {
@@ -144,7 +156,7 @@ class ProductController {
   async destroy(req, res) {
     try {
       const id = req.params.id
-      await Product.findByIdAndDelete(id)
+      await Product.findOneAndDelete({ id })
       res.json({ success: true, message: 'Xóa thành công' })
     } catch (error) {
       res.status(500).json({

@@ -22,10 +22,13 @@ class NewsController {
       const newsList = await News.find({}).lean()
 
       for (let newsItem of newsList) {
-        const user = await Users.findById(newsItem.author, {
-          name: 1,
-          _id: 0,
-        }).lean()
+        const user = await Users.findOne(
+          { id: newsItem.author },
+          {
+            name: 1,
+            _id: 0,
+          },
+        ).lean()
         newsItem.user_name = user ? user.name : ''
       }
 
@@ -65,10 +68,13 @@ class NewsController {
   // Show edit form
   async edit(req, res) {
     try {
-      const news = await News.findById(req.params.id, {
-        _id: 0,
-        __v: 0,
-      }).lean()
+      const news = await News.findOne(
+        { id: req.params.id },
+        {
+          _id: 0,
+          __v: 0,
+        },
+      ).lean()
       res.render('admin/news/edit', {
         news,
         showAdmin: true,
@@ -84,12 +90,15 @@ class NewsController {
   async update(req, res) {
     const { title, content, summary, image_url } = req.body
     try {
-      const updatedNews = await News.findByIdAndUpdate(req.params.id, {
-        title,
-        content,
-        summary,
-        image_url,
-      })
+      const updatedNews = await News.findOneAndUpdate(
+        { id: req.params.id },
+        {
+          title,
+          content,
+          summary,
+          image_url,
+        },
+      )
       console.log(updatedNews)
 
       if (updatedNews) {
@@ -109,7 +118,7 @@ class NewsController {
   async destroy(req, res) {
     try {
       const id = req.params.id
-      await News.findByIdAndDelete(id)
+      await News.findOneAndDelete({ id })
       res.json({ success: true, message: 'Xóa thành công' })
     } catch (error) {
       res.status(500).json({
@@ -123,10 +132,13 @@ class NewsController {
     try {
       const newsList = await News.find({}).sort({ createdAt: -1 }).lean()
       for (let newsItem of newsList) {
-        const user = await Users.findById(newsItem.author, {
-          name: 1,
-          _id: 0,
-        }).lean()
+        const user = await Users.findOne(
+          { id: newsItem.author },
+          {
+            name: 1,
+            _id: 0,
+          },
+        ).lean()
         newsItem.user_name = user ? user.name : ''
       }
       res.render('news', { newsList })
@@ -137,7 +149,7 @@ class NewsController {
 
   async showDetail(req, res) {
     try {
-      const news = await News.findById(req.params.id)
+      const news = await News.findOne({ id: req.params.id })
       if (!news) {
         return res.status(404).render('404')
       }
@@ -145,22 +157,22 @@ class NewsController {
       news.views = (news.views || 0) + 1
       await news.save()
 
-      const user = await Users.findById(news.author, {
-        name: 1,
-        _id: 0,
-      }).lean()
+      const user = await Users.findOne(
+        { id: news.author },
+        {
+          name: 1,
+          _id: 0,
+        },
+      ).lean()
 
-      const relatedNews = await News.find({ _id: { $ne: news._id } })
+      const relatedNews = await News.find({ id: { $ne: news.id } })
         .sort({ createdAt: -1 })
         .limit(3)
         .lean()
 
-      const excludeIds = [
-        news._id.toString(),
-        ...relatedNews.map((n) => n._id.toString()),
-      ]
+      const excludeIds = [news.id, ...relatedNews.map((n) => n.id)]
 
-      const latestNews = await News.find({ _id: { $nin: excludeIds } })
+      const latestNews = await News.find({ id: { $nin: excludeIds } })
         .sort({ createdAt: -1 })
         .limit(3)
         .lean()

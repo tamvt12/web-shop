@@ -3,7 +3,7 @@
     <table class='min-w-full table-auto shadow-sm rounded'>
       <thead class='bg-gray-100 text-gray-700'>
         <tr>
-          <th class='px-4 py-2 text-left'>
+          <th class='px-4 py-2 text-left max-w-[4rem] w-20'>
             ID
           </th>
           <th class='px-4 py-2 text-left'>
@@ -20,8 +20,8 @@
       <tbody class='text-gray-800'>
         {{#each cartItems}}
           <tr class='hover:bg-gray-50'>
-            <td class='px-4 py-2'>
-              {{this._id}}
+            <td class='px-4 py-2 w-20 max-w-[4rem]'>
+              {{this.id}}
             </td>
             <td class='px-4 py-2'>
               {{this.username}}

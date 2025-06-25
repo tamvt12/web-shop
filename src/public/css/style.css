@@ -864,6 +864,10 @@ video {
   height: 100vh;
 }
 
+.min-h-\[154px\] {
+  min-height: 154px;
+}
+
 .min-h-\[48px\] {
   min-height: 48px;
 }
@@ -1102,6 +1106,10 @@ video {
 
 .max-w-none {
   max-width: none;
+}
+
+.max-w-\[4rem\] {
+  max-width: 4rem;
 }
 
 .flex-1 {
@@ -1615,6 +1623,10 @@ video {
 
 .text-right {
   text-align: right;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 .text-2xl {

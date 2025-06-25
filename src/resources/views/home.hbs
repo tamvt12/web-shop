@@ -1,23 +1,31 @@
 <div class='content md:w-[80%] mx-auto mt-5'>
   <!-- Danh mục Section -->
-  <div
-    class='category-slider mb-4 flex gap-3 overflow-x-auto bg-white rounded-lg p-4'
-  >
-    {{#each categories}}
-      <div
-        class='category-item text-center p-2 rounded bg-gray-100 flex-shrink-0 w-[110px]'
-      >
-        <img
-          src="{{this.image_url}}"
-          alt="{{this.name}}"
-          class='w-[60px] h-[60px] object-cover mx-auto'
-        />
-        <div class='mt-1 text-sm text-gray-700'>
-          {{this.name}}
+  {{#if categories}}
+    <div
+      class='category-slider mb-6 flex gap-3 overflow-x-auto bg-white rounded-lg p-4'
+    >
+      {{#each categories}}
+        <div
+          class='category-item text-center p-2 rounded bg-gray-100 flex-shrink-0 w-[110px]'
+        >
+          <img
+            src="{{this.image_url}}"
+            alt="{{this.name}}"
+            class='w-[60px] h-[60px] object-cover mx-auto'
+          />
+          <div class='mt-1 text-sm text-gray-700'>
+            {{this.name}}
+          </div>
         </div>
-      </div>
-    {{/each}}
-  </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div
+      class='bg-white rounded-lg p-4 min-h-[154px] flex items-center justify-center text-lg font-bold'
+    >
+      Không có sản phẩm nào
+    </div>
+  {{/if}}
 
   <!-- Sản phẩm OCOP -->
   {{#each categories}}
@@ -28,7 +36,7 @@
       <div class='grid sm:grid-cols-3 md:grid-cols-5 gap-4'>
         {{#each this.products}}
           <a
-            href="/products/{{this._id}}"
+            href="/products/{{this.id}}"
             class='block text-inherit hover:no-underline'
           >
             <div
@@ -61,7 +69,7 @@
       </div>
       <div class='text-center mt-6'>
         <a
-          href="/store?category={{this._id}}"
+          href="/store?category={{this.id}}"
           class='inline-block bg-white border text-custom-xs text-black font-normal py-2 px-4 rounded-lg transition-colors duration-300'
         >
           Xem thêm sản phẩm

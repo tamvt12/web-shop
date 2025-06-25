@@ -25,8 +25,8 @@
         {{#each categories}}
           <li>
             <a
-              href='store?category={{this._id}}'
-              class='block py-2 px-3 rounded hover:bg-gray-100 {{#ifCond ../currentCategory._id this._id}}font-bold text-custom-green bg-gray-100{{/ifCond}}'
+              href='store?category={{this.id}}'
+              class='block py-2 px-3 rounded hover:bg-gray-100 {{#ifCond ../currentCategory.id this.id}}font-bold text-custom-green bg-gray-100{{/ifCond}}'
             >{{this.name}}</a>
           </li>
         {{/each}}
@@ -88,7 +88,7 @@
         <div class='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
           {{#each products}}
             <a
-              href='/products/{{this._id}}'
+              href='/products/{{this.id}}'
               class='block text-inherit hover:no-underline'
             >
               <div
@@ -129,10 +129,10 @@
           <span class='mr-3'>Trang {{currentPage}}/{{totalPages}}</span>
 
           {{#if (gt currentPage 1)}}
-            <a href='?page=1{{#if currentCategory}}&category={{currentCategory._id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+            <a href='?page=1{{#if currentCategory}}&category={{currentCategory.id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
               Đầu
             </a>
-            <a href='?page={{subtract currentPage 1}}{{#if currentCategory}}&category={{currentCategory._id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+            <a href='?page={{subtract currentPage 1}}{{#if currentCategory}}&category={{currentCategory.id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
               &laquo;
             </a>
           {{/if}}
@@ -141,17 +141,17 @@
             {{#if (eq this ../currentPage)}}
               <span class='px-3 py-1 border border-green-600 bg-green-600 text-white rounded'>{{this}}</span>
             {{else}}
-              <a href='?page={{this}}{{#if ../currentCategory}}&category={{../currentCategory._id}}{{/if}}{{#if ../search}}&search={{../search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+              <a href='?page={{this}}{{#if ../currentCategory}}&category={{../currentCategory.id}}{{/if}}{{#if ../search}}&search={{../search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
                 {{this}}
               </a>
             {{/if}}
           {{/each}}
 
           {{#if (lt currentPage totalPages)}}
-            <a href='?page={{add currentPage 1}}{{#if currentCategory}}&category={{currentCategory._id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+            <a href='?page={{add currentPage 1}}{{#if currentCategory}}&category={{currentCategory.id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
               &raquo;
             </a>
-            <a href='?page={{totalPages}}{{#if currentCategory}}&category={{currentCategory._id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+            <a href='?page={{totalPages}}{{#if currentCategory}}&category={{currentCategory.id}}{{/if}}{{#if search}}&search={{search}}{{/if}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
               Cuối
             </a>
           {{/if}}

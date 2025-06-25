@@ -3,7 +3,9 @@
     <table class='min-w-full table-fixed border-collapse'>
       <thead>
         <tr class='bg-gray-100'>
-          <th class='w-1/12  px-2 py-2 text-left text-sm font-semibold'>
+          <th
+            class='max-w-[4rem] w-20  px-2 py-2 text-left text-sm font-semibold'
+          >
             ID
           </th>
           <th class='w-2/12  px-2 py-2 text-left text-sm font-semibold'>
@@ -32,8 +34,8 @@
       <tbody>
         {{#each products}}
           <tr class='even:bg-gray-50'>
-            <td class='px-2 py-2 text-sm truncate max-w-[100px]'>
-              {{this._id}}
+            <td class='px-2 py-2 text-sm truncate max-w-[4rem] w-20'>
+              {{this.id}}
             </td>
             <td class='px-2 py-2 text-sm'>
               {{this.name}}
@@ -62,14 +64,14 @@
             <td class='px-2 py-2 text-sm whitespace-nowrap'>
               <div class='flex space-x-2'>
                 <a
-                  href="/admin/product/edit/{{this._id}}"
+                  href="/admin/product/edit/{{this.id}}"
                   class='bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs'
                 >
                   Edit
                 </a>
                 <button
                   type='button'
-                  onclick="removeRow('/admin/product/destroy/{{this._id}}')"
+                  onclick="removeRow('/admin/product/destroy/{{this.id}}')"
                   class='bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs'
                 >
                   Xóa
