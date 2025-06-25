@@ -3,9 +3,7 @@ const Order = require('../models/Order')
 const Product = require('../models/Product')
 const Order_Item = require('../models/Order_Item')
 const Review = require('../models/Review')
-const { request } = require('express')
 const Category = require('../models/Category')
-const mongoose = require('mongoose')
 
 class HomeController {
   async countUserOrders(user_id) {
@@ -690,15 +688,8 @@ class HomeController {
       const productId = req.params.id
       const user_id = req.session.userId
 
-      // Validate ObjectId
-      if (!mongoose.Types.ObjectId.isValid(productId)) {
-        return res
-          .status(404)
-          .render('404', { message: 'Sản phẩm không tồn tại' })
-      }
-
       // Get product details
-      const product = await Product.findById(productId).lean()
+      const product = await Product.findOne({ id: productId }).lean()
 
       if (!product) {
         return res
@@ -723,7 +714,7 @@ class HomeController {
 
       // Get rating data
       const ratingData = await Review.aggregate([
-        { $match: { product_id: new mongoose.Types.ObjectId(productId) } },
+        { $match: { product_id: productId } },
         {
           $group: {
             _id: '$product_id',
@@ -738,7 +729,7 @@ class HomeController {
 
       // Get reviews with user info
       const reviews = await Review.aggregate([
-        { $match: { product_id: new mongoose.Types.ObjectId(productId) } },
+        { $match: { product_id: productId } },
         {
           $lookup: {
             from: 'users',
@@ -765,7 +756,6 @@ class HomeController {
       // Get cart and order count
       const cartCount = await this.countUserCarts(user_id)
       const orderCount = await this.countUserOrders(user_id)
-
       res.render('product-detail', {
         product,
         cartCount,

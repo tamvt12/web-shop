@@ -1076,10 +1076,6 @@ video {
   max-width: 80rem;
 }
 
-.max-w-\[100px\] {
-  max-width: 100px;
-}
-
 .max-w-\[10rem\] {
   max-width: 10rem;
 }
@@ -1096,6 +1092,14 @@ video {
   max-width: 300px;
 }
 
+.max-w-\[4rem\] {
+  max-width: 4rem;
+}
+
+.max-w-\[80\%\] {
+  max-width: 80%;
+}
+
 .max-w-full {
   max-width: 100%;
 }
@@ -1106,10 +1110,6 @@ video {
 
 .max-w-none {
   max-width: none;
-}
-
-.max-w-\[4rem\] {
-  max-width: 4rem;
 }
 
 .flex-1 {

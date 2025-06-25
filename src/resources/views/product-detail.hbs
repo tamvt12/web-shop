@@ -48,7 +48,7 @@
 		<!-- Product Info -->
 		<div>
 			<div class="flex justify-between items-start">
-				<h1 class='text-xl font-semibold mb-3 flex items-center gap-2'>
+				<h1 class='text-xl font-semibold mb-3 flex items-center gap-2 max-w-[80%]'>
 					<span>{{product.name}}</span>
 				</h1>
 				<a href="#" id="shareButton" onclick="copyUrl(event)"
@@ -91,11 +91,11 @@
 					<span class='text-gray-500'>Phân loại 1:</span>
 					<div class='col-span-2 flex gap-2'>
 						{{#if product.gallery}}
-						{{#each product.gallery}}
-						<div class='p-1 border bg-white hover:border-green-600 cursor-pointer rounded'>
-							<img src="{{this}}" alt="variant" class='w-12 h-12 object-cover rounded' />
-						</div>
-						{{/each}}
+							{{#each product.gallery}}
+								<div class='p-1 border bg-white hover:border-green-600 cursor-pointer rounded'>
+									<img src="{{this}}" alt="variant" class='w-12 h-12 object-cover rounded' />
+								</div>
+							{{/each}}
 						{{/if}}
 					</div>
 				</div>
@@ -121,11 +121,11 @@
 			</div>
 
 			<div class='flex gap-2'>
-				<button onclick="addToCart('{{product._id}}')"
+				<button onclick="addToCart('{{product.id}}')"
 					class='flex-1 border bg-green-50 text-green-600 rounded py-3 hover:bg-green-100'>
 					Thêm vào giỏ hàng
 				</button>
-				<button onclick="buyNow('{{product._id}}')"
+				<button onclick="buyNow('{{product.id}}')"
 					class='flex-1 bg-green-600 text-white rounded py-3 hover:bg-green-700'>
 					Mua ngay
 				</button>

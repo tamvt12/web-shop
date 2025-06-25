@@ -33,48 +33,54 @@
       <h3 class='mb-3 text-lg font-semibold text-gray-800'>
         {{this.name}}
       </h3>
-      <div class='grid sm:grid-cols-3 md:grid-cols-5 gap-4'>
-        {{#each this.products}}
-          <a
-            href="/products/{{this.id}}"
-            class='block text-inherit hover:no-underline'
-          >
-            <div
-              class='bg-white border rounded-lg shadow-sm h-full flex flex-col hover:shadow-md transition'
+      {{#if this.products}}
+        <div class='grid sm:grid-cols-3 md:grid-cols-5 gap-4'>
+          {{#each this.products}}
+            <a
+              href="/products/{{this.id}}"
+              class='block text-inherit hover:no-underline'
             >
-              <img
-                src="{{this.image_url}}"
-                alt="{{this.name}}"
-                class='object-contain p-2 h-[140px] w-full'
-              />
-              <div class='p-2 flex flex-col flex-grow'>
-                <h6
-                  class='text-[13px] font-semibold text-gray-900 mb-1 line-clamp-2'
-                >
-                  {{this.name}}
-                </h6>
-                <p class='text-green-600 font-bold mb-1'>
-                  {{formatCurrency this.price}}
-                </p>
-                <div class='text-yellow-500 text-xs'>
-                  {{formatAverageRating this.rating}}
-                  <span class='text-gray-600 ml-1 text-xs'>
-                    ({{this.reviewCount}})
-                  </span>
+              <div
+                class='bg-white border rounded-lg shadow-sm h-full flex flex-col hover:shadow-md transition'
+              >
+                <img
+                  src="{{this.image_url}}"
+                  alt="{{this.name}}"
+                  class='object-contain p-2 h-[140px] w-full'
+                />
+                <div class='p-2 flex flex-col flex-grow'>
+                  <h6
+                    class='text-[13px] font-semibold text-gray-900 mb-1 line-clamp-2'
+                  >
+                    {{this.name}}
+                  </h6>
+                  <p class='text-green-600 font-bold mb-1'>
+                    {{formatCurrency this.price}}
+                  </p>
+                  <div class='text-yellow-500 text-xs'>
+                    {{formatAverageRating this.rating}}
+                    <span class='text-gray-600 ml-1 text-xs'>
+                      ({{this.reviewCount}})
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
+          {{/each}}
+        </div>
+        <div class='text-center mt-6'>
+          <a
+            href="/store?category={{this.id}}"
+            class='inline-block bg-white border text-custom-xs text-black font-normal py-2 px-4 rounded-lg transition-colors duration-300'
+          >
+            Xem thêm sản phẩm
           </a>
-        {{/each}}
-      </div>
-      <div class='text-center mt-6'>
-        <a
-          href="/store?category={{this.id}}"
-          class='inline-block bg-white border text-custom-xs text-black font-normal py-2 px-4 rounded-lg transition-colors duration-300'
-        >
-          Xem thêm sản phẩm
-        </a>
-      </div>
+        </div>
+      {{else}}
+        <div class='flex items-center justify-center text-lg font-bold'>
+          Không có sản phẩm nào
+        </div>
+      {{/if}}
     </div>
   {{/each}}
 </div>
