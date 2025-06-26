@@ -209,11 +209,9 @@
 		document.head.appendChild(style);
 
 		function updateMainImage(clickedImage) {
-			console.log('Updating main image:', clickedImage.src);
 			const mainImage = document.getElementById('mainImage');
 			if (mainImage) {
 				mainImage.src = clickedImage.src;
-				console.log('Main image updated to:', mainImage.src);
 			} else {
 				console.error('Main image element not found');
 			}

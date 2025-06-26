@@ -1,7 +1,6 @@
 const moment = require('moment')
 
 function formatCurrency(price) {
-  console.log('🚀 ~ formatCurrency ~ price:', price)
   const priceNumber = parseFloat(price)
 
   if (isNaN(priceNumber)) {

@@ -259,6 +259,8 @@ class HomeController {
   }
 
   addCart = (req, res) => {
+    // const dataBody = JSON.parse(req.body)
+    console.log('🚀 ~ HomeController ~ productId:', req.body)
     const productId = req.body.id
     const quantity = parseInt(req.body.quantity) || 1
     const userId = req.session.userId
@@ -267,7 +269,7 @@ class HomeController {
       return res.json({ error: 'Unauthorized' })
     }
 
-    Product.findById(productId)
+    Product.findOne({ id: productId })
       .then(async (product) => {
         let message = ''
         if (!product) {
@@ -393,7 +395,9 @@ class HomeController {
 
       let total = 0
       for (let cart_item of cart_items) {
-        const product = await Product.findById(cart_item.product_id).lean()
+        const product = await Product.findOne({
+          id: cart_item.product_id,
+        }).lean()
         if (product) {
           if (typeof product.image_url === 'string') {
             const imageArray = product.image_url
@@ -418,13 +422,14 @@ class HomeController {
     const cartCount = await this.countUserCarts(user_id)
     const orderCount = await this.countUserOrders(user_id)
     const { cart_items, total } = await this.cart(user_id)
+
     res.render('cart', {
       cart_items,
       orderCount,
       cartCount,
       total,
     })
-    // res.json({ cart_items });
+    // res.json({ cart_items })
   }
 
   updateCart = async (req, res) => {
@@ -442,7 +447,7 @@ class HomeController {
         user_id,
       })
 
-      const product = await Product.findById(cartItem.product_id)
+      const product = await Product.findOne({ id: cartItem.product_id })
       if (!product) {
         message = 'Sản phẩm không tồn tại'
       }
@@ -469,7 +474,7 @@ class HomeController {
 
     try {
       let message = ''
-      const deletedItem = await Cart_Item.findByIdAndDelete(id)
+      const deletedItem = await Cart_Item.findOneAndDelete({ id })
       if (!deletedItem) {
         return (message = 'Sản phẩm không tồn tại trong giỏ hàng')
       }

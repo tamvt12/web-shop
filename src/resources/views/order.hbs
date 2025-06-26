@@ -11,139 +11,145 @@
     Đơn Hàng
   </span>
 </div>
+{{#if orders}}
+	<div
+		id='orders-list'
+		class='space-y-6 w-[80%] mx-auto bg-white rounded-lg p-8 shadow-md'
+	>
+		{{#each orders}}
+			<div
+				class='flex flex-col md:flex-row gap-4 p-4 border rounded-md shadow-sm bg-white'
+			>
+				<!-- Hình ảnh sản phẩm đại diện -->
+				{{#if this.order_Item.0.product_id.image_url}}
+					{{#each this.order_Item.0.product_id.image_url}}
+						{{#if @first}}
+							<img
+								src="{{this}}"
+								alt=''
+								class='w-40 h-auto object-cover rounded-md'
+							/>
+						{{/if}}
+					{{/each}}
+				{{else}}
+					<img
+						src="{{this.order_Item.0.product_id.image_url}}"
+						alt=''
+						class='w-40 h-auto object-cover rounded-md'
+					/>
+				{{/if}}
 
-<div
-  id='orders-list'
-  class='space-y-6 w-[80%] mx-auto bg-white rounded-lg p-8 shadow-md'
->
-  {{#each orders}}
-    <div
-      class='flex flex-col md:flex-row gap-4 p-4 border rounded-md shadow-sm bg-white'
-    >
-      <!-- Hình ảnh sản phẩm đại diện -->
-      {{#if this.order_Item.0.product_id.image_url}}
-        {{#each this.order_Item.0.product_id.image_url}}
-          {{#if @first}}
-            <img
-              src="{{this}}"
-              alt=''
-              class='w-40 h-auto object-cover rounded-md'
-            />
-          {{/if}}
-        {{/each}}
-      {{else}}
-        <img
-          src="{{this.order_Item.0.product_id.image_url}}"
-          alt=''
-          class='w-40 h-auto object-cover rounded-md'
-        />
-      {{/if}}
+				<!-- Thông tin đơn hàng -->
+				<div class='flex-1 space-y-2 text-custom-sm'>
+					<p>
+						<strong>
+							Mã đơn hàng:
+						</strong>
+						<span class="inline-block w-20 max-w-[4rem] truncate align-middle">{{this._id}}</span>
+					</p>
+					<p>
+						<strong>
+							Tổng giá trị:
+						</strong>
+						{{formatCurrency this.total}}
+					</p>
+					<p>
+						<strong>
+							Trạng thái:
+						</strong>
+						{{this.status}}
+					</p>
+					<p>
+						<strong>
+							Ngày tạo:
+						</strong>
+						{{formatDate this.created_at}}
+					</p>
 
-      <!-- Thông tin đơn hàng -->
-      <div class='flex-1 space-y-2 text-custom-sm'>
-        <p>
-          <strong>
-            Mã đơn hàng:
-          </strong>
-          <span class="inline-block w-20 max-w-[4rem] truncate align-middle">{{this._id}}</span>
-        </p>
-        <p>
-          <strong>
-            Tổng giá trị:
-          </strong>
-          {{formatCurrency this.total}}
-        </p>
-        <p>
-          <strong>
-            Trạng thái:
-          </strong>
-          {{this.status}}
-        </p>
-        <p>
-          <strong>
-            Ngày tạo:
-          </strong>
-          {{formatDate this.created_at}}
-        </p>
+					<ul class='list-disc list-inside text-custom-xs text-black space-y-1'>
+						{{#each this.order_Item}}
+							<li>
+								{{this.product_id.name}} - Số lượng: {{this.quantity}} - Giá tiền:
+								<span class='text-red-600 font-semibold'>
+									{{formatCurrency this.product_id.price}}
+								</span>
+							</li>
+						{{/each}}
+					</ul>
+				</div>
 
-        <ul class='list-disc list-inside text-custom-xs text-black space-y-1'>
-          {{#each this.order_Item}}
-            <li>
-              {{this.product_id.name}} - Số lượng: {{this.quantity}} - Giá tiền:
-              <span class='text-red-600 font-semibold'>
-                {{formatCurrency this.product_id.price}}
-              </span>
-            </li>
-          {{/each}}
-        </ul>
-      </div>
-
-      {{#ifEquals this.status 'Đã hoàn thành'}}
-        <div class='mt-4 md:mt-0 md:ml-6 w-full md:w-1/4'>
-          <form
-            class='ratingForm space-y-4'
-            onsubmit="ratingFormSubmit(event, '{{this.id}}')"
-          >
-            <div>
-              {{#each this.order_Item}}
-                <input
-                  type='hidden'
-                  name='product_ids[]'
-                  value="{{this.product_id.id}}"
-                />
-              {{/each}}
-              <div
-                class='flex flex-row-reverse justify-end text-yellow-500 text-xl mb-2'
-                id='rating-{{this.id}}'
-                data-existing-rating='{{this.userRating}}'
-              >
-                {{#times 5}}
-                  <input
-                    type='radio'
-                    id='star-{{../id}}-{{@ratingValue}}'
-                    name='rating'
-                    value='{{@ratingValue}}'
-                    hidden
-                  />
-                  <label
-                    for='star-{{../id}}-{{@ratingValue}}'
-                    class='cursor-pointer star-label'
-                    data-rating='{{@ratingValue}}'
-                    data-order-id='{{../id}}'
-                  >
-                    <i class='fas fa-star'></i>
-                  </label>
-                {{/times}}
-              </div>
-              <div>
-                <label
-                  for="comment-{{this.id}}"
-                  class='block text-sm font-medium text-gray-700 mb-1'
-                >
-                  Bình luận
-                </label>
-                <input
-                  type='text'
-                  id="comment-{{this.id}}"
-                  name='comment'
-                  placeholder='Comment'
-                  value="{{this.userComment}}"
-                  class='w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-blue-300'
-                />
-              </div>
-              <button
-                type='submit'
-                class='w-full bg-btn bg-custom-green-hover text-white py-2 rounded transition duration-200 mt-4'
-              >
-                Đánh giá
-              </button>
-            </div>
-          </form>
-        </div>
-      {{/ifEquals}}
-    </div>
-  {{/each}}
-</div>
+				{{#ifEquals this.status 'Đã hoàn thành'}}
+					<div class='mt-4 md:mt-0 md:ml-6 w-full md:w-1/4'>
+						<form
+							class='ratingForm space-y-4'
+							onsubmit="ratingFormSubmit(event, '{{this.id}}')"
+						>
+							<div>
+								{{#each this.order_Item}}
+									<input
+										type='hidden'
+										name='product_ids[]'
+										value="{{this.product_id.id}}"
+									/>
+								{{/each}}
+								<div
+									class='flex flex-row-reverse justify-end text-yellow-500 text-xl mb-2'
+									id='rating-{{this.id}}'
+									data-existing-rating='{{this.userRating}}'
+								>
+									{{#times 5}}
+										<input
+											type='radio'
+											id='star-{{../id}}-{{@ratingValue}}'
+											name='rating'
+											value='{{@ratingValue}}'
+											hidden
+										/>
+										<label
+											for='star-{{../id}}-{{@ratingValue}}'
+											class='cursor-pointer star-label'
+											data-rating='{{@ratingValue}}'
+											data-order-id='{{../id}}'
+										>
+											<i class='fas fa-star'></i>
+										</label>
+									{{/times}}
+								</div>
+								<div>
+									<label
+										for="comment-{{this.id}}"
+										class='block text-sm font-medium text-gray-700 mb-1'
+									>
+										Bình luận
+									</label>
+									<input
+										type='text'
+										id="comment-{{this.id}}"
+										name='comment'
+										placeholder='Comment'
+										value="{{this.userComment}}"
+										class='w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-blue-300'
+									/>
+								</div>
+								<button
+									type='submit'
+									class='w-full bg-btn bg-custom-green-hover text-white py-2 rounded transition duration-200 mt-4'
+								>
+									Đánh giá
+								</button>
+							</div>
+						</form>
+					</div>
+				{{/ifEquals}}
+			</div>
+		{{/each}}
+	</div>
+{{else}}
+	<div
+		id='orders-list'
+		class='w-[80%] flex items-center justify-center mx-auto text-lg font-bold min-h-[256px] bg-white rounded-lg p-8 shadow-md'
+	>Không có đơn hàng nào</div>
+{{/if}}
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {

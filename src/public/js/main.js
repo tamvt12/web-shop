@@ -187,64 +187,50 @@ function decrementQuantity() {
 
 function addToCart(productId) {
   const quantity = document.getElementById('quantity').value
-  fetch('/addCart', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      id: productId,
-      quantity: parseInt(quantity),
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) {
-        alert(data.error)
+  $.ajax({
+    url: '/addCart',
+    type: 'POST',
+    data: { id: productId, quantity: parseInt(quantity) },
+    success: function (results) {
+      if (results.error === 'Unauthorized') {
+        window.location.href = '/login'
       } else {
-        if (data.message) {
-          alert(data.message)
+        if (results.message) {
+          alert(results.message)
         }
-        if (data.cartCount !== undefined) {
-          document.getElementById('cartCount').textContent = data.cartCount
+        if (results.cartCount !== undefined) {
+          // document.getElementById('cartCount').textContent = results.cartCount
         }
       }
-    })
-    .catch((error) => {
-      console.error('Error:', error)
-      alert('Có lỗi xảy ra khi thêm vào giỏ hàng')
-    })
+    },
+    error: function (xhr, status, error) {
+      console.error('Lỗi khi gửi dữ liệu:', error)
+    },
+  })
 }
 
 function buyNow(productId) {
   const quantity = document.getElementById('quantity').value
-  fetch('/buyNow', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      id: productId,
-      quantity: parseInt(quantity),
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) {
-        alert(data.error)
+  $.ajax({
+    url: '/addCart',
+    type: 'POST',
+    data: { id: productId, quantity: parseInt(quantity) },
+    success: function (results) {
+      if (results.error === 'Unauthorized') {
+        window.location.href = '/login'
       } else {
-        if (data.message) {
-          alert(data.message)
+        if (results.message) {
+          alert(results.message)
         }
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl
+        if (results.success) {
+          window.location.href = '/cart'
         }
       }
-    })
-    .catch((error) => {
-      console.error('Error:', error)
-      alert('Có lỗi xảy ra khi xử lý mua ngay')
-    })
+    },
+    error: function (xhr, status, error) {
+      console.error('Lỗi khi gửi dữ liệu:', error)
+    },
+  })
 }
 
 function loadCartItems(cartItems) {
@@ -255,35 +241,64 @@ function loadCartItems(cartItems) {
     return
   }
   cartItems.forEach((item) => {
-    console.log(item)
     const itemTotal = item.product.price.$numberDecimal * item.quantity
     total += itemTotal
     $('#cart-items').append(`
-            <tr class="cart-item">
-                <td>
-					<img src="${item.product.image_url}" alt="${item.product.name}">
+			<tr class='cart-item border-t'>
+				<td class='p-2 border'>
+					<img
+						src="${item.product.image_url}"
+						alt="${item.product.name}"
+						class='w-24 h-auto object-contain'
+					/>
 				</td>
-                <td>${item.product.name}</td>
-                <td class="text-danger">${formatCurrency(
-                  item.product.price.$numberDecimal,
-                )}</td>
-                <td>
-                    <div class="quantity-controls">
-                        <button class="btn btn-sm btn-primary" onclick="updateQuantity('${
-                          item._id
-                        }', ${item.quantity - 1})">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="btn btn-sm btn-primary" onclick="updateQuantity('${
-                          item._id
-                        }', ${item.quantity + 1})">+</button>
-                    </div>
-                </td>
-                <td class="text-danger">${formatCurrency(itemTotal)}</td>
-                <td><button class="btn btn-danger" onclick="removeItem('${
-                  item._id
-                }')">Xóa</button></td>
-            </tr>
-        `)
+				<td class='p-2 border'>
+					${item.product.name}
+				</td>
+				<td class='p-2 border text-red-600 font-semibold'>
+					${formatCurrency(item.product.price.$numberDecimal)}
+				</td>
+				<td class='p-2 border'>
+					<div class='flex items-center justify-center gap-2'>
+						<div class='flex items-center justify-between w-32 border rounded'>
+							<button
+								type='button'
+								onclick="updateQuantity('${item.id}', ${item.quantity} - 1)"
+								class='px-3 py-1 text-gray-500 hover:bg-gray-100'
+							>
+								−
+							</button>
+							<input
+								type='number'
+								id='quantity-${item.id}'
+								value='${item.quantity}'
+								min='1'
+								class='w-full text-center focus:outline-none'
+								onblur="updateQuantity('${item.id}', this.value)"
+							/>
+							<button
+								type='button'
+								onclick="updateQuantity('${item.id}', ${item.quantity} + 1)"
+								class='px-3 py-1 text-gray-500 hover:bg-gray-100'
+							>
+								+
+							</button>
+						</div>
+					</div>
+				</td>
+				<td class='p-2 border text-red-600 font-semibold'>
+					${formatCurrency(itemTotal)}
+				</td>
+				<td class='p-2'>
+					<button
+						class='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
+						onclick="removeItem('${item.id}')"
+					>
+						Xóa
+					</button>
+				</td>
+			</tr>
+    `)
   })
   $('#cart-total-price').text(formatCurrency(total))
 }
@@ -401,4 +416,14 @@ function ratingFormSubmit(e, orderId) {
       console.error('Đã xảy ra lỗi khi gửi đánh giá và bình luận: ', error)
     },
   })
+}
+
+function toggleModal(show) {
+  const modal = document.getElementById('logoutModal')
+  if (!modal) return
+  if (show) {
+    modal.classList.remove('hidden')
+  } else {
+    modal.classList.add('hidden')
+  }
 }

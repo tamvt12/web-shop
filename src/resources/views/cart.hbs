@@ -74,21 +74,22 @@
                   <div class='flex items-center w-32 border rounded'>
                     <button
                       type='button'
-                      onclick='decrementQuantity()'
+                      onclick="updateQuantity('{{this.id}}', {{this.quantity}} - 1)"
                       class='px-3 py-1 text-gray-500 hover:bg-gray-100'
                     >
                       −
                     </button>
                     <input
                       type='number'
-                      id='quantity'
-                      value="{{this.quantity}}"
+                      id='quantity-{{this.id}}'
+                      value='{{this.quantity}}'
                       min='1'
                       class='w-full text-center focus:outline-none'
+                      onblur="updateQuantity('{{this.id}}', this.value)"
                     />
                     <button
                       type='button'
-                      onclick='incrementQuantity()'
+                      onclick="updateQuantity('{{this.id}}', {{this.quantity}} + 1)"
                       class='px-3 py-1 text-gray-500 hover:bg-gray-100'
                     >
                       +
@@ -125,24 +126,25 @@
               </td>
               <td class='p-2 border'>
                 <div class='flex items-center justify-center gap-2'>
-                  <div class='flex items-center w-32 border rounded'>
+                  <div class='flex items-center justify-between w-32 border rounded'>
                     <button
                       type='button'
-                      onclick='decrementQuantity()'
+                      onclick="updateQuantity('{{this.id}}', {{this.quantity}} - 1)"
                       class='px-3 py-1 text-gray-500 hover:bg-gray-100'
                     >
                       −
                     </button>
                     <input
                       type='number'
-                      id='quantity'
-                      value="{{this.quantity}}"
+                      id='quantity-{{this.id}}'
+                      value='{{this.quantity}}'
                       min='1'
                       class='w-full text-center focus:outline-none'
+                      onblur="updateQuantity('{{this.id}}', this.value)"
                     />
                     <button
                       type='button'
-                      onclick='incrementQuantity()'
+                      onclick="updateQuantity('{{this.id}}', {{this.quantity}} + 1)"
                       class='px-3 py-1 text-gray-500 hover:bg-gray-100'
                     >
                       +

@@ -880,6 +880,18 @@ video {
   min-height: 100vh;
 }
 
+.min-h-\[\] {
+  min-height: ;
+}
+
+.min-h-\[140px\] {
+  min-height: 140px;
+}
+
+.min-h-\[256px\] {
+  min-height: 256px;
+}
+
 .w-1\/12 {
   width: 8.333333%;
 }
@@ -2076,10 +2088,6 @@ input[type=number] {
 }
 
 @media (min-width: 768px) {
-  .md\:col-span-2 {
-    grid-column: span 2 / span 2;
-  }
-
   .md\:ml-6 {
     margin-left: 1.5rem;
   }
