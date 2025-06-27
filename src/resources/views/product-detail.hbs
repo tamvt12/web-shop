@@ -65,42 +65,52 @@
 				<div class="border-l pl-4">
 					<span class="text-gray-500">0 lượt mua</span>
 				</div>
-				<a href="#" class="flex items-center gap-1 ml-auto">
+				{{!-- <a href="#" class="flex items-center gap-1 ml-auto">
 					<i class="fas fa-exclamation-triangle text-[#FFC107]"></i> Báo cáo
-				</a>
+				</a> --}}
 			</div>
 
 			<div class="pt-4 pb-4 border-t rounded-lg space-y-3">
 				<div class='grid grid-cols-3 items-center text-sm'>
 					<span class='text-gray-500'>Gửi từ</span>
-					<span class='col-span-2'>{{product.location}}</span>
+					<span class='col-span-2'>Hà Nội</span>
 				</div>
-				<div class='grid grid-cols-3 items-center text-sm'>
+				{{!-- <div class='grid grid-cols-3 items-center text-sm'>
 					<span class='text-gray-500'>Khu vực giao hàng</span>
 					<span class='col-span-2 flex items-center gap-1'>Chọn khu vực <i class="fas fa-angle-down"></i></span>
-				</div>
+				</div> --}}
 				<div class='grid grid-cols-3 items-center text-sm'>
-					<span class='text-gray-500'>Vận chuyển nhanh</span>
-					<span class='col-span-2'>0</span>
+					<span class='text-gray-500'>Vận chuyển</span>
+					<span class='col-span-2'>Giao nhanh</span>
 				</div>
 			</div>
 
-
-			<div class='my-4'>
-				<div class='grid grid-cols-3 items-center text-sm'>
-					<span class='text-gray-500'>Phân loại 1:</span>
-					<div class='col-span-2 flex gap-2'>
-						{{#if product.gallery}}
-							{{#each product.gallery}}
-								<div class='p-1 border bg-white hover:border-green-600 cursor-pointer rounded'>
-									<img src="{{this}}" alt="variant" class='w-12 h-12 object-cover rounded' />
-								</div>
-							{{/each}}
-						{{/if}}
+			<div class="mb-4">
+				{{#if product.variants}}
+					<div class="grid grid-cols-3 items-center text-sm mb-2">
+						<span class="text-gray-500">Số lượng còn lại:</span>
+						<span id="variant-stock" class="col-span-2">{{lookup (lookup product.variants 0) 'stock'}}</span>
 					</div>
-				</div>
+					<div class="grid grid-cols-3 items-center text-sm mb-2">
+						<span class='text-gray-500'>Chọn loại:</span>
+						<div class="col-span-2 flex flex-wrap gap-2" id="variant-buttons">
+							{{#each product.variants}}
+								<button
+									type="button"
+									class="variant-btn px-4 py-2 rounded-lg border transition {{#if (eq @index 0)}}bg-green-600 text-white border-green-600{{else}}bg-white text-gray-800 border-gray-300{{/if}} {{#unless this.stock}}opacity-50 cursor-not-allowed{{/unless}}"
+									data-idx="{{@index}}"
+									{{#unless this.stock}}disabled{{/unless}}
+								>
+									<div class="font-semibold">{{this.type}}</div>
+									<div class="text-xs text-gray-500">
+										{{#unless this.stock}}<span class="text-red-500 ml-1">(Hết hàng)</span>{{/unless}}
+									</div>
+								</button>
+							{{/each}}
+						</div>
+					</div>
+				{{/if}}
 			</div>
-
 			<div class='my-4'>
 				<div class='grid grid-cols-3 items-center text-sm'>
 					<span class='text-gray-500'>Số lượng:</span>
@@ -113,10 +123,19 @@
 					</div>
 				</div>
 			</div>
-
 			<div class='my-6'>
 				<h3 class='text-3xl text-green-600 font-semibold'>
-					{{formatCurrency product.price}}
+					<span id="product-price">
+						{{#if product.variants}}
+							{{#if product.variants.length}}
+								{{formatCurrency (lookup (lookup product.variants 0) 'price')}}
+							{{else}}
+								{{formatCurrency product.price}}
+							{{/if}}
+						{{else}}
+							{{formatCurrency product.price}}
+						{{/if}}
+					</span>
 				</h3>
 			</div>
 
@@ -187,6 +206,13 @@
 			{{/if}}
 		</div>
 	</div>
+
+	<!-- Thêm đoạn này trước <script> để truyền dữ liệu variants sang JS -->
+	{{#if product.variants}}
+	<script id="variants-data" type="application/json">
+		{{{json product.variants}}}
+	</script>
+	{{/if}}
 
 	<script>
 		// Add CSS for sharp images
@@ -270,5 +296,35 @@
 				alert('Không thể sao chép liên kết.');
 			});
 		}
+
+		let selectedVariantType = null;
+		document.addEventListener('DOMContentLoaded', function() {
+			const variantBtns = document.querySelectorAll('.variant-btn');
+			const variants = document.getElementById('variants-data') ? JSON.parse(document.getElementById('variants-data').textContent) : [];
+			// Gán mặc định là loại đầu tiên nếu có
+			if (variants.length) {
+				selectedVariantType = variants[0].type;
+			}
+			if (variantBtns.length) {
+				const priceSpan = document.getElementById('product-price');
+				const stockSpan = document.getElementById('variant-stock');
+				variantBtns.forEach(btn => {
+					btn.addEventListener('click', function() {
+						if (this.disabled) return;
+						// Bỏ active các nút khác
+						variantBtns.forEach(b => b.classList.remove('bg-green-600', 'text-white', 'border-green-600'));
+						variantBtns.forEach(b => b.classList.add('bg-white', 'text-gray-800', 'border-gray-300'));
+						this.classList.add('bg-green-600', 'text-white', 'border-green-600');
+						this.classList.remove('bg-white', 'text-gray-800', 'border-gray-300');
+						const idx = parseInt(this.getAttribute('data-idx'));
+						selectedVariantType = variants[idx].type;
+						if (variants && variants[idx]) {
+							priceSpan.textContent = formatMoney(variants[idx].price);
+							stockSpan.textContent = variants[idx].stock;
+						}
+					});
+				});
+			}
+		});
 	</script>
 </div>

@@ -70,39 +70,46 @@
       </div>
 
       <!-- Giá sản phẩm -->
-      <div>
-        <label
-          for='price'
-          class='block text-custom-xs font-medium text-black mb-1'
-        >
-          Giá sản phẩm
+      <div id='variants-section'>
+        <label class='block text-custom-xs font-medium text-black mb-1'>
+          Phân loại sản phẩm
         </label>
-        <input
-          type='number'
-          name='price'
-          id='price'
-          class='w-full border rounded px-3 py-2'
-          placeholder='Nhập giá sản phẩm'
-        />
-      </div>
-
-      <!-- Tồn kho -->
-      <div>
-        <label
-          for='stock'
-          class='block text-custom-xs font-medium text-black mb-1'
+        <div id='variants-list'>
+          <div class='flex space-x-2 mb-2 variant-row'>
+            <input
+              type='text'
+              name='variant_type[]'
+              class='border rounded px-2 py-1'
+              placeholder='Tên loại (VD: Size M, Màu Đỏ)'
+            />
+            <input
+              type='number'
+              name='variant_price[]'
+              class='border rounded px-2 py-1'
+              placeholder='Giá cho loại này'
+            />
+            <input
+              type='number'
+              name='variant_stock[]'
+              class='border rounded px-2 py-1'
+              placeholder='Tồn kho loại này'
+            />
+            <button
+              type='button'
+              class='remove-variant bg-red-500 text-white px-2 rounded'
+            >
+              X
+            </button>
+          </div>
+        </div>
+        <button
+          type='button'
+          id='add-variant'
+          class='bg-blue-500 text-white px-3 py-1 rounded'
         >
-          Số lượng sản phẩm
-        </label>
-        <input
-          type='number'
-          name='stock'
-          id='stock'
-          class='w-full border rounded px-3 py-2'
-          placeholder='Nhập số lượng sản phẩm'
-        />
+          + Thêm loại
+        </button>
       </div>
-
       <!-- Hình ảnh -->
       <div>
         <label
@@ -125,6 +132,29 @@
         ></div>
         <input type='hidden' name='image_url' id='thumb' />
       </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const addBtn = document.getElementById('add-variant');
+          const list = document.getElementById('variants-list');
+          list.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-variant')) {
+              e.target.parentElement.remove();
+            }
+          });
+          addBtn.addEventListener('click', function() {
+            const row = document.createElement('div');
+            row.className = 'flex space-x-2 mb-2 variant-row';
+            row.innerHTML = `
+              <input type="text" name="variant_type[]" class="border rounded px-2 py-1" placeholder="Tên loại (VD: Size M, Màu Đỏ)" />
+              <input type="number" name="variant_price[]" class="border rounded px-2 py-1" placeholder="Giá cho loại này" />
+              <input type="number" name="variant_stock[]" class="border rounded px-2 py-1" placeholder="Tồn kho loại này" />
+              <button type="button" class="remove-variant bg-red-500 text-white px-2 rounded">X</button>
+            `;
+            list.appendChild(row);
+          });
+        });
+      </script>
 
       <!-- Submit -->
       <div>

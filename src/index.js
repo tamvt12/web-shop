@@ -28,6 +28,8 @@ const hbs = engine.create({
     formatDate: helpers.formatDate,
     ifEquals: helpers.ifEquals,
     formatAverageRating: helpers.formatAverageRating,
+    lookupVariantPrice: helpers.lookupVariantPrice,
+    multiply: helpers.multiply,
     add: helpers.add,
     subtract: helpers.subtract,
     times: helpers.times,

@@ -111,50 +111,6 @@ function removeRow(url) {
   }
 }
 
-function addCart(id) {
-  $.ajax({
-    url: '/addCart',
-    type: 'POST',
-    data: { id: id },
-    success: function (results) {
-      if (results.error === 'Unauthorized') {
-        window.location.href = '/login'
-      } else {
-        if (results.message !== '') {
-          alert(results.message)
-        }
-        $('#cartCount').text(results.cartCount)
-        $('#orderCount').text(results.orderCount)
-      }
-    },
-    error: function (xhr, status, error) {
-      console.error('Lỗi khi gửi dữ liệu:', error)
-      console.log('Phản hồi từ server:', xhr.responseText)
-    },
-  })
-}
-
-function buyCart(id) {
-  $.ajax({
-    url: '/addCart',
-    type: 'POST',
-    data: { id: id },
-    success: function (response) {
-      if (response.error === 'Unauthorized') {
-        window.location.href = '/login'
-      } else {
-        if (response.message !== '') {
-          alert(response.message)
-        } else {
-          $('#cartCount').text(response.cartCount)
-          $('#orderCount').text(response.orderCount)
-          window.location.href = '/cart'
-        }
-      }
-    },
-  })
-}
-
 function updateMainImage(thumbnail) {
   // Remove active class from all thumbnails
   document.querySelectorAll('.thumbnail-image').forEach((img) => {
@@ -187,10 +143,15 @@ function decrementQuantity() {
 
 function addToCart(productId) {
   const quantity = document.getElementById('quantity').value
+
   $.ajax({
     url: '/addCart',
     type: 'POST',
-    data: { id: productId, quantity: parseInt(quantity) },
+    data: {
+      id: productId,
+      variantType: selectedVariantType,
+      quantity: parseInt(quantity),
+    },
     success: function (results) {
       if (results.error === 'Unauthorized') {
         window.location.href = '/login'
@@ -211,10 +172,15 @@ function addToCart(productId) {
 
 function buyNow(productId) {
   const quantity = document.getElementById('quantity').value
+
   $.ajax({
     url: '/addCart',
     type: 'POST',
-    data: { id: productId, quantity: parseInt(quantity) },
+    data: {
+      id: productId,
+      variantType: selectedVariantType,
+      quantity: parseInt(quantity),
+    },
     success: function (results) {
       if (results.error === 'Unauthorized') {
         window.location.href = '/login'
@@ -336,6 +302,17 @@ function formatCurrency(amount) {
   return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' đ'
 }
 
+function formatMoney(value) {
+  if (!value) return '0 đ'
+  let number = value
+  if (typeof value === 'object' && number.$numberDecimal) {
+    number = number.$numberDecimal
+  }
+  const priceNumber = parseFloat(number)
+  if (isNaN(priceNumber)) return 'Invalid Price'
+  return priceNumber.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' đ'
+}
+
 function checkout() {
   $.ajax({
     url: '/checkout',
@@ -401,6 +378,7 @@ function ratingFormSubmit(e, orderId) {
     product_ids: product_ids,
     order_id: orderId,
   }
+  console.log('🚀 ~ ratingFormSubmit ~ formData:', formData)
 
   $.ajax({
     url: '/rating',

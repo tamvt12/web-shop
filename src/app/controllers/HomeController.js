@@ -259,9 +259,8 @@ class HomeController {
   }
 
   addCart = (req, res) => {
-    // const dataBody = JSON.parse(req.body)
-    console.log('🚀 ~ HomeController ~ productId:', req.body)
-    const productId = req.body.id
+    const productId = parseInt(req.body.id)
+    const variantType = req.body.variantType
     const quantity = parseInt(req.body.quantity) || 1
     const userId = req.session.userId
 
@@ -277,32 +276,42 @@ class HomeController {
           return res.json({ error: message })
         }
 
-        if (product.stock <= 0) {
+        let stock = product.stock
+        if (variantType && product.variants && product.variants.length) {
+          const variant = product.variants.find((v) => v.type === variantType)
+          if (!variant) {
+            return res.json({ error: 'Loại sản phẩm không tồn tại' })
+          }
+          stock = variant.stock
+        }
+
+        if (stock <= 0) {
           message = 'Sản phẩm đã hết hàng'
           return res.json({ error: message })
         }
 
-        let cartItem = await Cart_Item.findOne({
-          user_id: userId,
-          product_id: productId,
-        })
+        let cartQuery = { user_id: userId, product_id: productId }
+        if (variantType) cartQuery.variant_type = variantType
+        console.log('🚀 ~ HomeController ~ .then ~ cartQuery:', cartQuery)
+        let cartItem = await Cart_Item.findOne(cartQuery)
 
         if (cartItem) {
           const newQuantity = cartItem.quantity + quantity
-          if (newQuantity > product.stock) {
+          if (newQuantity > stock) {
             message = 'Số lượng sản phẩm trong giỏ hàng đã đạt giới hạn'
             return res.json({ error: message })
           }
           cartItem.quantity = newQuantity
           await cartItem.save()
         } else {
-          if (quantity > product.stock) {
+          if (quantity > stock) {
             message = 'Số lượng sản phẩm vượt quá số lượng có sẵn'
             return res.json({ error: message })
           }
           cartItem = await Cart_Item.create({
             user_id: userId,
             product_id: productId,
+            variant_type: variantType || null,
             quantity: quantity,
           })
         }
@@ -334,7 +343,7 @@ class HomeController {
     }
 
     try {
-      const product = await Product.findById(productId)
+      const product = await Product.findOne({ id: productId })
 
       if (!product) {
         return res.json({ error: 'Sản phẩm không tồn tại' })
@@ -406,27 +415,27 @@ class HomeController {
               .filter((url) => url !== '')
             product.image_url = imageArray
           }
-
           cart_item.product = product
           cart_item.total = cart_item.quantity * product.price
+          cart_item.variants = product.variants || []
+          if (cart_item.variant_type) {
+            cart_item.variant_type = cart_item.variant_type
+          }
           total += cart_item.total
         }
       }
-
       return { cart_items, total }
-    } catch (err) {}
+    } catch (err) {
+      return { cart_items: [], total: 0 }
+    }
   }
 
   showCart = async (req, res, next) => {
     const user_id = req.session.userId
-    const cartCount = await this.countUserCarts(user_id)
-    const orderCount = await this.countUserOrders(user_id)
     const { cart_items, total } = await this.cart(user_id)
 
     res.render('cart', {
       cart_items,
-      orderCount,
-      cartCount,
       total,
     })
     // res.json({ cart_items })
@@ -494,96 +503,99 @@ class HomeController {
 
   checkOut = async (req, res) => {
     const user_id = req.session.userId
-
     try {
-      const cartItems = await Cart_Item.find({ user_id })
-        .populate('product_id')
-        .exec()
-
+      // Lấy tất cả item trong giỏ hàng của user
+      const cartItems = await Cart_Item.find({ user_id }).lean()
       if (!cartItems || cartItems.length === 0) {
         return res.status(400).json({ error: 'Giỏ hàng của bạn đang trống.' })
       }
-
+      // Lấy danh sách id sản phẩm duy nhất
+      const productIds = [...new Set(cartItems.map((item) => item.product_id))]
+      // Lấy thông tin sản phẩm dựa vào id tự tạo
+      const products = await Product.find({ id: { $in: productIds } }).lean()
+      const cartItemsWithProduct = cartItems.map((item) => {
+        const product = products.find((p) => p.id == item.product_id)
+        return {
+          ...item,
+          product: product || null,
+        }
+      })
+      // Tính tổng tiền
       let total = 0
-
-      for (const cartItem of cartItems) {
-        total += cartItem.product_id.price * cartItem.quantity
+      for (const cartItem of cartItemsWithProduct) {
+        if (!cartItem.product) continue
+        let price = cartItem.product.price
+        let variantName = null
+        // Nếu có variant_type, lấy giá của loại sản phẩm đó
+        if (cartItem.variant_type && Array.isArray(cartItem.product.variants)) {
+          const variant = cartItem.product.variants.find(
+            (v) => v.type === cartItem.variant_type,
+          )
+          if (variant) {
+            price = variant.price
+            variantName = variant.type
+          }
+        }
+        cartItem._finalPrice = price
+        cartItem._variantName = variantName
+        total += price * cartItem.quantity
       }
-
+      // Tạo order
       const order = new Order({
         user_id,
         total,
         status: 'Chờ xử lý',
       })
-
       const savedOrder = await order.save()
-
+      // Tạo các order item
       const orderItems = []
-      for (const cartItem of cartItems) {
+      for (const cartItem of cartItemsWithProduct) {
+        if (!cartItem.product) continue
         const orderItem = new Order_Item({
           order_id: savedOrder.id,
-          product_id: cartItem.product_id.id,
+          product_id: cartItem.product.id,
           quantity: cartItem.quantity,
-          price: cartItem.product_id.price,
+          price: cartItem._finalPrice,
+          variant_type: cartItem._variantName,
         })
         orderItems.push(orderItem.save())
       }
-
-      const orders = await Order.find({ user_id }).lean()
-
-      for (const order of orders) {
-        const items = await Order_Item.find({ order_id: order.id })
-          .populate('product_id')
-          .lean()
-
-        // Load existing rating for this order
-        const existingReview = await Review.findOne({
-          user_id: user_id,
-          order_id: order.id,
-        }).lean()
-
-        // Assign review data to order level
-        if (existingReview) {
-          order.userRating = existingReview.rating
-          order.userComment = existingReview.comment
-        } else {
-          order.userRating = null
-          order.userComment = null
-        }
-
-        for (const item of items) {
-          if (
-            item.product_id &&
-            typeof item.product_id.image_url === 'string'
-          ) {
-            const imageArray = item.product_id.image_url
-              .split(',')
-              .map((url) => url.trim())
-              .filter((url) => url !== '')
-            item.product_id.image_url = imageArray
+      // Cập nhật tồn kho sản phẩm
+      for (const item of cartItemsWithProduct) {
+        if (!item.product) continue
+        // Nếu có variant_type và sản phẩm có variants
+        if (item.variant_type && Array.isArray(item.product.variants)) {
+          // Tìm index của variant cần cập nhật
+          const variantIndex = item.product.variants.findIndex(
+            (v) => v.type === item.variant_type,
+          )
+          if (variantIndex !== -1) {
+            // Giảm stock của variant đó
+            const updateKey = `variants.${variantIndex}.stock`
+            await Product.findOneAndUpdate(
+              { id: item.product.id },
+              { $inc: { [updateKey]: -item.quantity } },
+            )
           }
+        } else {
+          // Nếu không có variant, giảm stock tổng
+          await Product.findOneAndUpdate(
+            { id: item.product.id },
+            { $inc: { stock: -item.quantity } },
+          )
         }
-        order.order_Item = items
       }
-
-      for (const item of cartItems) {
-        await Product.findByIdAndUpdate(item.product_id.id, {
-          $inc: { stock: -item.quantity },
-        })
-      }
-
+      // Xóa giỏ hàng
       await Cart_Item.deleteMany({ user_id })
       const cartCount = await this.countUserCarts(user_id)
       const orderCount = await this.countUserOrders(user_id)
       const { cart_items } = await this.cart(user_id)
-
       res.json({
         success: true,
         message: 'Đặt hàng thành công!',
         cartCount,
         orderCount,
         cart_items,
-        orders,
       })
     } catch (error) {
       console.error('Lỗi khi đặt hàng:', error)
@@ -601,16 +613,13 @@ class HomeController {
         .lean()
 
       for (const order of orders) {
-        const items = await Order_Item.find({ order_id: order.id })
-          .populate('product_id')
-          .lean()
+        const items = await Order_Item.find({ order_id: order.id }).lean()
 
         const existingReview = await Review.findOne({
           user_id: user_id,
           order_id: order.id,
         }).lean()
 
-        // Assign review data to order level
         if (existingReview) {
           order.userRating = existingReview.rating
           order.userComment = existingReview.comment
@@ -620,15 +629,14 @@ class HomeController {
         }
 
         for (const item of items) {
-          if (
-            item.product_id &&
-            typeof item.product_id.image_url === 'string'
-          ) {
-            const imageArray = item.product_id.image_url
+          item.product = await Product.findOne({ id: item.product_id }).lean()
+          if (item.product && typeof item.product.image_url === 'string') {
+            const imageArray = item.product.image_url
               .split(',')
               .map((url) => url.trim())
               .filter((url) => url !== '')
-            item.product_id.image_url = imageArray
+
+            item.product.image_url = imageArray
           }
         }
         order.order_Item = items

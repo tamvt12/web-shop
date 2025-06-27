@@ -71,7 +71,11 @@ class AdminController {
   }
 
   async showOrderItem(req, res) {
-    const orderItems = await Order_Item.find().populate('product_id').lean()
+    const orderItems = await Order_Item.find().lean()
+    for (let item of orderItems) {
+      const product = await Product.findOne({ id: item.product_id })
+      item.product_name = product.name
+    }
 
     res.render('admin/order-item/list', { showAdmin: true, orderItems })
   }

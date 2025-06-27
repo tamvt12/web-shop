@@ -55,7 +55,17 @@
                     {{this.name}}
                   </h6>
                   <p class='text-green-600 font-bold mb-1'>
-                    {{formatCurrency this.price}}
+                    {{#if this.variants}}
+                      {{#if this.variants.length}}
+                        {{formatCurrency
+                          (lookup (lookup this.variants 0) 'price')
+                        }}
+                      {{else}}
+                        {{formatCurrency this.price}}
+                      {{/if}}
+                    {{else}}
+                      {{formatCurrency this.price}}
+                    {{/if}}
                   </p>
                   <div class='text-yellow-500 text-xs'>
                     {{formatAverageRating this.rating}}

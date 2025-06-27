@@ -9,6 +9,16 @@ function formatCurrency(price) {
 
   return priceNumber.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' đ'
 }
+function lookupVariantPrice(variants, type) {
+  if (!variants || !type) return 0
+  const found = variants.find((v) => v.type === type)
+  if (!found) return 0
+  // Nếu dùng Decimal128 của MongoDB
+  if (typeof found.price === 'object' && found.price.$numberDecimal) {
+    return parseFloat(found.price.$numberDecimal)
+  }
+  return found.price
+}
 
 function ifCond(v1, v2, options) {
   if (v1 && v2 && v1.toString() === v2.toString()) {
@@ -54,6 +64,9 @@ function formatAverageRating(averageRating) {
   return starIcons
 }
 
+function multiply(a, b) {
+  return parseFloat(a) * parseFloat(b)
+}
 // Thêm các helper mới cho phân trang
 function add(a, b) {
   return a + b
@@ -98,6 +111,8 @@ module.exports = {
   formatDate,
   ifEquals,
   formatAverageRating,
+  lookupVariantPrice,
+  multiply,
   add,
   subtract,
   times,

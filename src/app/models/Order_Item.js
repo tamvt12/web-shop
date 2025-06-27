@@ -8,6 +8,7 @@ const Order_Item = new Schema({
   product_id: { type: Number, ref: 'Product' },
   quantity: Number,
   price: mongoose.Types.Decimal128,
+  variant_type: String,
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 })

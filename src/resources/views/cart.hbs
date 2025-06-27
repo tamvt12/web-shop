@@ -65,9 +65,17 @@
               </td>
               <td class='p-2 border'>
                 {{this.product.name}}
+                <br>
+                <select class="variant-select" data-cart-id="{{this.id}}" data-variants='{{{json this.variants}}}'>
+                  {{#each this.variants}}
+                    <option value="{{this.type}}" {{#if (eq this.type ../variant_type)}}selected{{/if}}>
+                      {{this.type}}
+                    </option>
+                  {{/each}}
+                </select>
               </td>
-              <td class='p-2 border text-red-600 font-semibold'>
-                {{formatCurrency this.product.price}}
+              <td class='p-2 border w-1/6 text-red-600 font-semibold price-cell'>
+                {{formatCurrency (lookupVariantPrice this.variants this.variant_type)}}
               </td>
               <td class='p-2 border'>
                 <div class='flex items-center justify-center gap-2'>
@@ -97,8 +105,8 @@
                   </div>
                 </div>
               </td>
-              <td class='p-2 border text-red-600 font-semibold'>
-                {{formatCurrency this.total}}
+              <td class='p-2 border text-red-600 font-semibold total-cell'>
+                {{formatCurrency (multiply (lookupVariantPrice this.variants this.variant_type) this.quantity)}}
               </td>
               <td class='p-2 border'>
                 <button
@@ -205,3 +213,37 @@
     </button>
   </div>
 </div>
+
+<script>
+document.querySelectorAll('.variant-select').forEach(function(select) {
+  select.addEventListener('change', function() {
+    const cartId = this.getAttribute('data-cart-id');
+    const selectedType = this.value;
+    const row = this.closest('tr');
+    const variants = JSON.parse(this.getAttribute('data-variants'));
+    const variant = variants.find(v => v.type === selectedType);
+    const priceCell = row.querySelector('.price-cell');
+    const totalCell = row.querySelector('.total-cell');
+    const quantity = parseInt(row.querySelector('input[type=number]').value);
+    priceCell.textContent = formatMoney(variant.price);
+		let price = variant.price;
+		if (typeof price === 'object' && price.$numberDecimal) {
+			price = parseFloat(price.$numberDecimal);
+		}
+    totalCell.textContent = formatMoney(price * quantity);
+    updateCartTotal();
+  });
+});
+
+function updateCartTotal() {
+  let total = 0;
+  document.querySelectorAll('tr.cart-item').forEach(function(row) {
+    const totalCell = row.querySelector('.total-cell');
+    if (totalCell) {
+      const value = totalCell.textContent.replace(/[^0-9]/g, '');
+      total += parseFloat(value) || 0;
+    }
+  });
+  document.getElementById('cart-total-price').textContent = formatMoney(total);
+}
+</script>

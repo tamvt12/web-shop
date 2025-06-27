@@ -43,6 +43,27 @@ class ProductController {
 
   store(req, res) {
     const { category_id, name, description, price, stock, image_url } = req.body
+    const variantTypes = req.body.variant_type || []
+    const variantPrices = req.body.variant_price || []
+    const variantStocks = req.body.variant_stock || []
+    let variants = []
+    if (Array.isArray(variantTypes)) {
+      for (let i = 0; i < variantTypes.length; i++) {
+        if (variantTypes[i] && variantPrices[i]) {
+          variants.push({
+            type: variantTypes[i],
+            price: variantPrices[i],
+            stock: variantStocks[i] || 0,
+          })
+        }
+      }
+    } else if (variantTypes && variantPrices) {
+      variants.push({
+        type: variantTypes,
+        price: variantPrices,
+        stock: variantStocks || 0,
+      })
+    }
     try {
       if (
         category_id === '' &&
@@ -63,6 +84,7 @@ class ProductController {
         stock,
         category_id,
         image_url,
+        variants,
       })
       product.save()
       res.redirect('/admin/product/list')
@@ -115,6 +137,28 @@ class ProductController {
   async update(req, res) {
     const { category_id, name, description, price, stock, image_url } = req.body
     const id = req.params.id
+    // Lấy variants từ form
+    const variantTypes = req.body.variant_type || []
+    const variantPrices = req.body.variant_price || []
+    const variantStocks = req.body.variant_stock || []
+    let variants = []
+    if (Array.isArray(variantTypes)) {
+      for (let i = 0; i < variantTypes.length; i++) {
+        if (variantTypes[i] && variantPrices[i]) {
+          variants.push({
+            type: variantTypes[i],
+            price: variantPrices[i],
+            stock: variantStocks[i] || 0,
+          })
+        }
+      }
+    } else if (variantTypes && variantPrices) {
+      variants.push({
+        type: variantTypes,
+        price: variantPrices,
+        stock: variantStocks || 0,
+      })
+    }
     try {
       if (
         category_id === '' &&
@@ -137,6 +181,7 @@ class ProductController {
           stock,
           category_id,
           image_url,
+          variants,
         },
       )
       if (updatedProduct) {

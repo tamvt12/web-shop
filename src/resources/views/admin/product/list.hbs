@@ -4,7 +4,7 @@
       <thead>
         <tr class='bg-gray-100'>
           <th
-            class='max-w-[4rem] w-20  px-2 py-2 text-left text-sm font-semibold'
+            class='max-w-10 min-w-5  px-2 py-2 text-left text-sm font-semibold'
           >
             ID
           </th>
@@ -34,7 +34,7 @@
       <tbody>
         {{#each products}}
           <tr class='even:bg-gray-50'>
-            <td class='px-2 py-2 text-sm truncate max-w-[4rem] w-20'>
+            <td class='px-2 py-2 text-sm truncate  max-w-10 min-w-5'>
               {{this.id}}
             </td>
             <td class='px-2 py-2 text-sm'>
@@ -44,10 +44,26 @@
               {{this.description}}
             </td>
             <td class='px-2 py-2 text-sm text-red-600'>
-              {{formatCurrency this.price}}
+              {{#if this.variants}}
+                {{#if this.variants.length}}
+                  {{formatCurrency (lookup (lookup this.variants 0) 'price')}}
+                {{else}}
+                  {{formatCurrency this.price}}
+                {{/if}}
+              {{else}}
+                {{formatCurrency this.price}}
+              {{/if}}
             </td>
             <td class='px-2 py-2 text-sm'>
-              {{this.stock}}
+              {{#if this.variants}}
+                {{#if this.variants.length}}
+                  {{lookup (lookup this.variants 0) 'stock'}}
+                {{else}}
+                  {{this.stock}}
+                {{/if}}
+              {{else}}
+                {{this.stock}}
+              {{/if}}
             </td>
             <td class='px-2 py-2 text-sm'>
               {{this.category_name}}

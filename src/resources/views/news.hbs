@@ -1,8 +1,8 @@
 <div class='container mt-4 w-[80%] mx-auto bg-white rounded-lg shadow-md p-7'>
-  <div class='grid grid-cols-1 md:grid-cols-3 gap-6'>
+  <div class='grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr'>
     <!-- Cột trái: Danh sách bài viết -->
     {{#each newsList}}
-      <div class='p-4 flex flex-col'>
+      <div class='p-4 flex flex-col h-full'>
         <a
           href="/news/{{this.id}}"
           class='text-gray-900 hover:text-blue-600 flex flex-col h-full'
@@ -18,7 +18,7 @@
             href="/news/{{this.id}}"
             class='text-gray-900 hover:text-blue-600 flex flex-col h-full'
           >
-            <h5 class='font-bold text-lg mt-4 mb-2 min-h-[48px]'>
+            <h5 class='font-bold text-lg mt-4 mb-2 leading-tight flex-1'>
               {{this.title}}
             </h5>
           </a>
