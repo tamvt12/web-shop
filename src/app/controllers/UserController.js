@@ -87,7 +87,11 @@ class UserController {
         expiresIn: '1h',
       })
       req.session.userId = user.id
+      req.session.sessionUserID = user._id
       req.session.username = user.name
+      req.session.fullName = user.fullName
+      req.session.gender = user.gender
+      req.session.birthDate = user.birthDate
       req.session.phone = user.phone
       req.session.email = user.email
       req.session.address = user.address
@@ -116,7 +120,7 @@ class UserController {
   }
 
   update = async (req, res) => {
-    const { email, phone, address } = req.body
+    const { id, phone, address, fullName, gender, birthDate } = req.body
 
     try {
       if (phone && !this.isPhoneNumber(phone)) {
@@ -125,15 +129,40 @@ class UserController {
           message: 'Số điện thoại không hợp lệ.',
         })
       }
-      const updatedUser = await User.findOneAndUpdate(
-        { email },
-        { phone, address },
-        { new: true },
-      )
+
+      // Validate gender
+      if (gender && !['male', 'female', 'other', ''].includes(gender)) {
+        return res.json({
+          success: false,
+          message: 'Giới tính không hợp lệ.',
+        })
+      }
+
+      // Validate birthDate format (YYYY-MM-DD)
+      if (birthDate && !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+        return res.json({
+          success: false,
+          message: 'Ngày sinh không đúng định dạng.',
+        })
+      }
+
+      const updateData = {}
+      if (phone !== undefined) updateData.phone = phone
+      if (address !== undefined) updateData.address = address
+      if (fullName !== undefined) updateData.fullName = fullName
+      if (gender !== undefined) updateData.gender = gender
+      if (birthDate !== undefined) updateData.birthDate = birthDate
+
+      const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+        new: true,
+      })
 
       if (updatedUser) {
         req.session.phone = updatedUser.phone
         req.session.address = updatedUser.address
+        req.session.fullName = updatedUser.fullName
+        req.session.gender = updatedUser.gender
+        req.session.birthDate = updatedUser.birthDate
 
         return res.json({
           success: true,
@@ -146,6 +175,7 @@ class UserController {
         })
       }
     } catch (error) {
+      console.error('Error updating user:', error)
       return res.json({
         success: false,
         message: 'Có lỗi xảy ra khi cập nhật.',
@@ -156,6 +186,74 @@ class UserController {
   isPhoneNumber(phone) {
     const phoneRegex = /^0[0-9]{9,10}$/
     return phoneRegex.test(phone)
+  }
+
+  async changePassword(req, res) {
+    const { currentPassword, newPassword } = req.body
+    const userId = req.session.userId
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Bạn chưa đăng nhập',
+      })
+    }
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng điền đầy đủ thông tin',
+      })
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mật khẩu mới phải có ít nhất 6 ký tự',
+      })
+    }
+
+    try {
+      const user = await User.findOne({ id: userId })
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy người dùng',
+        })
+      }
+
+      // Verify current password
+      const isCurrentPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user.password,
+      )
+
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({
+          success: false,
+          message: 'Mật khẩu hiện tại không đúng',
+        })
+      }
+
+      // Hash new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10)
+
+      // Update password
+      user.password = hashedNewPassword
+      await user.save()
+
+      return res.json({
+        success: true,
+        message: 'Đổi mật khẩu thành công',
+      })
+    } catch (error) {
+      console.error('Error changing password:', error)
+      return res.status(500).json({
+        success: false,
+        message: 'Có lỗi xảy ra khi đổi mật khẩu',
+      })
+    }
   }
 }
 

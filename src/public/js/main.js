@@ -20,12 +20,12 @@ $(document).ready(function () {
       dataType: 'json',
       success: function (data) {
         if (data.success) {
-          $('#errorAlert').addClass('alert-success')
-          $('#errorAlert').removeClass('alert-danger')
+          $('#errorAlert').addClass('text-green-700 bg-green-100')
+          $('#errorAlert').removeClass('text-red-700 bg-red-100')
           $('#errorAlert').text(data.message).show()
         } else {
-          $('#errorAlert').addClass('alert-danger')
-          $('#errorAlert').removeClass('alert-success')
+          $('#errorAlert').addClass('text-red-700 bg-red-100')
+          $('#errorAlert').removeClass('text-green-700 bg-green-100	')
           $('#errorAlert').text(data.message).show()
         }
       },
@@ -378,7 +378,6 @@ function ratingFormSubmit(e, orderId) {
     product_ids: product_ids,
     order_id: orderId,
   }
-  console.log('🚀 ~ ratingFormSubmit ~ formData:', formData)
 
   $.ajax({
     url: '/rating',
@@ -404,4 +403,87 @@ function toggleModal(show) {
   } else {
     modal.classList.add('hidden')
   }
+}
+
+function togglePasswordModal(show) {
+  const modal = document.getElementById('passwordModal')
+  if (!modal) return
+  if (show) {
+    modal.classList.remove('hidden')
+    // Clear previous alerts and form
+    document.getElementById('passwordErrorAlert').classList.add('hidden')
+    document.getElementById('passwordSuccessAlert').classList.add('hidden')
+    document.getElementById('passwordForm').reset()
+  } else {
+    modal.classList.add('hidden')
+  }
+}
+
+// Password change form handling
+$(document).ready(function () {
+  $('#passwordForm').on('submit', function (e) {
+    e.preventDefault()
+
+    const currentPassword = $('#currentPassword').val()
+    const newPassword = $('#newPassword').val()
+    const confirmPassword = $('#confirmPassword').val()
+
+    // Clear previous alerts
+    $('#passwordErrorAlert').addClass('hidden')
+    $('#passwordSuccessAlert').addClass('hidden')
+
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showPasswordError('Vui lòng điền đầy đủ thông tin')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      showPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      showPasswordError('Mật khẩu xác nhận không khớp')
+      return
+    }
+
+    // Send request to server
+    $.ajax({
+      url: '/change-password',
+      type: 'POST',
+      data: {
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      },
+      success: function (response) {
+        if (response.success) {
+          showPasswordSuccess(response.message)
+          $('#passwordForm')[0].reset()
+          // Close modal after 2 seconds
+          setTimeout(function () {
+            togglePasswordModal(false)
+          }, 2000)
+        } else {
+          showPasswordError(response.message)
+        }
+      },
+      error: function (xhr) {
+        const response = xhr.responseJSON
+        if (response && response.message) {
+          showPasswordError(response.message)
+        } else {
+          showPasswordError('Có lỗi xảy ra, vui lòng thử lại')
+        }
+      },
+    })
+  })
+})
+
+function showPasswordError(message) {
+  $('#passwordErrorAlert').removeClass('hidden').text(message)
+}
+
+function showPasswordSuccess(message) {
+  $('#passwordSuccessAlert').removeClass('hidden').text(message)
 }
