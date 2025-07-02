@@ -42,142 +42,80 @@
       </thead>
       <tbody id='cart-items'>
         {{#each cart_items}}
-          {{#if this.product}}
-            <tr class='cart-item border-t'>
-              <td class='p-2 border'>
-                {{#if this.product.image_url}}
-                  {{#each this.product.image_url}}
-                    {{#if @first}}
-                      <img
-                        src="{{this}}"
-                        alt="{{../this.product.name}}"
-                        class='w-24 h-auto object-contain'
-                      />
-                    {{/if}}
-                  {{/each}}
-                {{else}}
-                  <img
-                    src="{{this.product.image_url}}"
-                    alt="{{this.product.name}}"
-                    class='w-24 h-auto object-contain'
-                  />
-                {{/if}}
-              </td>
-              <td class='p-2 border'>
-                {{this.product.name}}
-                <br>
-                <select class="variant-select" data-cart-id="{{this.id}}" data-variants='{{{json this.variants}}}'>
-                  {{#each this.variants}}
-                    <option value="{{this.type}}" {{#if (eq this.type ../variant_type)}}selected{{/if}}>
-                      {{this.type}}
-                    </option>
-                  {{/each}}
-                </select>
-              </td>
-              <td class='p-2 border w-1/6 text-red-600 font-semibold price-cell'>
-                {{formatCurrency (lookupVariantPrice this.variants this.variant_type)}}
-              </td>
-              <td class='p-2 border'>
-                <div class='flex items-center justify-center gap-2'>
-                  <div class='flex items-center w-32 border rounded'>
-                    <button
-                      type='button'
-                      onclick="updateQuantity('{{this.id}}', {{this.quantity}} - 1)"
-                      class='px-3 py-1 text-gray-500 hover:bg-gray-100'
-                    >
-                      −
-                    </button>
-                    <input
-                      type='number'
-                      id='quantity-{{this.id}}'
-                      value='{{this.quantity}}'
-                      min='1'
-                      class='w-full text-center focus:outline-none'
-                      onblur="updateQuantity('{{this.id}}', this.value)"
-                    />
-                    <button
-                      type='button'
-                      onclick="updateQuantity('{{this.id}}', {{this.quantity}} + 1)"
-                      class='px-3 py-1 text-gray-500 hover:bg-gray-100'
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </td>
-              <td class='p-2 border text-red-600 font-semibold total-cell'>
-                {{formatCurrency (multiply (lookupVariantPrice this.variants this.variant_type) this.quantity)}}
-              </td>
-              <td class='p-2 border'>
-                <button
-                  class='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
-                  onclick="removeItem('{{this.id}}')"
-                >
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          {{else if this.product_id}}
-            <tr class='cart-item border-t'>
-              <td class='p-2 border'>
-                <img
-                  src="{{this.product_id.image_url}}"
-                  alt="{{this.product_id.name}}"
-                  class='w-24 h-auto object-contain'
-                />
-              </td>
-              <td class='p-2 border'>
-                {{this.product_id.name}}
-              </td>
-              <td class='p-2 border text-red-600 font-semibold'>
-                {{formatCurrency this.product_id.price.$numberDecimal}}
-              </td>
-              <td class='p-2 border'>
-                <div class='flex items-center justify-center gap-2'>
-                  <div class='flex items-center justify-between w-32 border rounded'>
-                    <button
-                      type='button'
-                      onclick="updateQuantity('{{this.id}}', {{this.quantity}} - 1)"
-                      class='px-3 py-1 text-gray-500 hover:bg-gray-100'
-                    >
-                      −
-                    </button>
-                    <input
-                      type='number'
-                      id='quantity-{{this.id}}'
-                      value='{{this.quantity}}'
-                      min='1'
-                      class='w-full text-center focus:outline-none'
-                      onblur="updateQuantity('{{this.id}}', this.value)"
-                    />
-                    <button
-                      type='button'
-                      onclick="updateQuantity('{{this.id}}', {{this.quantity}} + 1)"
-                      class='px-3 py-1 text-gray-500 hover:bg-gray-100'
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </td>
-              <td class='p-2 border text-red-600 font-semibold'>
-                {{
-                  formatCurrency
-                  (totalPrice
-                    this.product_id.price.$numberDecimal this.quantity
-                  )
-                }}
-              </td>
-              <td class='p-2'>
-                <button
-                  class='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
-                  onclick="removeItem('{{this.id}}')"
-                >
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          {{/if}}
+					<tr class='cart-item border-t'>
+						<td class='p-2 border'>
+							{{#if this.product.image_url}}
+								{{#each this.product.image_url}}
+									{{#if @first}}
+										<img
+											src="{{this}}"
+											alt="{{../this.product.name}}"
+											class='w-24 h-auto object-contain'
+										/>
+									{{/if}}
+								{{/each}}
+							{{else}}
+								<img
+									src="{{this.product.image_url}}"
+									alt="{{this.product.name}}"
+									class='w-24 h-auto object-contain'
+								/>
+							{{/if}}
+						</td>
+						<td class='p-2 border'>
+							{{this.product.name}}
+							<br>
+							<select class="variant-select" data-cart-id="{{this.id}}" data-variants='{{{json this.variants}}}'>
+								{{#each this.variants}}
+									<option value="{{this.type}}" {{#if (eq this.type ../variant_type)}}selected{{/if}}>
+										{{this.type}}
+									</option>
+								{{/each}}
+							</select>
+						</td>
+						<td class='p-2 border w-1/6 text-red-600 font-semibold price-cell'>
+							{{formatCurrency (lookupVariantPrice this.variants this.variant_type)}}
+						</td>
+						<td class='p-2 border'>
+							<div class='flex items-center justify-center gap-2'>
+								<div class='flex items-center w-32 border rounded'>
+									<button
+										type='button'
+										onclick="updateQuantity('{{this.id}}', {{this.quantity}} - 1)"
+										class='px-3 py-1 text-gray-500 hover:bg-gray-100'
+									>
+										−
+									</button>
+									<input
+										type='number'
+										id='quantity-{{this.id}}'
+										value='{{this.quantity}}'
+										min='1'
+										class='w-full text-center focus:outline-none'
+										onblur="updateQuantity('{{this.id}}', this.value)"
+									/>
+									<button
+										type='button'
+										onclick="updateQuantity('{{this.id}}', {{this.quantity}} + 1)"
+										class='px-3 py-1 text-gray-500 hover:bg-gray-100'
+									>
+										+
+									</button>
+								</div>
+							</div>
+						</td>
+						<td class='p-2 border text-red-600 font-semibold total-cell'>
+							{{formatCurrency (multiply (lookupVariantPrice this.variants this.variant_type) this.quantity)}}
+						</td>
+						<td class='p-2 border'>
+							<button
+								class='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
+								onclick="removeItem('{{this.id}}')"
+							>
+								Xóa
+							</button>
+						</td>
+					</tr>
         {{/each}}
       </tbody>
     </table>
@@ -207,9 +145,9 @@
   <div class='mt-4 text-right'>
     <button
       class='px-6 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition'
-      onclick='checkout()'
+      onclick='window.location.href = "/getCheckout"'
     >
-      Thanh toán
+      Mua hàng
     </button>
   </div>
 </div>

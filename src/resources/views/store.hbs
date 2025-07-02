@@ -32,44 +32,44 @@
         {{/each}}
       </ul>
 			<div class='mt-6'>
-      <h3 class='text-lg font-semibold mb-3'>Chọn khoảng giá</h3>
-      <form id='price-filter-form'>
-        <div class='space-y-2'>
-          <div class="grid grid-cols-2 gap-2">
-            <input
-              type='number'
-              name='minPrice'
-              id='minPrice'
-              placeholder='Từ'
-              class='w-full h-[30px] border rounded px-2 py-1 text-custom-sm focus:outline-none focus:ring-1 focus:ring-green-500'
-              value='{{minPrice}}'
-            />
-            <input
-              type='number'
-              name='maxPrice'
-              id='maxPrice'
-              placeholder='Đến'
-              class='w-full h-[30px] border rounded px-2 py-1 text-custom-sm focus:outline-none focus:ring-1 focus:ring-green-500'
-              value='{{maxPrice}}'
-            />
-          </div>
-        </div>
-        <button
-          type='submit'
-					id="price-filter-form"
-          class='w-full h-[30px] text-black border hover:bg-gray-100 py-2 rounded transition duration-200 mt-3 flex justify-center items-center'
-        >
-          Áp dụng
-        </button>
-				<button
-          type='button'
-					id="reset-price-filter"
-          class='w-full h-[30px] text-white bg-btn bg-custom-green-hover py-2 rounded transition duration-200 mt-3 flex justify-center items-center'
-        >
-          Đặt lại
-        </button>
-      </form>
-    </div>
+				<h3 class='text-lg font-semibold mb-3'>Chọn khoảng giá</h3>
+				<form id='price-filter-form'>
+					<div class='space-y-2'>
+						<div class="grid grid-cols-2 gap-2">
+							<input
+								type='number'
+								name='minPrice'
+								id='minPrice'
+								placeholder='Từ'
+								class='w-full h-[30px] border rounded px-2 py-1 text-custom-sm focus:outline-none focus:ring-1 focus:ring-green-500'
+								value='{{minPrice}}'
+							/>
+							<input
+								type='number'
+								name='maxPrice'
+								id='maxPrice'
+								placeholder='Đến'
+								class='w-full h-[30px] border rounded px-2 py-1 text-custom-sm focus:outline-none focus:ring-1 focus:ring-green-500'
+								value='{{maxPrice}}'
+							/>
+						</div>
+					</div>
+					<button
+						type='submit'
+						id="price-filter-form"
+						class='w-full h-[30px] text-black border hover:bg-gray-100 py-2 rounded transition duration-200 mt-3 flex justify-center items-center'
+					>
+						Áp dụng
+					</button>
+					<button
+						type='button'
+						id="reset-price-filter"
+						class='w-full h-[30px] text-white bg-btn bg-custom-green-hover py-2 rounded transition duration-200 mt-3 flex justify-center items-center'
+					>
+						Đặt lại
+					</button>
+				</form>
+    	</div>
     </div>
   </div>
 

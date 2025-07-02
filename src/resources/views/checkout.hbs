@@ -1,0 +1,190 @@
+<div class='w-[90%] mx-auto flex gap-6 mt-6'>
+  <!-- Main checkout form -->
+  <div class='w-2/3'>
+    <div class='p-6 bg-white rounded-lg shadow-md'>
+      <h2 class='text-xl font-bold mb-4 text-green-700'>
+        THANH TOÁN ĐƠN HÀNG
+      </h2>
+      <form action='/checkout' method='POST' id='checkout-form'>
+        <div class='grid grid-cols-2 gap-4 mb-4'>
+          <div>
+            <label for='name' class='block text-sm font-medium'>
+              Tên người nhận
+              <span class='text-red-500'>
+                *
+              </span>
+            </label>
+            <input
+              type='text'
+              id='name'
+              name='name'
+							value="{{sessionFullName}}"
+              required
+              class='w-full border rounded px-2 py-1 mt-1'
+            />
+          </div>
+          <div>
+            <label for='phone' class='block text-sm font-medium'>
+              Số điện thoại di động
+              <span class='text-red-500'>
+                *
+              </span>
+            </label>
+            <input
+              type='text'
+              id='phone'
+              name='phone'
+							value="{{sessionPhone}}"
+              required
+              class='w-full border rounded px-2 py-1 mt-1'
+            />
+          </div>
+        </div>
+        <div class='mb-4'>
+          <label for='address' class='block text-sm font-medium'>
+            Địa chỉ nhận hàng
+            <span class='text-red-500'>
+              *
+            </span>
+          </label>
+          <input
+            type='text'
+            id='address'
+            name='address'
+						value="{{sessionAddress}}"
+            required
+            class='w-full border rounded px-2 py-1 mt-1'
+          />
+        </div>
+        <div class='mb-4'>
+          <label class='block text-sm font-medium mb-1'>
+            PHƯƠNG THỨC VẬN CHUYỂN
+          </label>
+          <div class='flex gap-4'>
+            <label class='flex items-center'>
+              <input
+                type='radio'
+                name='shipping'
+                value='normal'
+                checked
+                class='mr-2'
+              />
+              Vận chuyển thường
+            </label>
+            <label class='flex items-center'>
+              <input type='radio' name='shipping' value='fast' class='mr-2' />
+              Vận chuyển nhanh
+            </label>
+          </div>
+        </div>
+        <!-- Sản phẩm trong đơn hàng -->
+        <div class='mb-4 pt-4 border-t'>
+          <table class='w-full text-sm border'>
+            <thead>
+              <tr class='bg-gray-100'>
+                <th class='p-2 text-left'>
+                  SẢN PHẨM
+                </th>
+                <th class='p-2'>
+                  SỐ LƯỢNG
+                </th>
+                <th class='p-2'>
+                  ĐƠN GIÁ
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each cart_items}}
+								<tr class='cart-item border-t'>
+									<td class='p-2 border'>
+										<div class="flex gap-2 items-center">
+											{{#if this.product.image_url}}
+												{{#each this.product.image_url}}
+													{{#if @first}}
+														<img
+															src="{{this}}"
+															alt="{{../this.product.name}}"
+															class='w-24 h-auto object-contain'
+														/>
+													{{/if}}
+												{{/each}}
+											{{else}}
+												<img
+													src="{{this.product.image_url}}"
+													alt="{{this.product.name}}"
+													class='w-24 h-auto object-contain'
+												/>
+											{{/if}}
+											{{this.product.name}}
+										</div>
+									</td>
+									<td class='p-2 border'>
+										<div class='flex items-center justify-center gap-2'>
+											{{this.quantity}}
+										</div>
+									</td>
+									<td class='p-2 border w-1/6 text-red-600 font-semibold price-cell'>
+										{{formatCurrency (multiply (lookupVariantPrice this.variants this.variant_type) this.quantity)}}
+									</td>
+								</tr>
+							{{/each}}
+            </tbody>
+          </table>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Order summary -->
+  <div class='w-1/3'>
+    <div class='p-6 bg-white rounded-lg shadow-md'>
+      <div class='mb-2 flex justify-between'>
+        <span>
+          Tạm tính
+        </span>
+        <span>
+          {{formatCurrency total}}
+        </span>
+      </div>
+      <div class='mb-2 flex justify-between'>
+        <span>
+          Phí vận chuyển
+        </span>
+        <span>
+          {{formatCurrency 0}}
+        </span>
+      </div>
+      <div class='mb-4 flex justify-between'>
+        <span>
+          Tổng tiền
+        </span>
+        <span class="text-[#F69E00]">
+          {{formatCurrency total}}
+        </span>
+      </div>
+      <div>
+        <label class='block text-sm font-medium mb-1'>
+          PHƯƠNG THỨC THANH TOÁN
+        </label>
+        <select
+          name='payment'
+          form='checkout-form'
+          class='w-full border rounded px-2 py-1'
+        >
+          <option value='cod'>
+            Thanh toán khi nhận hàng
+          </option>
+          <option value='bank'>
+            Chuyển khoản ngân hàng
+          </option>
+        </select>
+      </div>
+      <button
+          type='submit'
+          onclick="checkout()"
+          class='w-full bg-green-600 text-white py-2 rounded font-semibold mt-4 hover:bg-green-700 transition'
+        >
+          Đặt hàng
+        </button>
+    </div>
+  </div>
+</div>

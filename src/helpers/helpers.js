@@ -103,6 +103,13 @@ function array() {
   return Array.prototype.slice.call(arguments, 0, -1)
 }
 
+function length(array) {
+  if (Array.isArray(array)) {
+    return array.length
+  }
+  return 0
+}
+
 module.exports = {
   formatCurrency,
   ifCond,
@@ -123,4 +130,5 @@ module.exports = {
     return JSON.stringify(context, null, 2)
   },
   array,
+  length,
 }

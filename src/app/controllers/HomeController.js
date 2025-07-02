@@ -68,7 +68,8 @@ class HomeController {
     }
 
     res.render('home', {
-      showHeader: true,
+      showSearch: true,
+      showCart: true,
       categories,
       orderCount,
       cartCount,
@@ -168,7 +169,8 @@ class HomeController {
     }
 
     res.render('store', {
-      showHeader: true,
+      showSearch: true,
+      showCart: true,
       products,
       categories: allCategories,
       currentCategory,
@@ -246,7 +248,8 @@ class HomeController {
     }
 
     res.render('store', {
-      showHeader: true,
+      showSearch: true,
+      showCart: true,
       products,
       orderCount,
       cartCount,
@@ -292,7 +295,6 @@ class HomeController {
 
         let cartQuery = { user_id: userId, product_id: productId }
         if (variantType) cartQuery.variant_type = variantType
-        console.log('🚀 ~ HomeController ~ .then ~ cartQuery:', cartQuery)
         let cartItem = await Cart_Item.findOne(cartQuery)
 
         if (cartItem) {
@@ -416,11 +418,20 @@ class HomeController {
             product.image_url = imageArray
           }
           cart_item.product = product
-          cart_item.total = cart_item.quantity * product.price
           cart_item.variants = product.variants || []
           if (cart_item.variant_type) {
             cart_item.variant_type = cart_item.variant_type
           }
+          let price = 0
+          if (cart_item.variant_type && Array.isArray(product.variants)) {
+            const variant = product.variants.find(
+              (v) => v.type === cart_item.variant_type,
+            )
+            if (variant) {
+              price = variant.price
+            }
+          }
+          cart_item.total = cart_item.quantity * price
           total += cart_item.total
         }
       }
@@ -469,8 +480,9 @@ class HomeController {
         cartItem.quantity = quantity
         await cartItem.save()
       }
-      const { cart_items } = await this.cart(user_id)
-      res.json({ cart_items, quantity })
+      const cartCount = await this.countUserCarts(user_id)
+      const { cart_items, total } = await this.cart(user_id)
+      res.json({ cart_items, quantity, cartCount, total })
     } catch (err) {
       console.error('Error updating cart:', err)
       res.status(500).json({ error: 'Internal Server Error' })
@@ -501,8 +513,22 @@ class HomeController {
     }
   }
 
+  getCheckout = async (req, res) => {
+    const user_id = req.session.userId
+    const { cart_items, total } = await this.cart(user_id)
+    const cartCount = await this.countUserCarts(user_id)
+    res.render('checkout', {
+      showCart: true,
+      cart_items,
+      total,
+      cartCount,
+    })
+  }
+
   checkOut = async (req, res) => {
     const user_id = req.session.userId
+    // Lấy thông tin từ form
+    const { name, phone, address, shipping, payment } = req.body
     try {
       // Lấy tất cả item trong giỏ hàng của user
       const cartItems = await Cart_Item.find({ user_id }).lean()
@@ -540,11 +566,16 @@ class HomeController {
         cartItem._variantName = variantName
         total += price * cartItem.quantity
       }
-      // Tạo order
+      // Tạo order, thêm các trường mới
       const order = new Order({
         user_id,
         total,
         status: 'Chờ xử lý',
+        receiver_name: name,
+        receiver_phone: phone,
+        receiver_address: address,
+        shipping_method: shipping,
+        payment_method: payment,
       })
       const savedOrder = await order.save()
       // Tạo các order item
@@ -650,7 +681,7 @@ class HomeController {
         }
         return statusOrder[a.status] - statusOrder[b.status]
       })
-      res.render('order', { orders, cartCount, orderCount })
+      res.render('order', { orders, cartCount, orderCount, showCart: true })
     } catch (error) {
       res.status(500).send('Đã xảy ra lỗi khi tải danh sách đơn hàng')
     }
@@ -770,6 +801,7 @@ class HomeController {
       const cartCount = await this.countUserCarts(user_id)
       const orderCount = await this.countUserOrders(user_id)
       res.render('product-detail', {
+        showCart: true,
         product,
         cartCount,
         orderCount,

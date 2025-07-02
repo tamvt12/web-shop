@@ -33,6 +33,7 @@ function route(app) {
   app.get('/cart', HomeController.showCart)
   app.post('/updateCart', HomeController.updateCart)
   app.delete('/deleteCart/:id', HomeController.deleteCart)
+  app.get('/getCheckout', HomeController.getCheckout)
   app.post('/checkout', HomeController.checkOut)
   app.get('/order', HomeController.showOrder)
   app.post('/rating', HomeController.rating)

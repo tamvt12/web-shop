@@ -1,49 +1,57 @@
 <div class='container mt-4 w-[80%] mx-auto bg-white rounded-lg shadow-md p-7'>
-  <div class='grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr'>
-    <!-- Cột trái: Danh sách bài viết -->
-    {{#each newsList}}
-      <div class='p-4 flex flex-col h-full'>
-        <a
-          href="/news/{{this.id}}"
-          class='text-gray-900 hover:text-blue-600 flex flex-col h-full'
-        >
-          <img
-            src="{{this.image_url}}"
-            alt="{{this.title}}"
-            class='w-full h-56 object-cover rounded-xl'
-          />
-        </a>
-        <div class='flex-1 flex flex-col'>
+  {{#if newsList}}
+    <div class='grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr'>
+      <!-- Cột trái: Danh sách bài viết -->
+      {{#each newsList}}
+        <div class='p-4 flex flex-col h-full'>
           <a
             href="/news/{{this.id}}"
             class='text-gray-900 hover:text-blue-600 flex flex-col h-full'
           >
-            <h5 class='font-bold text-lg mt-4 mb-2 leading-tight flex-1'>
-              {{this.title}}
-            </h5>
+            <img
+              src="{{this.image_url}}"
+              alt="{{this.title}}"
+              class='w-full h-56 object-cover rounded-xl'
+            />
           </a>
-          <div class='flex items-center text-sm text-gray-500 mb-2'>
-            <span class='mr-1'>
-              📅
-            </span>
-            <span>
-              {{formatDate this.createdAt}}
-            </span>
-            <span class='mx-2'>
-              |
-            </span>
-            <span class='mr-1 text-green-600'>
-              👁️
-            </span>
-            <span class='text-green-600'>
-              Views ({{this.views}})
-            </span>
+          <div class='flex-1 flex flex-col'>
+            <a
+              href="/news/{{this.id}}"
+              class='text-gray-900 hover:text-blue-600 flex flex-col h-full'
+            >
+              <h5 class='font-bold text-lg mt-4 mb-2 leading-tight flex-1'>
+                {{this.title}}
+              </h5>
+            </a>
+            <div class='flex items-center text-sm text-gray-500 mb-2'>
+              <span class='mr-1'>
+                📅
+              </span>
+              <span>
+                {{formatDate this.createdAt}}
+              </span>
+              <span class='mx-2'>
+                |
+              </span>
+              <span class='mr-1 text-green-600'>
+                👁️
+              </span>
+              <span class='text-green-600'>
+                Views ({{this.views}})
+              </span>
+            </div>
+            <p class='text-gray-700 mb-2 flex-1'>
+              {{this.summary}}
+            </p>
           </div>
-          <p class='text-gray-700 mb-2 flex-1'>
-            {{this.summary}}
-          </p>
         </div>
-      </div>
-    {{/each}}
-  </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div
+      class='text-black text-[20px] font-bold font-[Roboto] min-h-[102px] flex items-center justify-center'
+    >
+      Không có bài viết nào
+    </div>
+  {{/if}}
 </div>

@@ -34,6 +34,12 @@ $(document).ready(function () {
       },
     })
   })
+
+  // Bắt sự kiện submit form checkout
+  $('#checkout-form').on('submit', function (e) {
+    e.preventDefault()
+    checkout()
+  })
 })
 
 $('#upload').change(function () {
@@ -160,7 +166,7 @@ function addToCart(productId) {
           alert(results.message)
         }
         if (results.cartCount !== undefined) {
-          // document.getElementById('cartCount').textContent = results.cartCount
+          document.getElementById('cartCount').textContent = results.cartCount
         }
       }
     },
@@ -199,21 +205,50 @@ function buyNow(productId) {
   })
 }
 
-function loadCartItems(cartItems) {
-  let total = 0
+function loadCartItems(cartItems, total) {
   $('#cart-items').empty()
   if (cartItems.length === 0) {
     $('#cart-total-price').text(formatCurrency(total))
     return
   }
   cartItems.forEach((item) => {
-    const itemTotal = item.product.price.$numberDecimal * item.quantity
+    // Lấy giá theo variant giống cart.hbs
+    let price = 0
+    if (item.variants && item.variant_type) {
+      // Tìm variant phù hợp
+      const variant = item.variants.find((v) => v.type === item.variant_type)
+      if (variant && variant.price) {
+        if (typeof variant.price === 'object' && variant.price.$numberDecimal) {
+          price = parseFloat(variant.price.$numberDecimal)
+        } else if (typeof variant.price === 'number') {
+          price = variant.price
+        }
+      }
+    } else if (item.product && item.product.price) {
+      // Fallback nếu không có variants
+      if (
+        typeof item.product.price === 'object' &&
+        item.product.price.$numberDecimal
+      ) {
+        price = parseFloat(item.product.price.$numberDecimal)
+      } else if (typeof item.product.price === 'number') {
+        price = item.product.price
+      }
+    }
+    let imageUrl = ''
+    if (Array.isArray(item.product.image_url)) {
+      imageUrl =
+        item.product.image_url.length > 0 ? item.product.image_url[0] : ''
+    } else {
+      imageUrl = item.product.image_url
+    }
+    const itemTotal = price * item.quantity
     total += itemTotal
     $('#cart-items').append(`
 			<tr class='cart-item border-t'>
 				<td class='p-2 border'>
 					<img
-						src="${item.product.image_url}"
+						src="${imageUrl}"
 						alt="${item.product.name}"
 						class='w-24 h-auto object-contain'
 					/>
@@ -222,7 +257,7 @@ function loadCartItems(cartItems) {
 					${item.product.name}
 				</td>
 				<td class='p-2 border text-red-600 font-semibold'>
-					${formatCurrency(item.product.price.$numberDecimal)}
+					${formatCurrency(price)}
 				</td>
 				<td class='p-2 border'>
 					<div class='flex items-center justify-center gap-2'>
@@ -252,7 +287,7 @@ function loadCartItems(cartItems) {
 						</div>
 					</div>
 				</td>
-				<td class='p-2 border text-red-600 font-semibold'>
+				<td class='p-2 border text-red-600 font-semibold total-cell'>
 					${formatCurrency(itemTotal)}
 				</td>
 				<td class='p-2'>
@@ -293,7 +328,8 @@ function updateQuantity(itemId, newQuantity) {
     type: 'post',
     data: { id: itemId, quantity: newQuantity },
     success: function (response) {
-      loadCartItems(response.cart_items)
+      loadCartItems(response.cart_items, response.total)
+      $('#cartCount').text(response.cartCount)
     },
   })
 }
@@ -314,22 +350,40 @@ function formatMoney(value) {
 }
 
 function checkout() {
+  // Lấy dữ liệu từ form
+  const name = $('#name').val()
+  const phone = $('#phone').val()
+  const address = $('#address').val()
+  const shipping = $('input[name="shipping"]:checked').val()
+  const payment = $('select[name="payment"]').val()
+
   $.ajax({
     url: '/checkout',
     type: 'POST',
+    data: {
+      name,
+      phone,
+      address,
+      shipping,
+      payment,
+    },
     success: function (response) {
-      $('#orderCount').text(response.orderCount)
       $('#cartCount').text(response.cartCount)
-      loadCartItems(response.cart_items)
       alert(response.message)
-      displayOrders(response.orders)
+      window.location.href = '/order'
+    },
+    error: function (xhr) {
+      if (xhr.responseJSON && xhr.responseJSON.error) {
+        alert(xhr.responseJSON.error)
+      } else {
+        alert('Đã xảy ra lỗi khi đặt hàng.')
+      }
     },
   })
 }
 
 function displayOrders(orders) {
   orders.forEach(function (order) {
-    console.log(order)
     var html = $(`<div class="order d-flex m-3">
 			{{#each this.order_Item}}
 				<img src="{{this.product.image_url}}" alt="" style="width: 200px; height: 200px;">

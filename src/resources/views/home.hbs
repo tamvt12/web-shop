@@ -1,27 +1,31 @@
 <div class='content md:w-[80%] mx-auto mt-5'>
   <!-- Danh mục Section -->
   {{#if categories}}
-    <div
-      class='category-slider mb-6 flex gap-3 overflow-x-auto bg-white rounded-lg p-4'
-    >
-      {{#each categories}}
+    <div class='mb-6 bg-white rounded-lg p-4'>
+      <div class='relative border-gray-300 overflow-hidden'>
         <div
-          class='category-item text-center p-2 rounded bg-gray-100 flex-shrink-0 w-[110px]'
+          class='category-slider flex gap-3 scroll-smooth py-2 {{#if (lt (length categories) 5)}} justify-center {{else}} overflow-x-auto {{/if}}'
         >
-          <img
-            src="{{this.image_url}}"
-            alt="{{this.name}}"
-            class='w-[60px] h-[60px] object-cover mx-auto'
-          />
-          <div class='mt-1 text-sm text-gray-700'>
-            {{this.name}}
-          </div>
+          {{#each categories}}
+            <div
+              class='category-item text-center p-2 rounded bg-gray-100 flex-shrink-0 w-[110px]'
+            >
+              <img
+                src="{{this.image_url}}"
+                alt="{{this.name}}"
+                class='w-auto h-[60px] object-cover mx-auto'
+              />
+              <div class='mt-1 text-sm text-gray-700'>
+                {{this.name}}
+              </div>
+            </div>
+          {{/each}}
         </div>
-      {{/each}}
+      </div>
     </div>
   {{else}}
     <div
-      class='bg-white rounded-lg p-4 min-h-[154px] flex items-center justify-center text-lg font-bold'
+      class='bg-white rounded-lg p-4 min-h-[154px] font-[Roboto] flex items-center justify-center text-lg font-bold'
     >
       Không có sản phẩm nào
     </div>
@@ -30,7 +34,7 @@
   <!-- Sản phẩm OCOP -->
   {{#each categories}}
     <div class='bg-white rounded-lg p-4 mb-4 last:mb-0'>
-      <h3 class='mb-3 text-lg font-semibold text-gray-800'>
+      <h3 class='mb-3 text-[25px] font-[Roboto] font-semibold text-white pl-10 h-[150px] flex items-center' style="background-image: url('/img/bg-product.png');">
         {{this.name}}
       </h3>
       {{#if this.products}}
@@ -87,7 +91,7 @@
           </a>
         </div>
       {{else}}
-        <div class='flex items-center justify-center text-lg font-bold'>
+        <div class='flex items-center justify-center font-[Roboto] text-[20px] font-bold'>
           Không có sản phẩm nào
         </div>
       {{/if}}
