@@ -9,9 +9,9 @@
 	</div>
 </nav>
 
-<nav class="bg-white text-custom-green text-custom-base fixed top-9 w-full z-50 shadow ">
+<nav class="bg-white text-custom-green text-custom-base fixed top-9 w-full z-50 shadow-md ">
 	<div class="max-w-full px-4 sm:px-6 lg:px-8">
-		<div class="flex items-center justify-between md:h-28 h-12">
+		<div class="flex items-center justify-between h-16">
 			<!-- Mobile Toggle -->
 			<div class="flex items-center md:hidden">
 				<button class="text-custom-green focus:outline-none" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
@@ -24,39 +24,51 @@
 
 			<div class='items-center justify-center py-6 hidden md:flex'>
 				<a href='/' class='flex items-center'>
-					<img src='/img/logo.png' alt='Logo' class='w-20 h-auto' />
+					<img src='/img/logo.png' alt='Logo' class='w-16 h-auto' />
 				</a>
 			</div>
 
 			<!-- Search Form -->
-			<div class="hidden md:flex space-x-6 items-center">
-				<form method="get" action="/search" class="hidden md:block min-w-[400px]">
-					{{#if showSearch}}
-						<div class="relative">
-							<input type="text" name="search" value="{{search}}" placeholder="Tìm kiếm"
-								class="w-full px-4 py-2 rounded-md border-custom text-black bg-white focus:outline-none focus:ring"
-							/>
-							<button type="submit" class="absolute right-0 top-0 w-12 h-full text-white bg-btn border-r rounded-r">
-								<i class="fas fa-search"></i>
-							</button>
-						</div>
-					{{/if}}
-				</form>
+			{{#if showSearch}}
+				<div class="hidden md:flex space-x-6 items-center">
+					<form method="get" action="/search" class="hidden md:block min-w-[400px]">
+							<div class="relative">
+								<input type="text" name="search" value="{{search}}" placeholder="Tìm kiếm"
+									class="w-full px-4 py-2 rounded-md border-custom text-black bg-white focus:outline-none focus:ring"
+								/>
+								<button type="submit" class="absolute right-0 top-0 w-12 h-full text-white bg-btn border-r rounded-r">
+									<i class="fas fa-search"></i>
+								</button>
+							</div>
 
-			<!-- Menu Items -->
+					</form>
 
-				{{!-- <a href="/" class="hover:underline flex items-center gap-1">
-					<i class="fa fa-home"></i> Trang Chủ
-				</a> --}}
-				{{!-- <a href="/order" class="relative hover:underline flex items-center gap-1">
-					<span id="orderCount"
-						class="absolute -top-2 -right-3 bg-red-600 text-white text-xs px-1 rounded-full">
-						{{#if orderCount}}{{formatCount orderCount}}{{else}}0{{/if}}
-					</span>
-					<i class="fas fa-file"></i> Đơn Hàng
-				</a> --}}
+				<!-- Menu Items -->
+
+					{{!-- <a href="/" class="hover:underline flex items-center gap-1">
+						<i class="fa fa-home"></i> Trang Chủ
+					</a> --}}
+					{{!-- <a href="/order" class="relative hover:underline flex items-center gap-1">
+						<span id="orderCount"
+							class="absolute -top-2 -right-3 bg-red-600 text-white text-xs px-1 rounded-full">
+							{{#if orderCount}}{{formatCount orderCount}}{{else}}0{{/if}}
+						</span>
+						<i class="fas fa-file"></i> Đơn Hàng
+					</a> --}}
+					<a href="/cart" class="relative flex items-center gap-1">
+						<span id="cartCount"
+							class="absolute -top-2 -right-3 bg-red-600 text-white text-xs px-1 rounded-full">
+							{{#if cartCount}}{{formatCount cartCount}}{{else}}0{{/if}}
+						</span>
+						<i class="fas fa-shopping-cart"></i> Giỏ Hàng
+					</a>
+				</div>
+			{{/if}}
+
+			<!-- User Dropdown or Auth Links -->
+			<div class="flex items-center gap-5">
 				{{#if showCart}}
-					<a href="/cart" class="relative hover:underline flex items-center gap-1">
+					<a href="/cart" class="relative flex items-center gap-1">
 						<span id="cartCount"
 							class="absolute -top-2 -right-3 bg-red-600 text-white text-xs px-1 rounded-full">
 							{{#if cartCount}}{{formatCount cartCount}}{{else}}0{{/if}}
@@ -64,41 +76,39 @@
 						<i class="fas fa-shopping-cart"></i> Giỏ Hàng
 					</a>
 				{{/if}}
-			</div>
-
-			<!-- User Dropdown or Auth Links -->
-			<div class="relative">
-				{{#if sessionUser}}
-					<div class="relative group">
-						<button
-							class="flex items-center space-x-2 focus:outline-none">
-							<img src="/img/undraw_profile.svg" class="w-8 h-8 rounded-full" />
-							<span class="text-sm">{{sessionUser}}</span>
-						</button>
-						<!-- Invisible gap to prevent dropdown from closing -->
-						<div class="absolute top-full left-0 right-0 h-6 bg-transparent"></div>
-						<div id="dropdownMenu"
-							class="hidden group-hover:block absolute right-0 mt-1 bg-white text-black shadow rounded w-40 z-50">
-							<a href="#" onclick="toggleModal(true)" class="block px-4 py-2 hover:bg-gray-100">
-								<i class="fas fa-user mr-2"></i> Thông tin
-							</a>
-							<a href="/order" class="block px-4 py-2 hover:bg-gray-100">
-								<i class="fas fa-file mr-3"></i> Đơn hàng
-							</a>
-							<a href="#" onclick="togglePasswordModal(true)" class="block px-4 py-2 hover:bg-gray-100">
-								<i class="fas fa-key mr-2"></i> Đổi mật khẩu
-							</a>
-							<a href="/logout" class="block px-4 py-2 hover:bg-gray-100">
-								<i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
-							</a>
+				<div class="relative">
+					{{#if sessionUser}}
+						<div class="relative group">
+							<button
+								class="flex items-center space-x-2 focus:outline-none">
+								<img src="/img/undraw_profile.svg" class="w-8 h-8 rounded-full" />
+								<span class="text-sm">{{sessionUser}}</span>
+							</button>
+							<!-- Invisible gap to prevent dropdown from closing -->
+							<div class="absolute top-full left-0 right-0 h-6 bg-transparent"></div>
+							<div id="dropdownMenu"
+								class="hidden group-hover:block absolute right-0 mt-1 bg-white text-black shadow rounded w-40 z-50">
+								<a href="#" onclick="toggleModal(true)" class="block px-4 py-2 hover:bg-gray-100">
+									<i class="fas fa-user mr-2"></i> Thông tin
+								</a>
+								<a href="/order" class="block px-4 py-2 hover:bg-gray-100">
+									<i class="fas fa-file mr-3"></i> Đơn hàng
+								</a>
+								<a href="#" onclick="togglePasswordModal(true)" class="block px-4 py-2 hover:bg-gray-100">
+									<i class="fas fa-key mr-2"></i> Đổi mật khẩu
+								</a>
+								<a href="/logout" class="block px-4 py-2 hover:bg-gray-100">
+									<i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
+								</a>
+							</div>
 						</div>
-					</div>
-				{{else}}
-					<div class="flex space-x-4">
-						<a href="/login" class="hover:underline">Đăng nhập</a>
-						<a href="/register" class="hover:underline">Đăng ký</a>
-					</div>
-				{{/if}}
+					{{else}}
+						<div class="flex space-x-4">
+							<a href="/login" class="hover:underline">Đăng nhập</a>
+							<a href="/register" class="hover:underline">Đăng ký</a>
+						</div>
+					{{/if}}
+				</div>
 			</div>
 		</div>
 	</div>
@@ -126,7 +136,7 @@
 </nav>
 
 <!-- Spacer -->
-<div class="md:h-[150px] h-24"></div>
+<div class="md:h-[102px] h-24"></div>
 
 <!-- Content -->
 {{> profile}}

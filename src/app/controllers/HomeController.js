@@ -69,7 +69,6 @@ class HomeController {
 
     res.render('home', {
       showSearch: true,
-      showCart: true,
       categories,
       orderCount,
       cartCount,
@@ -170,7 +169,6 @@ class HomeController {
 
     res.render('store', {
       showSearch: true,
-      showCart: true,
       products,
       categories: allCategories,
       currentCategory,
@@ -249,7 +247,6 @@ class HomeController {
 
     res.render('store', {
       showSearch: true,
-      showCart: true,
       products,
       orderCount,
       cartCount,

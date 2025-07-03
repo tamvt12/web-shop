@@ -1273,6 +1273,10 @@ video {
   gap: 2rem;
 }
 
+.gap-5 {
+  gap: 1.25rem;
+}
+
 .space-x-1 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(0.25rem * var(--tw-space-x-reverse));
@@ -2182,6 +2186,10 @@ input[type=number] {
     height: 150px;
   }
 
+  .md\:h-\[102px\] {
+    height: 102px;
+  }
+
   .md\:w-1\/4 {
     width: 25%;
   }
@@ -2218,9 +2226,17 @@ input[type=number] {
     flex-direction: row;
   }
 
+  .md\:justify-end {
+    justify-content: flex-end;
+  }
+
   .md\:px-6 {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
+  }
+
+  .md\:text-left {
+    text-align: left;
   }
 }
 

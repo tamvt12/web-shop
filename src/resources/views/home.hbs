@@ -1,7 +1,7 @@
 <div class='content md:w-[80%] mx-auto mt-5'>
   <!-- Danh mục Section -->
   {{#if categories}}
-    <div class='mb-6 bg-white rounded-lg p-4'>
+    <div class='mb-6 bg-white rounded-lg p-4 shadow-md'>
       <div class='relative border-gray-300 overflow-hidden'>
         <div
           class='category-slider flex gap-3 scroll-smooth py-2 {{#if (lt (length categories) 5)}} justify-center {{else}} overflow-x-auto {{/if}}'
@@ -25,7 +25,7 @@
     </div>
   {{else}}
     <div
-      class='bg-white rounded-lg p-4 min-h-[154px] font-[Roboto] flex items-center justify-center text-lg font-bold'
+      class='bg-white rounded-lg p-4 min-h-[154px] font-[Roboto] flex items-center justify-center text-lg font-bold shadow-md'
     >
       Không có sản phẩm nào
     </div>
@@ -33,7 +33,7 @@
 
   <!-- Sản phẩm OCOP -->
   {{#each categories}}
-    <div class='bg-white rounded-lg p-4 mb-4 last:mb-0'>
+    <div class='bg-white rounded-lg p-4 mb-4 last:mb-0 shadow-md'>
       <h3 class='mb-3 text-[25px] font-[Roboto] font-semibold text-white pl-10 h-[150px] flex items-center' style="background-image: url('/img/bg-product.png');">
         {{this.name}}
       </h3>
