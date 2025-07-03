@@ -65,6 +65,36 @@ class HomeController {
         image_url: cat.image_url,
         products,
       })
+      categories.push({
+        id: cat.id,
+        name: cat.name,
+        image_url: cat.image_url,
+        products,
+      })
+      categories.push({
+        id: cat.id,
+        name: cat.name,
+        image_url: cat.image_url,
+        products,
+      })
+      categories.push({
+        id: cat.id,
+        name: cat.name,
+        image_url: cat.image_url,
+        products,
+      })
+      categories.push({
+        id: cat.id,
+        name: cat.name,
+        image_url: cat.image_url,
+        products,
+      })
+      categories.push({
+        id: cat.id,
+        name: cat.name,
+        image_url: cat.image_url,
+        products,
+      })
     }
 
     res.render('home', {

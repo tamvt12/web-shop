@@ -541,3 +541,138 @@ function showPasswordError(message) {
 function showPasswordSuccess(message) {
   $('#passwordSuccessAlert').removeClass('hidden').text(message)
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  const slides = document.getElementById('slides')
+  const totalImages = slides.children.length
+  const imagesPerSlide = 3
+  let currentSlide = 0
+
+  const totalSlides = Math.ceil(totalImages / imagesPerSlide)
+
+  function goToSlide(index) {
+    const slideWidth = slides.clientWidth / imagesPerSlide
+    const extraSpace = 2 * (imagesPerSlide - 1)
+    slides.style.transform = `translateX(-${
+      index * (slideWidth * imagesPerSlide + extraSpace)
+    }px)`
+    currentSlide = index
+    updateDots()
+  }
+
+  function updateDots() {
+    const dots = document.querySelectorAll('#slideshow-dots button')
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('bg-blue-600', i === currentSlide)
+      dot.classList.toggle('bg-gray-300', i !== currentSlide)
+    })
+  }
+
+  // Render dots
+  const dotContainer = document.getElementById('slideshow-dots')
+  for (let i = 0; i < totalSlides; i++) {
+    const dot = document.createElement('button')
+    dot.className = 'w-3 h-3 rounded-full bg-gray-300'
+    dot.addEventListener('click', () => goToSlide(i))
+    dotContainer.appendChild(dot)
+  }
+
+  goToSlide(0)
+})
+
+document.querySelectorAll('.variant-select').forEach(function (select) {
+  select.addEventListener('change', function () {
+    const cartId = this.getAttribute('data-cart-id')
+    const selectedType = this.value
+    const row = this.closest('tr')
+    const variants = JSON.parse(this.getAttribute('data-variants'))
+    const variant = variants.find((v) => v.type === selectedType)
+    const priceCell = row.querySelector('.price-cell')
+    const totalCell = row.querySelector('.total-cell')
+    const quantity = parseInt(row.querySelector('input[type=number]').value)
+    priceCell.textContent = formatMoney(variant.price)
+    let price = variant.price
+    if (typeof price === 'object' && price.$numberDecimal) {
+      price = parseFloat(price.$numberDecimal)
+    }
+    totalCell.textContent = formatMoney(price * quantity)
+    updateCartTotal()
+  })
+})
+
+function updateCartTotal() {
+  let total = 0
+  document.querySelectorAll('tr.cart-item').forEach(function (row) {
+    const totalCell = row.querySelector('.total-cell')
+    if (totalCell) {
+      const value = totalCell.textContent.replace(/[^0-9]/g, '')
+      total += parseFloat(value) || 0
+    }
+  })
+  document.getElementById('cart-total-price').textContent = formatMoney(total)
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  // This function updates star colors based on the data-rating attribute.
+  // It's robust and doesn't depend on the DOM order of stars.
+  function updateStars(container, rating) {
+    const starLabels = container.querySelectorAll('.star-label')
+    starLabels.forEach((label) => {
+      const starValue = parseInt(label.dataset.rating, 10)
+      const starIcon = label.querySelector('i')
+      if (starValue <= rating) {
+        starIcon.style.color = '#fbbf24' // yellow
+      } else {
+        starIcon.style.color = '#d1d5db' // gray
+      }
+    })
+  }
+
+  // Initialize stars for all rating forms on the page
+  document.querySelectorAll('.ratingForm').forEach((form) => {
+    const ratingContainer = form.querySelector('[data-existing-rating]')
+    const existingRating =
+      parseInt(ratingContainer.getAttribute('data-existing-rating'), 10) || 0
+
+    // Set all stars to gray initially
+    ratingContainer
+      .querySelectorAll('.star-label i')
+      .forEach((s) => (s.style.color = '#d1d5db'))
+
+    // Color stars for existing ratings
+    if (existingRating > 0) {
+      updateStars(ratingContainer, existingRating)
+      const radioToCheck = ratingContainer.querySelector(
+        `input[value="${existingRating}"]`,
+      )
+      if (radioToCheck) {
+        radioToCheck.checked = true
+      }
+    }
+  })
+
+  // Add click event listener to all star labels
+  document.querySelectorAll('.star-label').forEach((label) => {
+    label.addEventListener('click', function (e) {
+      e.preventDefault()
+
+      const rating = parseInt(this.getAttribute('data-rating'), 10)
+      const orderId = this.getAttribute('data-order-id')
+      const ratingContainer = document.getElementById(`rating-${orderId}`)
+
+      if (!ratingContainer) {
+        console.error('Không tìm thấy ratingContainer cho orderId:', orderId)
+        return
+      }
+
+      const radioToCheck = ratingContainer.querySelector(
+        `input[value="${rating}"]`,
+      )
+
+      if (radioToCheck) {
+        radioToCheck.checked = true
+      }
+      updateStars(ratingContainer, rating)
+    })
+  })
+})

@@ -151,37 +151,3 @@
     </button>
   </div>
 </div>
-
-<script>
-document.querySelectorAll('.variant-select').forEach(function(select) {
-  select.addEventListener('change', function() {
-    const cartId = this.getAttribute('data-cart-id');
-    const selectedType = this.value;
-    const row = this.closest('tr');
-    const variants = JSON.parse(this.getAttribute('data-variants'));
-    const variant = variants.find(v => v.type === selectedType);
-    const priceCell = row.querySelector('.price-cell');
-    const totalCell = row.querySelector('.total-cell');
-    const quantity = parseInt(row.querySelector('input[type=number]').value);
-    priceCell.textContent = formatMoney(variant.price);
-		let price = variant.price;
-		if (typeof price === 'object' && price.$numberDecimal) {
-			price = parseFloat(price.$numberDecimal);
-		}
-    totalCell.textContent = formatMoney(price * quantity);
-    updateCartTotal();
-  });
-});
-
-function updateCartTotal() {
-  let total = 0;
-  document.querySelectorAll('tr.cart-item').forEach(function(row) {
-    const totalCell = row.querySelector('.total-cell');
-    if (totalCell) {
-      const value = totalCell.textContent.replace(/[^0-9]/g, '');
-      total += parseFloat(value) || 0;
-    }
-  });
-  document.getElementById('cart-total-price').textContent = formatMoney(total);
-}
-</script>
