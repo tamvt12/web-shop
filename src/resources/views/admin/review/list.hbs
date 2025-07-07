@@ -51,4 +51,37 @@
       </tbody>
     </table>
   </div>
+  {{#if (gt totalPages 1)}}
+    <div class='flex justify-end items-center mt-8 text-sm text-gray-600 space-x-1'>
+      <span class='mr-3'>Trang {{currentPage}}/{{totalPages}}</span>
+
+      {{#if (gt currentPage 1)}}
+        <a href='?page=1' class='px-3 py-1 border rounded hover:bg-gray-100'>
+          Đầu
+        </a>
+        <a href='?page={{subtract currentPage 1}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+          &laquo;
+        </a>
+      {{/if}}
+
+      {{#each pages}}
+        {{#if (eq this ../currentPage)}}
+          <span class='px-3 py-1 border border-green-600 bg-green-600 text-white rounded'>{{this}}</span>
+        {{else}}
+          <a href='?page={{this}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+            {{this}}
+          </a>
+        {{/if}}
+      {{/each}}
+
+      {{#if (lt currentPage totalPages)}}
+        <a href='?page={{add currentPage 1}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+          &raquo;
+        </a>
+        <a href='?page={{totalPages}}' class='px-3 py-1 border rounded hover:bg-gray-100'>
+          Cuối
+        </a>
+      {{/if}}
+    </div>
+  {{/if}}
 </div>

@@ -2,12 +2,45 @@ const Category = require('../models/Category')
 
 class CategoryController {
   index(req, res, next) {
-    Category.find({})
-      .lean()
-      .then((categories) => {
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    Category.countDocuments({})
+      .then(async (totalCategories) => {
+        const totalPages = Math.ceil(totalCategories / perPage)
+        const pages = []
+        const maxPagesToShow = 5
+        let startPage, endPage
+        if (totalPages <= maxPagesToShow) {
+          startPage = 1
+          endPage = totalPages
+        } else {
+          const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+          const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+          if (page <= maxPagesBeforeCurrent) {
+            startPage = 1
+            endPage = maxPagesToShow
+          } else if (page + maxPagesAfterCurrent >= totalPages) {
+            startPage = totalPages - maxPagesToShow + 1
+            endPage = totalPages
+          } else {
+            startPage = page - maxPagesBeforeCurrent
+            endPage = page + maxPagesAfterCurrent
+          }
+        }
+        for (let i = startPage; i <= endPage; i++) {
+          pages.push(i)
+        }
+
+        const categories = await Category.find({})
+          .skip((page - 1) * perPage)
+          .limit(perPage)
+          .lean()
         res.render('admin/category/list', {
           showAdmin: true,
           categories,
+          currentPage: page,
+          totalPages,
+          pages,
         })
       })
       .catch(next)

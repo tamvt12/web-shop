@@ -7,12 +7,50 @@ const User = require('../models/User')
 
 class AdminController {
   async showOrder(req, res, next) {
-    const orders = await Order.find({}).lean()
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    const totalOrders = await Order.countDocuments({})
+    const totalPages = Math.ceil(totalOrders / perPage)
+
+    const pages = []
+    const maxPagesToShow = 5
+    let startPage, endPage
+    if (totalPages <= maxPagesToShow) {
+      startPage = 1
+      endPage = totalPages
+    } else {
+      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+      if (page <= maxPagesBeforeCurrent) {
+        startPage = 1
+        endPage = maxPagesToShow
+      } else if (page + maxPagesAfterCurrent >= totalPages) {
+        startPage = totalPages - maxPagesToShow + 1
+        endPage = totalPages
+      } else {
+        startPage = page - maxPagesBeforeCurrent
+        endPage = page + maxPagesAfterCurrent
+      }
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i)
+    }
+
+    const orders = await Order.find({})
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .lean()
     for (let order of orders) {
       const user = await User.findOne({ id: order.user_id })
       order.username = user ? user.name : ''
     }
-    res.render('admin/order/list', { showAdmin: true, orders })
+    res.render('admin/order/list', {
+      showAdmin: true,
+      orders,
+      currentPage: page,
+      totalPages,
+      pages,
+    })
   }
 
   async editOrder(req, res, next) {
@@ -60,28 +98,136 @@ class AdminController {
   }
 
   async showCartItem(req, res) {
-    const cartItems = await Cart_Item.find().populate('product_id').lean()
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    const totalCartItems = await Cart_Item.countDocuments({})
+    const totalPages = Math.ceil(totalCartItems / perPage)
+
+    const pages = []
+    const maxPagesToShow = 5
+    let startPage, endPage
+    if (totalPages <= maxPagesToShow) {
+      startPage = 1
+      endPage = totalPages
+    } else {
+      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+      if (page <= maxPagesBeforeCurrent) {
+        startPage = 1
+        endPage = maxPagesToShow
+      } else if (page + maxPagesAfterCurrent >= totalPages) {
+        startPage = totalPages - maxPagesToShow + 1
+        endPage = totalPages
+      } else {
+        startPage = page - maxPagesBeforeCurrent
+        endPage = page + maxPagesAfterCurrent
+      }
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i)
+    }
+
+    const cartItems = await Cart_Item.find({})
+      .populate('product_id')
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .lean()
 
     for (let cartItem of cartItems) {
       const user = await User.findOne({ id: cartItem.user_id })
       cartItem.username = user ? user.name : ''
     }
 
-    res.render('admin/cart-item/list', { showAdmin: true, cartItems })
+    res.render('admin/cart-item/list', {
+      showAdmin: true,
+      cartItems,
+      currentPage: page,
+      totalPages,
+      pages,
+    })
   }
 
   async showOrderItem(req, res) {
-    const orderItems = await Order_Item.find().lean()
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    const totalOrderItems = await Order_Item.countDocuments({})
+    const totalPages = Math.ceil(totalOrderItems / perPage)
+
+    const pages = []
+    const maxPagesToShow = 5
+    let startPage, endPage
+    if (totalPages <= maxPagesToShow) {
+      startPage = 1
+      endPage = totalPages
+    } else {
+      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+      if (page <= maxPagesBeforeCurrent) {
+        startPage = 1
+        endPage = maxPagesToShow
+      } else if (page + maxPagesAfterCurrent >= totalPages) {
+        startPage = totalPages - maxPagesToShow + 1
+        endPage = totalPages
+      } else {
+        startPage = page - maxPagesBeforeCurrent
+        endPage = page + maxPagesAfterCurrent
+      }
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i)
+    }
+
+    const orderItems = await Order_Item.find({})
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .lean()
     for (let item of orderItems) {
       const product = await Product.findOne({ id: item.product_id })
       item.product_name = product.name
     }
-
-    res.render('admin/order-item/list', { showAdmin: true, orderItems })
+    res.render('admin/order-item/list', {
+      showAdmin: true,
+      orderItems,
+      currentPage: page,
+      totalPages,
+      pages,
+    })
   }
 
   async showReview(req, res) {
-    const reviews = await Review.find({}).lean()
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    const totalReviews = await Review.countDocuments({})
+    const totalPages = Math.ceil(totalReviews / perPage)
+
+    const pages = []
+    const maxPagesToShow = 5
+    let startPage, endPage
+    if (totalPages <= maxPagesToShow) {
+      startPage = 1
+      endPage = totalPages
+    } else {
+      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+      if (page <= maxPagesBeforeCurrent) {
+        startPage = 1
+        endPage = maxPagesToShow
+      } else if (page + maxPagesAfterCurrent >= totalPages) {
+        startPage = totalPages - maxPagesToShow + 1
+        endPage = totalPages
+      } else {
+        startPage = page - maxPagesBeforeCurrent
+        endPage = page + maxPagesAfterCurrent
+      }
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i)
+    }
+
+    const reviews = await Review.find({})
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .lean()
 
     for (let review of reviews) {
       const product = await Product.findOne({ id: review.product_id }).lean()
@@ -89,7 +235,13 @@ class AdminController {
       review.username = user ? user.name : ''
       review.product = product ? product.name : ''
     }
-    res.render('admin/review/list', { showAdmin: true, reviews })
+    res.render('admin/review/list', {
+      showAdmin: true,
+      reviews,
+      currentPage: page,
+      totalPages,
+      pages,
+    })
   }
 
   upload(req, res) {

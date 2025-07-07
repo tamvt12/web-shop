@@ -19,7 +19,39 @@ class NewsController {
   // Get all news articles
   async index(req, res, next) {
     try {
-      const newsList = await News.find({}).lean()
+      const page = parseInt(req.query.page) || 1
+      const perPage = 15
+      const totalNews = await News.countDocuments({})
+      const totalPages = Math.ceil(totalNews / perPage)
+
+      const pages = []
+      const maxPagesToShow = 5
+      let startPage, endPage
+      if (totalPages <= maxPagesToShow) {
+        startPage = 1
+        endPage = totalPages
+      } else {
+        const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+        const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+        if (page <= maxPagesBeforeCurrent) {
+          startPage = 1
+          endPage = maxPagesToShow
+        } else if (page + maxPagesAfterCurrent >= totalPages) {
+          startPage = totalPages - maxPagesToShow + 1
+          endPage = totalPages
+        } else {
+          startPage = page - maxPagesBeforeCurrent
+          endPage = page + maxPagesAfterCurrent
+        }
+      }
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i)
+      }
+
+      const newsList = await News.find({})
+        .skip((page - 1) * perPage)
+        .limit(perPage)
+        .lean()
 
       for (let newsItem of newsList) {
         const user = await Users.findOne(
@@ -32,7 +64,13 @@ class NewsController {
         newsItem.user_name = user ? user.name : ''
       }
 
-      res.render('admin/news/index', { showAdmin: true, news: newsList })
+      res.render('admin/news/list', {
+        showAdmin: true,
+        news: newsList,
+        currentPage: page,
+        totalPages,
+        pages,
+      })
     } catch (error) {
       next(error)
     }
@@ -40,7 +78,7 @@ class NewsController {
 
   // Show create form
   create(req, res) {
-    res.render('admin/news/create', { showAdmin: true })
+    res.render('admin/news/add', { showAdmin: true })
   }
 
   // Store new article

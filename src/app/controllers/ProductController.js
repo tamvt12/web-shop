@@ -3,9 +3,39 @@ const Category = require('../models/Category')
 
 class ProductController {
   index(req, res, next) {
-    Product.find({})
-      .lean()
-      .then(async (products) => {
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    Product.countDocuments({})
+      .then(async (totalProducts) => {
+        const totalPages = Math.ceil(totalProducts / perPage)
+        const pages = []
+        const maxPagesToShow = 5
+        let startPage, endPage
+        if (totalPages <= maxPagesToShow) {
+          startPage = 1
+          endPage = totalPages
+        } else {
+          const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+          const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+          if (page <= maxPagesBeforeCurrent) {
+            startPage = 1
+            endPage = maxPagesToShow
+          } else if (page + maxPagesAfterCurrent >= totalPages) {
+            startPage = totalPages - maxPagesToShow + 1
+            endPage = totalPages
+          } else {
+            startPage = page - maxPagesBeforeCurrent
+            endPage = page + maxPagesAfterCurrent
+          }
+        }
+        for (let i = startPage; i <= endPage; i++) {
+          pages.push(i)
+        }
+
+        const products = await Product.find({})
+          .skip((page - 1) * perPage)
+          .limit(perPage)
+          .lean()
         for (let product of products) {
           const category = await Category.findOne(
             { id: product.category_id },
@@ -23,8 +53,13 @@ class ProductController {
             product.image_url = imageArray.length > 0 ? imageArray[0] : ''
           }
         }
-        res.render('admin/product/list', { showAdmin: true, products })
-        // res.json(products);
+        res.render('admin/product/list', {
+          showAdmin: true,
+          products,
+          currentPage: page,
+          totalPages,
+          pages,
+        })
       })
       .catch(next)
   }
