@@ -187,7 +187,7 @@ class HomeController {
   search = async (req, res) => {
     const search = req.query.search
     const page = parseInt(req.query.page) || 1
-    const perPage = 1
+    const perPage = 12
     const user_id = req.session.userId
     const cartCount = await this.countUserCarts(user_id)
     const orderCount = await this.countUserOrders(user_id)
@@ -240,6 +240,13 @@ class HomeController {
           },
         },
       ])
+      if (typeof product.image_url === 'string') {
+        const imageArray = product.image_url
+          .split(',')
+          .map((url) => url.trim())
+          .filter((url) => url !== '')
+        product.image_url = imageArray.length > 0 ? imageArray[0] : ''
+      }
 
       product.rating = ratingData.length > 0 ? ratingData[0].averageRating : 0
       product.reviewCount =
