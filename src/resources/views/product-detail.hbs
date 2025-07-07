@@ -148,8 +148,8 @@
 					class='flex-1 bg-green-600 text-white rounded py-3 hover:bg-green-700'>
 					Mua ngay
 				</button>
-				<button class='border rounded px-4 py-3 hover:bg-gray-100'>
-					<i class="far fa-heart text-gray-600"></i>
+				<button id="favorite-btn" class='border rounded px-4 py-3 hover:bg-gray-100' data-product-id="{{product.id}}">
+					<i id="favorite-icon" class="{{#if isFavorited}}fas fa-heart text-red-500{{else}}far fa-heart text-gray-600{{/if}}"></i>
 				</button>
 			</div>
 		</div>

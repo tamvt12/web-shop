@@ -40,6 +40,62 @@ $(document).ready(function () {
     e.preventDefault()
     checkout()
   })
+
+  // Wishlist (Yêu thích)
+  $('#favorite-btn').on('click', function () {
+    var productId =
+      $('#favorite-btn').data('product-id') ||
+      $('#favorite-btn').attr('data-product-id') ||
+      $('#favorite-btn').attr('product-id') ||
+      $('#favorite-btn').val() ||
+      $('#favorite-btn').attr('value') ||
+      $('#favorite-btn').attr('data-id') ||
+      $('#favorite-btn').attr('data') ||
+      $('#favorite-btn').attr('data-product') ||
+      $('#favorite-btn').attr('data-productid') ||
+      $('#favorite-btn').attr('data-product_id') ||
+      $('#favorite-btn').attr('data-product-id')
+    if (!productId) {
+      productId =
+        $('#favorite-btn')
+          .attr('onclick')
+          ?.match(/'(\d+)'/)?.[1] ||
+        $('#favorite-btn')
+          .attr('onclick')
+          ?.match(/"(\d+)"/)?.[1] ||
+        $('#favorite-btn')
+          .attr('onclick')
+          ?.match(/\((\d+)\)/)?.[1]
+    }
+    var $icon = $('#favorite-icon')
+    var isFavorited = $icon.hasClass('fas')
+    if (!productId) return
+    if (!isFavorited) {
+      $.ajax({
+        url: '/wishlist/' + productId,
+        type: 'POST',
+        xhrFields: { withCredentials: true },
+        success: function () {
+          $icon.removeClass('far text-gray-600').addClass('fas text-red-500')
+        },
+        error: function () {
+          alert('Vui lòng đăng nhập để sử dụng tính năng này!')
+        },
+      })
+    } else {
+      $.ajax({
+        url: '/wishlist/' + productId,
+        type: 'DELETE',
+        xhrFields: { withCredentials: true },
+        success: function () {
+          $icon.removeClass('fas text-red-500').addClass('far text-gray-600')
+        },
+        error: function () {
+          alert('Vui lòng đăng nhập để sử dụng tính năng này!')
+        },
+      })
+    }
+  })
 })
 
 $('#upload').change(function () {
@@ -544,6 +600,7 @@ function showPasswordSuccess(message) {
 
 document.addEventListener('DOMContentLoaded', function () {
   const slides = document.getElementById('slides')
+  if (!slides) return
   const totalImages = slides.children.length
   const imagesPerSlide = 3
   let currentSlide = 0

@@ -3,6 +3,14 @@ const router = express.Router()
 const { checkLoggedIn } = require('../middleware/authMiddleware')
 const userController = require('../app/controllers/UserController')
 
+router.post('/wishlist/:productId', checkLoggedIn, userController.addWishlist)
+router.delete(
+  '/wishlist/:productId',
+  checkLoggedIn,
+  userController.removeWishlist,
+)
+router.get('/wishlist/:productId', checkLoggedIn, userController.checkWishlist)
+
 router.get('/login', userController.showLogin)
 router.get('/register', userController.showRegister)
 router.post('/register', userController.register)

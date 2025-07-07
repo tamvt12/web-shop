@@ -4,6 +4,7 @@ const Product = require('../models/Product')
 const Order_Item = require('../models/Order_Item')
 const Review = require('../models/Review')
 const Category = require('../models/Category')
+const Wishlist = require('../models/Wishlist')
 
 class HomeController {
   async countUserOrders(user_id) {
@@ -797,11 +798,21 @@ class HomeController {
       // Get cart and order count
       const cartCount = await this.countUserCarts(user_id)
       const orderCount = await this.countUserOrders(user_id)
+      // Kiểm tra sản phẩm đã yêu thích chưa
+      let isFavorited = false
+      if (user_id) {
+        const fav = await Wishlist.findOne({
+          user_id: user_id,
+          product_id: product.id,
+        })
+        isFavorited = !!fav
+      }
       res.render('product-detail', {
         showCart: true,
         product,
         cartCount,
         orderCount,
+        isFavorited,
       })
     } catch (error) {
       console.error('Error in showProduct:', error)

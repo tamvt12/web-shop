@@ -1,6 +1,8 @@
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Wishlist = require('../models/Wishlist')
+const Product = require('../models/Product')
 
 class UserController {
   async index(req, res) {
@@ -253,6 +255,49 @@ class UserController {
         success: false,
         message: 'Có lỗi xảy ra khi đổi mật khẩu',
       })
+    }
+  }
+
+  async addWishlist(req, res) {
+    try {
+      const userId = req.session.userId
+      const productId = req.params.productId
+      const exists = await Wishlist.findOne({
+        user_id: userId,
+        product_id: productId,
+      })
+      if (exists) {
+        return res.status(400).json({ message: 'Đã có trong yêu thích' })
+      }
+      await Wishlist.create({ user_id: userId, product_id: productId })
+      res.json({ success: true })
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
+    }
+  }
+
+  async removeWishlist(req, res) {
+    try {
+      const userId = req.session.userId
+      const productId = req.params.productId
+      await Wishlist.deleteOne({ user_id: userId, product_id: productId })
+      res.json({ success: true })
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
+    }
+  }
+
+  async checkWishlist(req, res) {
+    try {
+      const userId = req.session.userId
+      const productId = req.params.productId
+      const exists = await Wishlist.findOne({
+        user_id: userId,
+        product_id: productId,
+      })
+      res.json({ favorited: !!exists })
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
     }
   }
 }
