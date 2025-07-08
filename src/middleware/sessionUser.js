@@ -2,7 +2,7 @@ const session = require('express-session')
 
 module.exports = (req, res, next) => {
   if (req.session && req.session.username) {
-    res.locals.sessionUserID = req.session.sessionUserID
+    res.locals.sessionUserCode = req.session.sessionUserCode
     res.locals.sessionUser = req.session.username
     res.locals.sessionFullName = req.session.fullName
     res.locals.sessionGender = req.session.gender
@@ -11,6 +11,7 @@ module.exports = (req, res, next) => {
     res.locals.sessionEmail = req.session.email
     res.locals.sessionAddress = req.session.address
   } else {
+    res.locals.sessionUserCode = null
     res.locals.sessionUser = null
     res.locals.sessionFullName = null
     res.locals.sessionGender = null

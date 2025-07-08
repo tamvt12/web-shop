@@ -89,7 +89,7 @@ class UserController {
         expiresIn: '1h',
       })
       req.session.userId = user.id
-      req.session.sessionUserID = user._id
+      req.session.sessionUserCode = user.user_code
       req.session.username = user.name
       req.session.fullName = user.fullName
       req.session.gender = user.gender
@@ -110,7 +110,7 @@ class UserController {
     }
   }
 
-  logout(req, res) {
+  logout = (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         return res.redirect('/')

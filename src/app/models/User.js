@@ -13,8 +13,16 @@ const User = new Schema({
   role: { type: String, default: 'user' },
   phone: { type: String, default: null, length: 10 },
   address: { type: String, default: null },
+  user_code: { type: String, unique: true },
 })
 
 User.plugin(AutoIncrement, { inc_field: 'id', id: 'user_id_counter' })
+User.post('save', async function (doc, next) {
+  if (!doc.user_code && doc.id) {
+    const code = 'KH' + String(doc.id).padStart(4, '0')
+    await doc.constructor.findByIdAndUpdate(doc._id, { user_code: code })
+  }
+  next()
+})
 
 module.exports = mongoose.model('User', User)

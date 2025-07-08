@@ -15,7 +15,7 @@
         onclick="toggleCollapse('category')"
       >
         <span>
-          <i class='fas fa-th-large mr-2'></i>
+          <i class='fas fa-layer-group mr-2'></i>
           Thể loại
         </span>
         <i
@@ -38,7 +38,7 @@
         onclick="toggleCollapse('product')"
       >
         <span>
-          <i class='fas fa-cubes mr-2'></i>
+          <i class='fas fa-box-open mr-2'></i>
           Sản phẩm
         </span>
         <i
@@ -101,7 +101,7 @@
         onclick="toggleCollapse('order_item')"
       >
         <span>
-          <i class='fas fa-list-alt mr-2'></i>
+          <i class='fas fa-clipboard-list mr-2'></i>
           Chi tiết đơn hàng
         </span>
         <i
@@ -153,6 +153,26 @@
           Thêm mới
         </a>
         <a href='/admin/news/list' class='block py-1 none-underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 bg-custom-green-hover rounded'
+        onclick="toggleCollapse('favorite')"
+      >
+        <span>
+          <i class='fas fa-heart mr-2'></i>
+          Lượt yêu thích
+        </span>
+        <i
+          class='fas fa-chevron-right text-sm transition-transform duration-300 collapse-icon'
+        ></i>
+      </button>
+      <div id='favorite' class='pl-6 mt-1 hidden'>
+        <a href='/admin/favorite/list' class='block py-1 none-underline'>
           Danh sách
         </a>
       </div>

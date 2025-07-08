@@ -1,0 +1,41 @@
+<div class='container mx-auto p-5 bg-white'>
+  <div class='overflow-x-auto'>
+    <table class='min-w-full table-auto text-sm text-left text-gray-700'>
+      <thead class='bg-gray-100'>
+        <tr>
+          <th class='max-w-10 min-w-5 px-4 py-3 font-semibold text-gray-600'>
+            ID
+          </th>
+          <th class='w-2/6 px-4 py-3 font-semibold text-gray-600'>
+            Tên sản phẩm
+          </th>
+          <th class='w-2/6 px-2 py-2 text-left text-sm font-semibold'>
+            Người yêu thích
+          </th>
+          <th class='w-1/6 px-4 py-3 font-semibold text-gray-600'>
+           	Ngày yêu thích
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each favorites}}
+          <tr class='hover:bg-gray-50'>
+            <td class='px-4 py-2  max-w-10 min-w-5'>
+              {{this.id}}
+            </td>
+            <td class='px-4 py-2'>
+              {{this.productName}}
+            </td>
+            <td class='px-2 py-2 text-sm'>
+              {{this.userName}}
+            </td>
+            <td class='px-4 py-2'>
+              {{this.createdAt}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{> pagination}}
+</div>

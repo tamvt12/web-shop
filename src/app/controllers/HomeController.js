@@ -185,16 +185,28 @@ class HomeController {
   }
 
   search = async (req, res) => {
-    const search = req.query.search
+    const { search, minPrice, maxPrice } = req.query
     const page = parseInt(req.query.page) || 1
     const perPage = 12
     const user_id = req.session.userId
     const cartCount = await this.countUserCarts(user_id)
     const orderCount = await this.countUserOrders(user_id)
-    const totalProducts = await Product.countDocuments({
-      name: { $regex: new RegExp(search, 'i') },
-    })
 
+    const productQuery = {
+      name: { $regex: new RegExp(search, 'i') },
+    }
+
+    if (minPrice || maxPrice) {
+      productQuery.price = {}
+      if (minPrice) {
+        productQuery.price.$gte = parseInt(minPrice)
+      }
+      if (maxPrice) {
+        productQuery.price.$lte = parseInt(maxPrice)
+      }
+    }
+
+    const totalProducts = await Product.countDocuments(productQuery)
     const totalPages = Math.ceil(totalProducts / perPage)
     const pages = []
     const maxPagesToShow = 5
@@ -220,9 +232,7 @@ class HomeController {
       pages.push(i)
     }
 
-    const products = await Product.find({
-      name: { $regex: new RegExp(search, 'i') },
-    })
+    const products = await Product.find(productQuery)
       .skip((page - 1) * perPage)
       .limit(perPage)
       .lean()
@@ -262,6 +272,8 @@ class HomeController {
       currentPage: page,
       totalPages: totalPages,
       pages: pages,
+      minPrice,
+      maxPrice,
       layout: 'main',
     })
   }
