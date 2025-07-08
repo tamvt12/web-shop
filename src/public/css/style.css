@@ -857,6 +857,18 @@ video {
   height: 100vh;
 }
 
+.h-5 {
+  height: 1.25rem;
+}
+
+.h-\[78px\] {
+  height: 78px;
+}
+
+.h-\[70px\] {
+  height: 70px;
+}
+
 .max-h-\[90vh\] {
   max-height: 90vh;
 }
@@ -1063,6 +1075,11 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-fit {
+  width: -moz-fit-content;
+  width: fit-content;
 }
 
 .min-w-20 {

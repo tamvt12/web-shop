@@ -17,108 +17,114 @@
   </h1>
 
   <div class='overflow-x-auto'>
-    <table class='w-full border border-gray-200 rounded-lg text-sm text-left'>
-      <thead class='bg-gray-100'>
-        <tr>
-          <th class='px-4 py-2 border'>
-            Hình ảnh
-          </th>
-          <th class='px-4 py-2 border'>
-            Tên sản phẩm
-          </th>
-          <th class='px-4 py-2 border'>
-            Giá
-          </th>
-          <th class='px-4 py-2 border'>
-            Số lượng
-          </th>
-          <th class='px-4 py-2 border'>
-            Tổng giá trị
-          </th>
-          <th class='px-4 py-2 border'>
-            Hành động
-          </th>
-        </tr>
-      </thead>
-      <tbody id='cart-items'>
-        {{#each cart_items}}
-					<tr class='cart-item border-t'>
-						<td class='p-2 border'>
-							{{#if this.product.image_url}}
-								{{#each this.product.image_url}}
-									{{#if @first}}
-										<img
-											src="{{this}}"
-											alt="{{../this.product.name}}"
-											class='w-24 h-auto object-contain'
-										/>
-									{{/if}}
-								{{/each}}
-							{{else}}
-								<img
-									src="{{this.product.image_url}}"
-									alt="{{this.product.name}}"
-									class='w-24 h-auto object-contain'
-								/>
-							{{/if}}
-						</td>
-						<td class='p-2 border'>
-							{{this.product.name}}
-							<br>
-							<select class="variant-select" data-cart-id="{{this.id}}" data-variants='{{{json this.variants}}}'>
-								{{#each this.variants}}
-									<option value="{{this.type}}" {{#if (eq this.type ../variant_type)}}selected{{/if}}>
-										{{this.type}}
-									</option>
-								{{/each}}
-							</select>
-						</td>
-						<td class='p-2 border w-1/6 text-red-600 font-semibold price-cell'>
-							{{formatCurrency (lookupVariantPrice this.variants this.variant_type)}}
-						</td>
-						<td class='p-2 border'>
-							<div class='flex items-center justify-center gap-2'>
-								<div class='flex items-center w-32 border rounded'>
-									<button
-										type='button'
-										onclick="updateQuantity('{{this.id}}', {{this.quantity}} - 1)"
-										class='px-3 py-1 text-gray-500 hover:bg-gray-100'
-									>
-										−
-									</button>
-									<input
-										type='number'
-										id='quantity-{{this.id}}'
-										value='{{this.quantity}}'
-										min='1'
-										class='w-full text-center focus:outline-none'
-										onblur="updateQuantity('{{this.id}}', this.value)"
-									/>
-									<button
-										type='button'
-										onclick="updateQuantity('{{this.id}}', {{this.quantity}} + 1)"
-										class='px-3 py-1 text-gray-500 hover:bg-gray-100'
-									>
-										+
-									</button>
-								</div>
-							</div>
-						</td>
-						<td class='p-2 border text-red-600 font-semibold total-cell'>
-							{{formatCurrency (multiply (lookupVariantPrice this.variants this.variant_type) this.quantity)}}
-						</td>
-						<td class='p-2 border'>
-							<button
-								class='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
-								onclick="removeItem('{{this.id}}')"
-							>
-								Xóa
-							</button>
-						</td>
+		{{#if cart_items}}
+			<table class='w-full border border-gray-200 rounded-lg text-sm text-left'>
+				<thead class='bg-gray-100'>
+					<tr>
+						<th class='px-4 py-2 border'>
+							Hình ảnh
+						</th>
+						<th class='px-4 py-2 border'>
+							Tên sản phẩm
+						</th>
+						<th class='px-4 py-2 border'>
+							Giá
+						</th>
+						<th class='px-4 py-2 border'>
+							Số lượng
+						</th>
+						<th class='px-4 py-2 border'>
+							Tổng giá trị
+						</th>
+						<th class='px-4 py-2 border'>
+							Hành động
+						</th>
 					</tr>
-        {{/each}}
-      </tbody>
-    </table>
+				</thead>
+				<tbody id='cart-items'>
+					{{#each cart_items}}
+						<tr class='cart-item border-t'>
+							<td class='p-2 border'>
+								{{#if this.product.image_url}}
+									{{#each this.product.image_url}}
+										{{#if @first}}
+											<img
+												src="{{this}}"
+												alt="{{../this.product.name}}"
+												class='w-24 h-auto object-contain'
+											/>
+										{{/if}}
+									{{/each}}
+								{{else}}
+									<img
+										src="{{this.product.image_url}}"
+										alt="{{this.product.name}}"
+										class='w-24 h-auto object-contain'
+									/>
+								{{/if}}
+							</td>
+							<td class='p-2 border'>
+								{{this.product.name}}
+								<br>
+								<select class="variant-select" data-cart-id="{{this.id}}" data-variants='{{{json this.variants}}}'>
+									{{#each this.variants}}
+										<option value="{{this.type}}" {{#if (eq this.type ../variant_type)}}selected{{/if}}>
+											{{this.type}}
+										</option>
+									{{/each}}
+								</select>
+							</td>
+							<td class='p-2 border w-1/6 text-red-600 font-semibold price-cell'>
+								{{formatCurrency (lookupVariantPrice this.variants this.variant_type)}}
+							</td>
+							<td class='p-2 border'>
+								<div class='flex items-center justify-center gap-2'>
+									<div class='flex items-center w-32 border rounded'>
+										<button
+											type='button'
+											onclick="updateQuantity('{{this.id}}', {{this.quantity}} - 1)"
+											class='px-3 py-1 text-gray-500 hover:bg-gray-100'
+										>
+											−
+										</button>
+										<input
+											type='number'
+											id='quantity-{{this.id}}'
+											value='{{this.quantity}}'
+											min='1'
+											class='w-full text-center focus:outline-none'
+											onblur="updateQuantity('{{this.id}}', this.value)"
+										/>
+										<button
+											type='button'
+											onclick="updateQuantity('{{this.id}}', {{this.quantity}} + 1)"
+											class='px-3 py-1 text-gray-500 hover:bg-gray-100'
+										>
+											+
+										</button>
+									</div>
+								</div>
+							</td>
+							<td class='p-2 border text-red-600 font-semibold total-cell'>
+								{{formatCurrency (multiply (lookupVariantPrice this.variants this.variant_type) this.quantity)}}
+							</td>
+							<td class='p-2 border'>
+								<button
+									class='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
+									onclick="removeItem('{{this.id}}')"
+								>
+									Xóa
+								</button>
+							</td>
+						</tr>
+					{{/each}}
+				</tbody>
+			</table>
+		{{else}}
+		<div class="h-[70px] font-bold text-[20px] mx-auto w-fit">
+			Không có sản phẩm nào trong giỏ
+		</div>
+		{{/if}}
   </div>
 
   <!-- Tổng cộng -->
@@ -142,12 +148,14 @@
   </div>
 
   <!-- Nút thanh toán -->
-  <div class='mt-4 text-right'>
-    <button
-      class='px-6 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition'
-      onclick='window.location.href = "/getCheckout"'
-    >
-      Mua hàng
-    </button>
-  </div>
+	{{#if cart_items}}
+		<div class='mt-4 text-right'>
+			<button
+				class='px-6 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition'
+				onclick='window.location.href = "/getCheckout"'
+			>
+				Mua hàng
+			</button>
+		</div>
+	{{/if}}
 </div>

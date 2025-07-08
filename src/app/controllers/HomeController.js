@@ -534,6 +534,9 @@ class HomeController {
     const user_id = req.session.userId
     const { cart_items, total } = await this.cart(user_id)
     const cartCount = await this.countUserCarts(user_id)
+    if (!cart_items || cart_items.length === 0) {
+      return res.redirect('/cart')
+    }
     res.render('checkout', {
       showCart: true,
       cart_items,
