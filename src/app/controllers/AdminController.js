@@ -128,7 +128,6 @@ class AdminController {
     }
 
     const cartItems = await Cart_Item.find({})
-      .populate('product_id')
       .skip((page - 1) * perPage)
       .limit(perPage)
       .lean()
@@ -136,6 +135,9 @@ class AdminController {
     for (let cartItem of cartItems) {
       const user = await User.findOne({ id: cartItem.user_id })
       cartItem.username = user ? user.name : ''
+
+      const product = await Product.findOne({ id: cartItem.product_id })
+      cartItem.product_name = product ? product.name : ''
     }
 
     res.render('admin/cart-item/list', {
@@ -183,7 +185,9 @@ class AdminController {
       .lean()
     for (let item of orderItems) {
       const product = await Product.findOne({ id: item.product_id })
+      const order = await Order.findOne({ id: item.order_id })
       item.product_name = product.name
+      item.order_code = order.order_code
     }
     res.render('admin/order-item/list', {
       showAdmin: true,

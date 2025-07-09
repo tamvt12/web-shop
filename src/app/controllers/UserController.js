@@ -160,7 +160,6 @@ class UserController {
     try {
       const role = ['admin', 'user']
       const user = await User.findOne({ id: req.params.id }).lean()
-      console.log('🚀 ~ UserController ~ show= ~ user:', user)
       res.render('admin/user/edit', {
         user,
         role,
