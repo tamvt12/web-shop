@@ -1,0 +1,118 @@
+<div class='flex justify-center mt-10'>
+  <div class='w-full max-w-2xl bg-white shadow-md rounded-lg p-6'>
+    {{#if messages.error}}
+      <div class='bg-red-100 text-red-700 px-4 py-3 rounded mb-4'>
+        {{messages.error}}
+      </div>
+    {{else if messages.success}}
+      <div class='bg-green-100 text-green-700 px-4 py-3 rounded mb-4'>
+        {{messages.success}}
+      </div>
+    {{/if}}
+
+    <form method='post' class="space-y-6">
+      <div class='mb-4'>
+        <label
+          for='user_code'
+          class='block text-custom-base text-black font-medium mb-2'
+        >
+          Mã khách hàng
+        </label>
+        <input
+          type='text'
+          id='user_code'
+          name='user_code'
+					disabled
+          class='w-full px-4 py-2 border border-gray-300 rounded bg-gray-100'
+          placeholder='Nhập tên danh mục'
+          value="{{user.user_code}}"
+        />
+				<input
+          type='text'
+          id='id'
+          name='id'
+					readonly
+          class='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 hidden'
+          placeholder='Nhập tên danh mục'
+          value="{{user._id}}"
+        />
+      </div>
+			<div class='mb-4'>
+        <label
+          for='name'
+          class='block text-custom-base text-black font-medium mb-2'
+        >
+          Tên khách hàng
+        </label>
+        <input
+          type='text'
+          id='name'
+          name='name'
+					disabled
+          class='w-full px-4 py-2 border border-gray-300 rounded bg-gray-100'
+          placeholder='Nhập tên danh mục'
+          value="{{user.name}}"
+        />
+      </div>
+			<div class='mb-4'>
+        <label
+          for='email'
+          class='block text-custom-base text-black font-medium mb-2'
+        >
+          Email
+        </label>
+        <input
+          type='text'
+          id='email'
+          name='email'
+					disabled
+          class='w-full px-4 py-2 border border-gray-300 rounded bg-gray-100'
+          placeholder='Nhập tên danh mục'
+          value="{{user.email}}"
+        />
+      </div>
+			<div class='mb-4'>
+        <label
+          for='phone'
+          class='block text-custom-base text-black font-medium mb-2'
+        >
+          Số điện thoại
+        </label>
+        <input
+          type='text'
+          id='phone'
+          name='phone'
+					disabled
+          class='w-full px-4 py-2 border border-gray-300 rounded bg-gray-100'
+          placeholder='Nhập tên danh mục'
+          value="{{user.phone}}"
+        />
+      </div>
+      <div>
+        <label for="status" class="block text-custom-base font-medium text-black mb-1">
+          Trạng thái đơn hàng
+        </label>
+        <select
+          name="role"
+					{{#ifCond user.name 'admin'}}disabled{{/ifCond}}
+          class="w-full px-4 py-2 border border-gray-300 rounded{{#ifCond user.name 'admin'}} bg-gray-200 {{else}} focus:outline-none focus:ring focus:ring-blue-300 {{/ifCond}}"
+        >
+          {{#each role}}
+            <option value="{{this}}" {{#ifCond this ../user.role}}selected{{/ifCond}}>
+              {{this}}
+            </option>
+          {{/each}}
+        </select>
+      </div>
+			{{#ifCond user.name 'admin'}}
+			{{else}}
+				<button
+					type='submit'
+					class='w-full bg-btn text-white py-2 rounded bg-custom-green-hover transition'
+				>
+					Sửa
+				</button>
+			{{/ifCond}}
+    </form>
+  </div>
+</div>

@@ -156,3 +156,111 @@
     Không có đơn hàng nào
   </div>
 {{/if}}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+  // This function updates star colors based on the data-rating attribute.
+  // It's robust and doesn't depend on the DOM order of stars.
+		function updateStars(container, rating) {
+			const starLabels = container.querySelectorAll('.star-label')
+			starLabels.forEach((label) => {
+				const starValue = parseInt(label.dataset.rating, 10)
+				const starIcon = label.querySelector('i')
+				if (starValue <= rating) {
+					starIcon.style.color = '#fbbf24' // yellow
+				} else {
+					starIcon.style.color = '#d1d5db' // gray
+				}
+			})
+		}
+
+		function ratingFormSubmit(e, orderId) {
+			e.preventDefault()
+			const form = e.target
+			const ratingInput = $(form).find('input[name="rating"]:checked')
+			const ratingValue = ratingInput.val()
+
+			if (!ratingValue) {
+				alert('Vui lòng chọn số sao đánh giá.')
+				return
+			}
+
+			const product_ids = $(form)
+				.find('input[name="product_ids[]"]')
+				.map(function () {
+					return $(this).val()
+				})
+				.get()
+
+			const formData = {
+				rating: ratingValue,
+				comment: $(form).find('input[name="comment"]').val(),
+				product_ids: product_ids,
+				order_id: orderId,
+			}
+
+			$.ajax({
+				url: '/rating',
+				type: 'POST',
+				data: formData,
+				success: function (response) {
+					if (response.success) {
+						alert('Đánh giá thành công.')
+						location.reload()
+					}
+				},
+				error: function (error) {
+					console.error('Đã xảy ra lỗi khi gửi đánh giá và bình luận: ', error)
+				},
+			})
+		}
+
+		// Initialize stars for all rating forms on the page
+		document.querySelectorAll('.ratingForm').forEach((form) => {
+			const ratingContainer = form.querySelector('[data-existing-rating]')
+			const existingRating =
+				parseInt(ratingContainer.getAttribute('data-existing-rating'), 10) || 0
+
+			// Set all stars to gray initially
+			ratingContainer
+				.querySelectorAll('.star-label i')
+				.forEach((s) => (s.style.color = '#d1d5db'))
+
+			// Color stars for existing ratings
+			if (existingRating > 0) {
+				updateStars(ratingContainer, existingRating)
+				const radioToCheck = ratingContainer.querySelector(
+					`input[value="${existingRating}"]`,
+				)
+				if (radioToCheck) {
+					radioToCheck.checked = true
+				}
+			}
+		})
+
+		// Add click event listener to all star labels
+		document.querySelectorAll('.star-label').forEach((label) => {
+			label.addEventListener('click', function (e) {
+				e.preventDefault()
+
+				const rating = parseInt(this.getAttribute('data-rating'), 10)
+				const orderId = this.getAttribute('data-order-id')
+				const ratingContainer = document.getElementById(`rating-${orderId}`)
+
+				if (!ratingContainer) {
+					console.error('Không tìm thấy ratingContainer cho orderId:', orderId)
+					return
+				}
+
+				const radioToCheck = ratingContainer.querySelector(
+					`input[value="${rating}"]`,
+				)
+
+				if (radioToCheck) {
+					radioToCheck.checked = true
+				}
+				updateStars(ratingContainer, rating)
+			})
+		})
+	})
+</script>

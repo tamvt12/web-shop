@@ -177,6 +177,26 @@
         </a>
       </div>
     </div>
+
+    <div>
+      <button
+        class='w-full flex items-center justify-between px-2 py-2 bg-custom-green-hover rounded'
+        onclick="toggleCollapse('user')"
+      >
+        <span>
+          <i class='fas fa-user mr-2'></i>
+          User
+        </span>
+        <i
+          class='fas fa-chevron-right text-sm transition-transform duration-300 collapse-icon'
+        ></i>
+      </button>
+      <div id='user' class='pl-6 mt-1 hidden'>
+        <a href='/admin/user/list' class='block py-1 none-underline'>
+          Danh sách
+        </a>
+      </div>
+    </div>
   </nav>
 </aside>
 

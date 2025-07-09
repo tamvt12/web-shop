@@ -1,23 +1,8 @@
 const News = require('../models/News')
 const Users = require('../models/User')
-const multer = require('multer')
-const path = require('path')
-
-// Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/news')
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname))
-  },
-})
-
-const upload = multer({ storage: storage })
-
 class NewsController {
   // Get all news articles
-  async index(req, res, next) {
+  index = async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1
       const perPage = 15
@@ -77,12 +62,12 @@ class NewsController {
   }
 
   // Show create form
-  create(req, res) {
+  create = (req, res) => {
     res.render('admin/news/add', { showAdmin: true })
   }
 
   // Store new article
-  store(req, res) {
+  store = (req, res) => {
     const { title, content, summary, image_url } = req.body
 
     try {
@@ -104,7 +89,7 @@ class NewsController {
   }
 
   // Show edit form
-  async edit(req, res) {
+  edit = async (req, res) => {
     try {
       const news = await News.findOne(
         { id: req.params.id },
@@ -125,7 +110,7 @@ class NewsController {
   }
 
   // Update article
-  async update(req, res) {
+  update = async (req, res) => {
     const { title, content, summary, image_url } = req.body
     try {
       const updatedNews = await News.findOneAndUpdate(
@@ -137,7 +122,6 @@ class NewsController {
           image_url,
         },
       )
-      console.log(updatedNews)
 
       if (updatedNews) {
         res.redirect('/admin/news/list')
@@ -153,7 +137,7 @@ class NewsController {
     }
   }
 
-  async destroy(req, res) {
+  destroy = async (req, res) => {
     try {
       const id = req.params.id
       await News.findOneAndDelete({ id })
@@ -166,7 +150,7 @@ class NewsController {
     }
   }
 
-  async showList(req, res) {
+  showList = async (req, res) => {
     try {
       const newsList = await News.find({}).sort({ createdAt: -1 }).lean()
       for (let newsItem of newsList) {
@@ -185,7 +169,7 @@ class NewsController {
     }
   }
 
-  async showDetail(req, res) {
+  showDetail = async (req, res) => {
     try {
       const news = await News.findOne({ id: req.params.id })
       if (!news) {

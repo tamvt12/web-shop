@@ -268,3 +268,37 @@
     </div>
   </div>
 </div>
+
+<script>
+	function toggleModal(show) {
+		const modal = document.getElementById('logoutModal')
+		if (!modal) return
+		if (show) {
+			modal.classList.remove('hidden')
+		} else {
+			modal.classList.add('hidden')
+		}
+	}
+
+	function togglePasswordModal(show) {
+		const modal = document.getElementById('passwordModal')
+		if (!modal) return
+		if (show) {
+			modal.classList.remove('hidden')
+			// Clear previous alerts and form
+			document.getElementById('passwordErrorAlert').classList.add('hidden')
+			document.getElementById('passwordSuccessAlert').classList.add('hidden')
+			document.getElementById('passwordForm').reset()
+		} else {
+			modal.classList.add('hidden')
+		}
+	}
+
+	function showPasswordError(message) {
+		$('#passwordErrorAlert').removeClass('hidden').text(message)
+	}
+
+	function showPasswordSuccess(message) {
+		$('#passwordSuccessAlert').removeClass('hidden').text(message)
+	}
+</script>

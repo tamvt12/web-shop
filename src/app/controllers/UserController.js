@@ -1,28 +1,63 @@
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const Wishlist = require('../models/Wishlist')
-const Product = require('../models/Product')
+const Review = require('../models/Review')
 
 class UserController {
-  async index(req, res) {
-    try {
-      const users = await User.find({})
-      res.json(users)
-    } catch (error) {
-      res.status(400).json({ err: 'ERROR!!!' })
-    }
+  index = async (req, res, next) => {
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    User.countDocuments({})
+      .then(async (totalUsers) => {
+        const totalPages = Math.ceil(totalUsers / perPage)
+        const pages = []
+        const maxPagesToShow = 5
+        let startPage, endPage
+        if (totalPages <= maxPagesToShow) {
+          startPage = 1
+          endPage = totalPages
+        } else {
+          const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+          const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+          if (page <= maxPagesBeforeCurrent) {
+            startPage = 1
+            endPage = maxPagesToShow
+          } else if (page + maxPagesAfterCurrent >= totalPages) {
+            startPage = totalPages - maxPagesToShow + 1
+            endPage = totalPages
+          } else {
+            startPage = page - maxPagesBeforeCurrent
+            endPage = page + maxPagesAfterCurrent
+          }
+        }
+        for (let i = startPage; i <= endPage; i++) {
+          pages.push(i)
+        }
+
+        const users = await User.find({})
+          .skip((page - 1) * perPage)
+          .limit(perPage)
+          .lean()
+        res.render('admin/user/list', {
+          showAdmin: true,
+          users,
+          currentPage: page,
+          totalPages,
+          pages,
+        })
+      })
+      .catch(next)
   }
 
-  showLogin(req, res) {
+  showLogin = (req, res) => {
     res.render('login', { showLogin: true, messages: req.flash() })
   }
 
-  showRegister(req, res) {
+  showRegister = (req, res) => {
     res.render('register', { showLogin: true, messages: req.flash() })
   }
 
-  async register(req, res) {
+  register = async (req, res) => {
     const { name, email, password, repeatPassword } = req.body
 
     if (name === '' || email === '' || password === '') {
@@ -62,7 +97,7 @@ class UserController {
     }
   }
 
-  async login(req, res) {
+  login = async (req, res) => {
     const { email, password } = req.body
 
     if (email === '' || password === '') {
@@ -121,9 +156,25 @@ class UserController {
     })
   }
 
-  update = async (req, res) => {
-    const { id, phone, address, fullName, gender, birthDate } = req.body
+  show = async (req, res) => {
+    try {
+      const role = ['admin', 'user']
+      const user = await User.findOne({ id: req.params.id }).lean()
+      console.log('🚀 ~ UserController ~ show= ~ user:', user)
+      res.render('admin/user/edit', {
+        user,
+        role,
+        showAdmin: true,
+        messages: req.flash(),
+      })
+    } catch (error) {
+      req.flash('error', 'Failed to load user.')
+      res.redirect('/admin')
+    }
+  }
 
+  update = async (req, res) => {
+    const { id, phone, address, role, fullName, gender, birthDate } = req.body
     try {
       if (phone && !this.isPhoneNumber(phone)) {
         return res.json({
@@ -154,27 +205,38 @@ class UserController {
       if (fullName !== undefined) updateData.fullName = fullName
       if (gender !== undefined) updateData.gender = gender
       if (birthDate !== undefined) updateData.birthDate = birthDate
+      if (role !== undefined) updateData.role = role
 
       const updatedUser = await User.findByIdAndUpdate(id, updateData, {
         new: true,
       })
 
-      if (updatedUser) {
-        req.session.phone = updatedUser.phone
-        req.session.address = updatedUser.address
-        req.session.fullName = updatedUser.fullName
-        req.session.gender = updatedUser.gender
-        req.session.birthDate = updatedUser.birthDate
-
-        return res.json({
-          success: true,
-          message: 'Cập nhật thành công.',
-        })
+      if (role) {
+        if (updatedUser) {
+          res.redirect('/admin/user/list')
+        } else {
+          req.flash('error', 'Cập nhập thất bại!!!')
+          const referer = req.get('Referer')
+          res.redirect(referer)
+        }
       } else {
-        return res.json({
-          success: false,
-          message: 'Không tìm thấy người dùng.',
-        })
+        if (updatedUser) {
+          req.session.phone = updatedUser.phone
+          req.session.address = updatedUser.address
+          req.session.fullName = updatedUser.fullName
+          req.session.gender = updatedUser.gender
+          req.session.birthDate = updatedUser.birthDate
+
+          return res.json({
+            success: true,
+            message: 'Cập nhật thành công.',
+          })
+        } else {
+          return res.json({
+            success: false,
+            message: 'Không tìm thấy người dùng.',
+          })
+        }
       }
     } catch (error) {
       console.error('Error updating user:', error)
@@ -190,7 +252,7 @@ class UserController {
     return phoneRegex.test(phone)
   }
 
-  async changePassword(req, res) {
+  changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body
     const userId = req.session.userId
 
@@ -258,46 +320,43 @@ class UserController {
     }
   }
 
-  async addWishlist(req, res) {
-    try {
-      const userId = req.session.userId
-      const productId = req.params.productId
-      const exists = await Wishlist.findOne({
-        user_id: userId,
-        product_id: productId,
-      })
-      if (exists) {
-        return res.status(400).json({ message: 'Đã có trong yêu thích' })
-      }
-      await Wishlist.create({ user_id: userId, product_id: productId })
-      res.json({ success: true })
-    } catch (err) {
-      res.status(500).json({ message: 'Lỗi server' })
-    }
-  }
+  rating = async (req, res) => {
+    const { product_ids, order_id, rating, comment } = req.body
+    const user_id = req.session.userId
 
-  async removeWishlist(req, res) {
     try {
-      const userId = req.session.userId
-      const productId = req.params.productId
-      await Wishlist.deleteOne({ user_id: userId, product_id: productId })
-      res.json({ success: true })
-    } catch (err) {
-      res.status(500).json({ message: 'Lỗi server' })
-    }
-  }
+      await Promise.all(
+        product_ids.map(async (product_id) => {
+          const existingReview = await Review.findOne({
+            user_id: user_id,
+            product_id: product_id,
+            order_id: order_id,
+          })
 
-  async checkWishlist(req, res) {
-    try {
-      const userId = req.session.userId
-      const productId = req.params.productId
-      const exists = await Wishlist.findOne({
-        user_id: userId,
-        product_id: productId,
-      })
-      res.json({ favorited: !!exists })
-    } catch (err) {
-      res.status(500).json({ message: 'Lỗi server' })
+          if (existingReview) {
+            existingReview.rating = rating
+            existingReview.comment = comment
+            existingReview.updated_at = new Date()
+            await existingReview.save()
+          } else {
+            // Create new review
+            const newReview = new Review({
+              user_id,
+              product_id,
+              order_id,
+              rating,
+              comment,
+              created_at: new Date(),
+            })
+            await newReview.save()
+          }
+        }),
+      )
+
+      res.json({ success: true })
+    } catch (error) {
+      console.error('Error in rating:', error)
+      res.json({ success: false })
     }
   }
 }

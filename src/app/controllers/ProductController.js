@@ -1,8 +1,10 @@
 const Product = require('../models/Product')
 const Category = require('../models/Category')
+const Review = require('../models/Review')
+const Home = require('./HomeController')
 
 class ProductController {
-  index(req, res, next) {
+  index = (req, res, next) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
     Product.countDocuments({})
@@ -64,7 +66,7 @@ class ProductController {
       .catch(next)
   }
 
-  create(req, res, next) {
+  create = (req, res, next) => {
     Category.find({})
       .lean()
       .then((categories) => {
@@ -76,7 +78,7 @@ class ProductController {
       .catch(next)
   }
 
-  store(req, res) {
+  store = (req, res) => {
     const { category_id, name, description, price, stock, image_url } = req.body
     const variantTypes = req.body.variant_type || []
     const variantPrices = req.body.variant_price || []
@@ -129,7 +131,7 @@ class ProductController {
     }
   }
 
-  async show(req, res) {
+  show = async (req, res) => {
     try {
       const product = await Product.findOne(
         { id: req.params.id },
@@ -169,7 +171,7 @@ class ProductController {
     }
   }
 
-  async update(req, res) {
+  update = async (req, res) => {
     const { category_id, name, description, price, stock, image_url } = req.body
     const id = req.params.id
     // Lấy variants từ form
@@ -233,7 +235,7 @@ class ProductController {
     }
   }
 
-  async destroy(req, res) {
+  destroy = async (req, res) => {
     try {
       const id = req.params.id
       await Product.findOneAndDelete({ id })
@@ -243,6 +245,101 @@ class ProductController {
         success: false,
         message: 'Có lỗi xảy ra khi xóa',
       })
+    }
+  }
+
+  showDetail = async (req, res) => {
+    try {
+      const productId = req.params.id
+      const user_id = req.session.userId
+
+      // Get product details
+      const product = await Product.findOne({ id: productId }).lean()
+
+      if (!product) {
+        return res
+          .status(404)
+          .render('404', { message: 'Sản phẩm không tồn tại' })
+      }
+
+      // Get category
+      const category = await Category.findOne({
+        id: product.category_id,
+      }).lean()
+      product.category = category
+
+      // Convert image_url string to array
+      if (typeof product.image_url === 'string') {
+        const imageArray = product.image_url
+          .split(',')
+          .map((url) => url.trim())
+          .filter((url) => url !== '')
+        product.image_url = imageArray
+      }
+
+      // Get rating data
+      const ratingData = await Review.aggregate([
+        { $match: { product_id: productId } },
+        {
+          $group: {
+            _id: '$product_id',
+            averageRating: { $avg: '$rating' },
+            reviewCount: { $sum: 1 },
+          },
+        },
+      ])
+      product.rating = ratingData.length > 0 ? ratingData[0].averageRating : 0
+      product.reviewCount =
+        ratingData.length > 0 ? ratingData[0].reviewCount : 0
+
+      // Get reviews with user info
+      const reviews = await Review.aggregate([
+        { $match: { product_id: productId } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $unwind: '$user' },
+        {
+          $project: {
+            rating: 1,
+            comment: 1,
+            createdAt: 1,
+            'user.name': 1,
+            'user.avatar': 1,
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ])
+
+      product.reviews = reviews
+
+      // Get cart and order count
+      const cartCount = await Home.countUserCarts(user_id)
+      const orderCount = await Home.countUserOrders(user_id)
+      // Kiểm tra sản phẩm đã yêu thích chưa
+      let isFavorited = false
+      if (user_id) {
+        const fav = await Favorite.findOne({
+          user_id: user_id,
+          product_id: product.id,
+        })
+        isFavorited = !!fav
+      }
+      res.render('product-detail', {
+        showCart: true,
+        product,
+        cartCount,
+        orderCount,
+        isFavorited,
+      })
+    } catch (error) {
+      console.error('Error in showProduct:', error)
+      res.status(500).render('error', { message: 'Đã có lỗi xảy ra' })
     }
   }
 }

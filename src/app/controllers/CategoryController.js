@@ -1,7 +1,7 @@
 const Category = require('../models/Category')
 
 class CategoryController {
-  index(req, res, next) {
+  index = (req, res, next) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
     Category.countDocuments({})
@@ -46,14 +46,14 @@ class CategoryController {
       .catch(next)
   }
 
-  create(req, res) {
+  create = (req, res) => {
     res.render('admin/category/add', {
       showAdmin: true,
       messages: req.flash(),
     })
   }
 
-  store(req, res) {
+  store = (req, res) => {
     const { name, image_url } = req.body
     try {
       if (name === '') {
@@ -72,7 +72,7 @@ class CategoryController {
     }
   }
 
-  async show(req, res) {
+  show = async (req, res) => {
     try {
       const category = await Category.findOne(
         { id: req.params.id },
@@ -92,7 +92,7 @@ class CategoryController {
     }
   }
 
-  async update(req, res) {
+  update = async (req, res) => {
     const { name, image_url } = req.body
     const id = req.params.id
     try {
@@ -122,7 +122,7 @@ class CategoryController {
     }
   }
 
-  async destroy(req, res) {
+  destroy = async (req, res) => {
     try {
       const id = req.params.id
       await Category.findOneAndDelete({ id })

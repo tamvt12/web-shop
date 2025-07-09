@@ -4,7 +4,7 @@ const Product = require('../models/Product')
 const Order_Item = require('../models/Order_Item')
 const Review = require('../models/Review')
 const Category = require('../models/Category')
-const Wishlist = require('../models/Wishlist')
+const Favorite = require('../models/Favorite')
 
 class HomeController {
   async countUserOrders(user_id) {
@@ -470,7 +470,7 @@ class HomeController {
   }
 
   updateCart = async (req, res) => {
-    const { id, quantity } = req.body
+    const { id, quantity, variant_type } = req.body
     const user_id = req.session.userId
 
     if (!user_id) {
@@ -484,22 +484,52 @@ class HomeController {
         user_id,
       })
 
+      if (!cartItem) {
+        return res.json({ error: 'Cart item not found' })
+      }
+
       const product = await Product.findOne({ id: cartItem.product_id })
       if (!product) {
         message = 'Sản phẩm không tồn tại'
       }
 
-      if (quantity > product.stock) {
-        message = 'Số lượng sản phẩm trong giỏ hàng đã đạt giới hạn'
+      // Nếu có variant_type mới, kiểm tra và cập nhật
+      if (variant_type) {
+        // Kiểm tra variant_type có hợp lệ không
+        const variant = (product.variants || []).find(
+          (v) => v.type === variant_type,
+        )
+        if (!variant) {
+          return res.json({ error: 'Loại sản phẩm không tồn tại' })
+        }
+        cartItem.variant_type = variant_type
       }
 
+      // Nếu có quantity, kiểm tra và cập nhật
+      if (quantity !== undefined) {
+        // Nếu có variant_type mới thì kiểm tra stock của variant đó
+        let stock = product.stock
+        if (cartItem.variant_type && Array.isArray(product.variants)) {
+          const variant = product.variants.find(
+            (v) => v.type === cartItem.variant_type,
+          )
+          if (variant) {
+            stock = variant.stock
+          }
+        }
+        if (quantity > stock) {
+          message = 'Số lượng sản phẩm trong giỏ hàng đã đạt giới hạn'
+        }
+        if (message === '') {
+          cartItem.quantity = quantity
+        }
+      }
       if (message === '') {
-        cartItem.quantity = quantity
         await cartItem.save()
       }
       const cartCount = await this.countUserCarts(user_id)
       const { cart_items, total } = await this.cart(user_id)
-      res.json({ cart_items, quantity, cartCount, total })
+      res.json({ cart_items, quantity: cartItem.quantity, cartCount, total })
     } catch (err) {
       console.error('Error updating cart:', err)
       res.status(500).json({ error: 'Internal Server Error' })
@@ -704,141 +734,6 @@ class HomeController {
       res.render('order', { orders, cartCount, orderCount, showCart: true })
     } catch (error) {
       res.status(500).send('Đã xảy ra lỗi khi tải danh sách đơn hàng')
-    }
-  }
-
-  rating = async (req, res) => {
-    const { product_ids, order_id, rating, comment } = req.body
-    const user_id = req.session.userId
-
-    try {
-      await Promise.all(
-        product_ids.map(async (product_id) => {
-          const existingReview = await Review.findOne({
-            user_id: user_id,
-            product_id: product_id,
-            order_id: order_id,
-          })
-
-          if (existingReview) {
-            existingReview.rating = rating
-            existingReview.comment = comment
-            existingReview.updated_at = new Date()
-            await existingReview.save()
-          } else {
-            // Create new review
-            const newReview = new Review({
-              user_id,
-              product_id,
-              order_id,
-              rating,
-              comment,
-              created_at: new Date(),
-            })
-            await newReview.save()
-          }
-        }),
-      )
-
-      res.json({ success: true })
-    } catch (error) {
-      console.error('Error in rating:', error)
-      res.json({ success: false })
-    }
-  }
-
-  showDetail = async (req, res) => {
-    try {
-      const productId = req.params.id
-      const user_id = req.session.userId
-
-      // Get product details
-      const product = await Product.findOne({ id: productId }).lean()
-
-      if (!product) {
-        return res
-          .status(404)
-          .render('404', { message: 'Sản phẩm không tồn tại' })
-      }
-
-      // Get category
-      const category = await Category.findOne({
-        id: product.category_id,
-      }).lean()
-      product.category = category
-
-      // Convert image_url string to array
-      if (typeof product.image_url === 'string') {
-        const imageArray = product.image_url
-          .split(',')
-          .map((url) => url.trim())
-          .filter((url) => url !== '')
-        product.image_url = imageArray
-      }
-
-      // Get rating data
-      const ratingData = await Review.aggregate([
-        { $match: { product_id: productId } },
-        {
-          $group: {
-            _id: '$product_id',
-            averageRating: { $avg: '$rating' },
-            reviewCount: { $sum: 1 },
-          },
-        },
-      ])
-      product.rating = ratingData.length > 0 ? ratingData[0].averageRating : 0
-      product.reviewCount =
-        ratingData.length > 0 ? ratingData[0].reviewCount : 0
-
-      // Get reviews with user info
-      const reviews = await Review.aggregate([
-        { $match: { product_id: productId } },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'user_id',
-            foreignField: '_id',
-            as: 'user',
-          },
-        },
-        { $unwind: '$user' },
-        {
-          $project: {
-            rating: 1,
-            comment: 1,
-            createdAt: 1,
-            'user.name': 1,
-            'user.avatar': 1,
-          },
-        },
-        { $sort: { createdAt: -1 } },
-      ])
-
-      product.reviews = reviews
-
-      // Get cart and order count
-      const cartCount = await this.countUserCarts(user_id)
-      const orderCount = await this.countUserOrders(user_id)
-      // Kiểm tra sản phẩm đã yêu thích chưa
-      let isFavorited = false
-      if (user_id) {
-        const fav = await Wishlist.findOne({
-          user_id: user_id,
-          product_id: product.id,
-        })
-        isFavorited = !!fav
-      }
-      res.render('product-detail', {
-        showCart: true,
-        product,
-        cartCount,
-        orderCount,
-        isFavorited,
-      })
-    } catch (error) {
-      console.error('Error in showProduct:', error)
-      res.status(500).render('error', { message: 'Đã có lỗi xảy ra' })
     }
   }
 }

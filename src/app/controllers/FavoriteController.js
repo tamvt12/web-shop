@@ -1,15 +1,15 @@
-const Wishlist = require('../models/Wishlist')
+const Favorite = require('../models/Favorite')
 const Product = require('../models/Product')
 const User = require('../models/User')
 const Review = require('../models/Review')
 const { showCart } = require('./HomeController')
 
 class FavoriteController {
-  list = async (req, res) => {
+  index = async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1
       const perPage = 15
-      const totalFavorites = await Wishlist.countDocuments({})
+      const totalFavorites = await Favorite.countDocuments({})
       const totalPages = Math.ceil(totalFavorites / perPage)
 
       const pages = []
@@ -36,7 +36,7 @@ class FavoriteController {
         pages.push(i)
       }
 
-      const favorites = await Wishlist.find({})
+      const favorites = await Favorite.find({})
         .skip((page - 1) * perPage)
         .limit(perPage)
         .lean()
@@ -66,7 +66,50 @@ class FavoriteController {
     }
   }
 
-  userWishlist = async (req, res) => {
+  create = async (req, res) => {
+    try {
+      const userId = req.session.userId
+      const productId = req.params.productId
+      const exists = await Favorite.findOne({
+        user_id: userId,
+        product_id: productId,
+      })
+      if (exists) {
+        return res.status(400).json({ message: 'Đã có trong yêu thích' })
+      }
+      await Favorite.create({ user_id: userId, product_id: productId })
+      res.json({ success: true })
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
+    }
+  }
+
+  destroy = async (req, res) => {
+    try {
+      const userId = req.session.userId
+      const productId = req.params.productId
+      await Favorite.deleteOne({ user_id: userId, product_id: productId })
+      res.json({ success: true })
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
+    }
+  }
+
+  checkFavorite = async (req, res) => {
+    try {
+      const userId = req.session.userId
+      const productId = req.params.productId
+      const exists = await Favorite.findOne({
+        user_id: userId,
+        product_id: productId,
+      })
+      res.json({ favorited: !!exists })
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
+    }
+  }
+
+  userFavorite = async (req, res) => {
     try {
       const userId = req.session.userId
       if (!userId) {
@@ -75,7 +118,7 @@ class FavoriteController {
       const { page: pageQuery, minPrice, maxPrice } = req.query
       const page = parseInt(pageQuery) || 1
       const perPage = 12
-      const totalFavorites = await Wishlist.countDocuments({ user_id: userId })
+      const totalFavorites = await Favorite.countDocuments({ user_id: userId })
       const totalPages = Math.ceil(totalFavorites / perPage)
       const pages = []
       const maxPagesToShow = 5
@@ -100,11 +143,11 @@ class FavoriteController {
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i)
       }
-      const wishlistItems = await Wishlist.find({ user_id: userId })
+      const FavoriteItems = await Favorite.find({ user_id: userId })
         .skip((page - 1) * perPage)
         .limit(perPage)
         .lean()
-      const productIds = wishlistItems.map((item) => item.product_id)
+      const productIds = FavoriteItems.map((item) => item.product_id)
       let products = await Product.find({ id: { $in: productIds } }).lean()
       // Lọc theo khoảng giá nếu có
       if (minPrice || maxPrice) {
@@ -140,7 +183,7 @@ class FavoriteController {
         product.reviewCount =
           ratingData.length > 0 ? ratingData[0].reviewCount : 0
       }
-      res.render('wishlist', {
+      res.render('Favorite', {
         showCart: true,
         products,
         currentPage: page,

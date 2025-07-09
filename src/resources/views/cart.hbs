@@ -159,3 +159,52 @@
 		</div>
 	{{/if}}
 </div>
+
+<script>
+	document.querySelectorAll('.variant-select').forEach(function (select) {
+		select.addEventListener('change', function () {
+			const cartId = this.getAttribute('data-cart-id')
+			const selectedType = this.value
+			// Gửi request lên server để update variant_type
+			fetch('/updateCart', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Requested-With': 'XMLHttpRequest',
+				},
+				body: JSON.stringify({
+					id: cartId,
+					variant_type: selectedType
+				})
+			})
+				.then(res => res.json())
+				.then(data => {
+					if (data.cart_items) {
+						// Nếu backend trả về cart_items, cập nhật lại giao diện
+						if (typeof loadCartItems === 'function') {
+							loadCartItems(data.cart_items, data.total)
+						} else {
+							location.reload()
+						}
+					} else if (data.success) {
+						location.reload()
+					} else {
+						alert('Cập nhật loại sản phẩm thất bại!')
+					}
+				})
+				.catch(() => alert('Có lỗi xảy ra!'))
+		})
+	})
+
+	function updateCartTotal() {
+		let total = 0
+		document.querySelectorAll('tr.cart-item').forEach(function (row) {
+			const totalCell = row.querySelector('.total-cell')
+			if (totalCell) {
+				const value = totalCell.textContent.replace(/[^0-9]/g, '')
+				total += parseFloat(value) || 0
+			}
+		})
+		document.getElementById('cart-total-price').textContent = formatMoney(total)
+	}
+</script>

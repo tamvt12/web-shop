@@ -6,7 +6,9 @@ const productRouter = require('./product')
 const adminRouter = require('./admin')
 const newsRouter = require('./news')
 const HomeController = require('../app/controllers/HomeController')
+const ProductController = require('../app/controllers/ProductController')
 const NewsController = require('../app/controllers/NewsController')
+const UserController = require('../app/controllers/UserController')
 
 function route(app) {
   app.use('/news', newsRouter)
@@ -27,7 +29,7 @@ function route(app) {
   app.get('/', HomeController.home)
   app.get('/store', HomeController.showStore)
   app.get('/search', HomeController.search)
-  app.get('/products/:id', HomeController.showDetail)
+  app.get('/products/:id', ProductController.showDetail)
   app.post('/addCart', HomeController.addCart)
   app.post('/buyNow', HomeController.buyNow)
   app.get('/cart', HomeController.showCart)
@@ -36,7 +38,7 @@ function route(app) {
   app.get('/getCheckout', HomeController.getCheckout)
   app.post('/checkout', HomeController.checkOut)
   app.get('/order', HomeController.showOrder)
-  app.post('/rating', HomeController.rating)
+  app.post('/rating', UserController.rating)
   app.get('/news', NewsController.showList)
   app.get('/news/:id', NewsController.showDetail)
 }

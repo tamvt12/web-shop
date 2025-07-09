@@ -6,7 +6,7 @@ const Review = require('../models/Review')
 const User = require('../models/User')
 
 class AdminController {
-  async showOrder(req, res, next) {
+  showOrder = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
     const totalOrders = await Order.countDocuments({})
@@ -53,7 +53,7 @@ class AdminController {
     })
   }
 
-  async editOrder(req, res, next) {
+  editOrder = async (req, res) => {
     try {
       const status = ['Chờ xử lý', 'Đang giao', 'Đã hoàn thành']
       const order = await Order.findOne({ id: req.params.id }).lean()
@@ -73,7 +73,7 @@ class AdminController {
     }
   }
 
-  async updateOrder(req, res, next) {
+  updateOrder = async (req, res) => {
     const status = req.body.status
     const id = req.params.id
     try {
@@ -97,7 +97,7 @@ class AdminController {
     }
   }
 
-  async showCartItem(req, res) {
+  showCartItem = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
     const totalCartItems = await Cart_Item.countDocuments({})
@@ -147,7 +147,7 @@ class AdminController {
     })
   }
 
-  async showOrderItem(req, res) {
+  showOrderItem = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
     const totalOrderItems = await Order_Item.countDocuments({})
@@ -194,7 +194,7 @@ class AdminController {
     })
   }
 
-  async showReview(req, res) {
+  showReview = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
     const totalReviews = await Review.countDocuments({})
@@ -244,7 +244,7 @@ class AdminController {
     })
   }
 
-  upload(req, res) {
+  upload = (req, res) => {
     if (req.files && req.files.length > 0) {
       const imageUrls = req.files.map((file) => file.path)
       res.json({

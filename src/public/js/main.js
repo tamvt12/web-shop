@@ -96,6 +96,64 @@ $(document).ready(function () {
       })
     }
   })
+
+  $('#passwordForm').on('submit', function (e) {
+    e.preventDefault()
+
+    const currentPassword = $('#currentPassword').val()
+    const newPassword = $('#newPassword').val()
+    const confirmPassword = $('#confirmPassword').val()
+
+    // Clear previous alerts
+    $('#passwordErrorAlert').addClass('hidden')
+    $('#passwordSuccessAlert').addClass('hidden')
+
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showPasswordError('Vui lòng điền đầy đủ thông tin')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      showPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      showPasswordError('Mật khẩu xác nhận không khớp')
+      return
+    }
+
+    // Send request to server
+    $.ajax({
+      url: '/change-password',
+      type: 'POST',
+      data: {
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      },
+      success: function (response) {
+        if (response.success) {
+          showPasswordSuccess(response.message)
+          $('#passwordForm')[0].reset()
+          // Close modal after 2 seconds
+          setTimeout(function () {
+            togglePasswordModal(false)
+          }, 2000)
+        } else {
+          showPasswordError(response.message)
+        }
+      },
+      error: function (xhr) {
+        const response = xhr.responseJSON
+        if (response && response.message) {
+          showPasswordError(response.message)
+        } else {
+          showPasswordError('Có lỗi xảy ra, vui lòng thử lại')
+        }
+      },
+    })
+  })
 })
 
 $('#upload').change(function () {
@@ -261,6 +319,18 @@ function buyNow(productId) {
   })
 }
 
+function renderVariantSelect(item) {
+  let select = `<select class="variant-select" data-cart-id="${
+    item.id
+  }" data-variants='${JSON.stringify(item.variants)}'>`
+  item.variants.forEach((variant) => {
+    const selected = variant.type === item.variant_type ? 'selected' : ''
+    select += `<option value="${variant.type}" ${selected}>${variant.type}</option>`
+  })
+  select += '</select>'
+  return select
+}
+
 function loadCartItems(cartItems, total) {
   $('#cart-items').empty()
   if (cartItems.length === 0) {
@@ -311,6 +381,8 @@ function loadCartItems(cartItems, total) {
 				</td>
 				<td class='p-2 border'>
 					${item.product.name}
+					<br>
+					${renderVariantSelect(item)}
 				</td>
 				<td class='p-2 border text-red-600 font-semibold'>
 					${formatCurrency(price)}
@@ -437,299 +509,3 @@ function checkout() {
     },
   })
 }
-
-function displayOrders(orders) {
-  orders.forEach(function (order) {
-    var html = $(`<div class="order d-flex m-3">
-			{{#each this.order_Item}}
-				<img src="{{this.product.image_url}}" alt="" style="width: 200px; height: 200px;">
-			{{/each}}
-			<div class="ml-3">
-				<p><strong>Mã đơn hàng:</strong> {{this._id}}</p>
-				<p><strong>Tổng giá trị:</strong> {{formatCurrency this.total}}</p>
-				<p><strong>Trạng thái:</strong> {{this.status}}</p>
-				<p><strong>Ngày tạo:</strong> {{formatDate this.created_at}}</p>
-
-				<ul>
-					{{#each this.order_Item}}
-					<li>{{this.product.name}} - Số lượng: {{this.quantity}} - Thành tiền:
-						<span class="text-danger">{{formatCurrency this.product.price}}</span>
-					</li>
-					{{/each}}
-				</ul>
-			</div>
-		</div>`)
-
-    // $('#orders-list').append(html);
-  })
-}
-
-function ratingFormSubmit(e, orderId) {
-  e.preventDefault()
-  const form = e.target
-  const ratingInput = $(form).find('input[name="rating"]:checked')
-  const ratingValue = ratingInput.val()
-
-  if (!ratingValue) {
-    alert('Vui lòng chọn số sao đánh giá.')
-    return
-  }
-
-  const product_ids = $(form)
-    .find('input[name="product_ids[]"]')
-    .map(function () {
-      return $(this).val()
-    })
-    .get()
-
-  const formData = {
-    rating: ratingValue,
-    comment: $(form).find('input[name="comment"]').val(),
-    product_ids: product_ids,
-    order_id: orderId,
-  }
-
-  $.ajax({
-    url: '/rating',
-    type: 'POST',
-    data: formData,
-    success: function (response) {
-      if (response.success) {
-        alert('Đánh giá thành công.')
-        location.reload()
-      }
-    },
-    error: function (error) {
-      console.error('Đã xảy ra lỗi khi gửi đánh giá và bình luận: ', error)
-    },
-  })
-}
-
-function toggleModal(show) {
-  const modal = document.getElementById('logoutModal')
-  if (!modal) return
-  if (show) {
-    modal.classList.remove('hidden')
-  } else {
-    modal.classList.add('hidden')
-  }
-}
-
-function togglePasswordModal(show) {
-  const modal = document.getElementById('passwordModal')
-  if (!modal) return
-  if (show) {
-    modal.classList.remove('hidden')
-    // Clear previous alerts and form
-    document.getElementById('passwordErrorAlert').classList.add('hidden')
-    document.getElementById('passwordSuccessAlert').classList.add('hidden')
-    document.getElementById('passwordForm').reset()
-  } else {
-    modal.classList.add('hidden')
-  }
-}
-
-// Password change form handling
-$(document).ready(function () {
-  $('#passwordForm').on('submit', function (e) {
-    e.preventDefault()
-
-    const currentPassword = $('#currentPassword').val()
-    const newPassword = $('#newPassword').val()
-    const confirmPassword = $('#confirmPassword').val()
-
-    // Clear previous alerts
-    $('#passwordErrorAlert').addClass('hidden')
-    $('#passwordSuccessAlert').addClass('hidden')
-
-    // Validation
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      showPasswordError('Vui lòng điền đầy đủ thông tin')
-      return
-    }
-
-    if (newPassword.length < 6) {
-      showPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự')
-      return
-    }
-
-    if (newPassword !== confirmPassword) {
-      showPasswordError('Mật khẩu xác nhận không khớp')
-      return
-    }
-
-    // Send request to server
-    $.ajax({
-      url: '/change-password',
-      type: 'POST',
-      data: {
-        currentPassword: currentPassword,
-        newPassword: newPassword,
-      },
-      success: function (response) {
-        if (response.success) {
-          showPasswordSuccess(response.message)
-          $('#passwordForm')[0].reset()
-          // Close modal after 2 seconds
-          setTimeout(function () {
-            togglePasswordModal(false)
-          }, 2000)
-        } else {
-          showPasswordError(response.message)
-        }
-      },
-      error: function (xhr) {
-        const response = xhr.responseJSON
-        if (response && response.message) {
-          showPasswordError(response.message)
-        } else {
-          showPasswordError('Có lỗi xảy ra, vui lòng thử lại')
-        }
-      },
-    })
-  })
-})
-
-function showPasswordError(message) {
-  $('#passwordErrorAlert').removeClass('hidden').text(message)
-}
-
-function showPasswordSuccess(message) {
-  $('#passwordSuccessAlert').removeClass('hidden').text(message)
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  const slides = document.getElementById('slides')
-  if (!slides) return
-  const totalImages = slides.children.length
-  const imagesPerSlide = 3
-  let currentSlide = 0
-
-  const totalSlides = Math.ceil(totalImages / imagesPerSlide)
-
-  function goToSlide(index) {
-    const slideWidth = slides.clientWidth / imagesPerSlide
-    const extraSpace = 2 * (imagesPerSlide - 1)
-    slides.style.transform = `translateX(-${
-      index * (slideWidth * imagesPerSlide + extraSpace)
-    }px)`
-    currentSlide = index
-    updateDots()
-  }
-
-  function updateDots() {
-    const dots = document.querySelectorAll('#slideshow-dots button')
-    dots.forEach((dot, i) => {
-      dot.classList.toggle('bg-blue-600', i === currentSlide)
-      dot.classList.toggle('bg-gray-300', i !== currentSlide)
-    })
-  }
-
-  // Render dots
-  const dotContainer = document.getElementById('slideshow-dots')
-  for (let i = 0; i < totalSlides; i++) {
-    const dot = document.createElement('button')
-    dot.className = 'w-3 h-3 rounded-full bg-gray-300'
-    dot.addEventListener('click', () => goToSlide(i))
-    dotContainer.appendChild(dot)
-  }
-
-  goToSlide(0)
-})
-
-document.querySelectorAll('.variant-select').forEach(function (select) {
-  select.addEventListener('change', function () {
-    const cartId = this.getAttribute('data-cart-id')
-    const selectedType = this.value
-    const row = this.closest('tr')
-    const variants = JSON.parse(this.getAttribute('data-variants'))
-    const variant = variants.find((v) => v.type === selectedType)
-    const priceCell = row.querySelector('.price-cell')
-    const totalCell = row.querySelector('.total-cell')
-    const quantity = parseInt(row.querySelector('input[type=number]').value)
-    priceCell.textContent = formatMoney(variant.price)
-    let price = variant.price
-    if (typeof price === 'object' && price.$numberDecimal) {
-      price = parseFloat(price.$numberDecimal)
-    }
-    totalCell.textContent = formatMoney(price * quantity)
-    updateCartTotal()
-  })
-})
-
-function updateCartTotal() {
-  let total = 0
-  document.querySelectorAll('tr.cart-item').forEach(function (row) {
-    const totalCell = row.querySelector('.total-cell')
-    if (totalCell) {
-      const value = totalCell.textContent.replace(/[^0-9]/g, '')
-      total += parseFloat(value) || 0
-    }
-  })
-  document.getElementById('cart-total-price').textContent = formatMoney(total)
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  // This function updates star colors based on the data-rating attribute.
-  // It's robust and doesn't depend on the DOM order of stars.
-  function updateStars(container, rating) {
-    const starLabels = container.querySelectorAll('.star-label')
-    starLabels.forEach((label) => {
-      const starValue = parseInt(label.dataset.rating, 10)
-      const starIcon = label.querySelector('i')
-      if (starValue <= rating) {
-        starIcon.style.color = '#fbbf24' // yellow
-      } else {
-        starIcon.style.color = '#d1d5db' // gray
-      }
-    })
-  }
-
-  // Initialize stars for all rating forms on the page
-  document.querySelectorAll('.ratingForm').forEach((form) => {
-    const ratingContainer = form.querySelector('[data-existing-rating]')
-    const existingRating =
-      parseInt(ratingContainer.getAttribute('data-existing-rating'), 10) || 0
-
-    // Set all stars to gray initially
-    ratingContainer
-      .querySelectorAll('.star-label i')
-      .forEach((s) => (s.style.color = '#d1d5db'))
-
-    // Color stars for existing ratings
-    if (existingRating > 0) {
-      updateStars(ratingContainer, existingRating)
-      const radioToCheck = ratingContainer.querySelector(
-        `input[value="${existingRating}"]`,
-      )
-      if (radioToCheck) {
-        radioToCheck.checked = true
-      }
-    }
-  })
-
-  // Add click event listener to all star labels
-  document.querySelectorAll('.star-label').forEach((label) => {
-    label.addEventListener('click', function (e) {
-      e.preventDefault()
-
-      const rating = parseInt(this.getAttribute('data-rating'), 10)
-      const orderId = this.getAttribute('data-order-id')
-      const ratingContainer = document.getElementById(`rating-${orderId}`)
-
-      if (!ratingContainer) {
-        console.error('Không tìm thấy ratingContainer cho orderId:', orderId)
-        return
-      }
-
-      const radioToCheck = ratingContainer.querySelector(
-        `input[value="${rating}"]`,
-      )
-
-      if (radioToCheck) {
-        radioToCheck.checked = true
-      }
-      updateStars(ratingContainer, rating)
-    })
-  })
-})
