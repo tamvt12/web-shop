@@ -213,6 +213,47 @@ $('#upload').change(function () {
   })
 })
 
+function ratingFormSubmit(e, orderId) {
+  e.preventDefault()
+  const form = e.target
+  const ratingInput = $(form).find('input[name="rating"]:checked')
+  const ratingValue = ratingInput.val()
+
+  if (!ratingValue) {
+    alert('Vui lòng chọn số sao đánh giá.')
+    return
+  }
+
+  const product_ids = $(form)
+    .find('input[name="product_ids[]"]')
+    .map(function () {
+      return $(this).val()
+    })
+    .get()
+
+  const formData = {
+    rating: ratingValue,
+    comment: $(form).find('input[name="comment"]').val(),
+    product_ids: product_ids,
+    order_id: orderId,
+  }
+
+  $.ajax({
+    url: '/rating',
+    type: 'POST',
+    data: formData,
+    success: function (response) {
+      if (response.success) {
+        alert('Đánh giá thành công.')
+        location.reload()
+      }
+    },
+    error: function (error) {
+      console.error('Đã xảy ra lỗi khi gửi đánh giá và bình luận: ', error)
+    },
+  })
+}
+
 function removeRow(url) {
   if (confirm('Xóa mà không thể khôi phục. Bạn có chắc ?')) {
     $.ajax({
@@ -479,7 +520,7 @@ function formatMoney(value) {
 
 function checkout() {
   // Lấy dữ liệu từ form
-  const name = $('#name').val()
+  const name = $('#full-name').val()
   const phone = $('#phone').val()
   const address = $('#address').val()
   const shipping = $('input[name="shipping"]:checked').val()

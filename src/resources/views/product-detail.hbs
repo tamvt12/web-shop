@@ -63,7 +63,7 @@
 					<span class=''>{{formatAverageRating product.rating}}</span>
 				</div>
 				<div class="border-l pl-4">
-					<span class="text-gray-500">0 lượt mua</span>
+					<span class="text-gray-500">{{orderCount}} lượt mua</span>
 				</div>
 				{{!-- <a href="#" class="flex items-center gap-1 ml-auto">
 					<i class="fas fa-exclamation-triangle text-[#FFC107]"></i> Báo cáo
@@ -177,32 +177,32 @@
 
 		<div id='tab-content-reviews' class='mt-4 tab-content hidden'>
 			{{#if product.reviews}}
-			{{#each product.reviews}}
-			<div class='mb-6'>
-				<div class='flex items-center gap-3 mb-2'>
-					<img src="{{#if this.user.avatar}}{{this.user.avatar}}{{else}}/img/undraw_profile.svg{{/if}}"
-						class='w-10 h-10 rounded-full object-cover' onerror="this.src='/img/undraw_profile.svg'" />
-					<div class='flex-1'>
-						<h6 class='font-semibold mb-1'>
-							{{this.user.name}}
-						</h6>
-						<div class='text-yellow-500'>
-							{{formatAverageRating this.rating}}
+				{{#each product.reviews}}
+				<div class='mb-6'>
+					<div class='flex items-center gap-3 mb-2'>
+						<img src="{{#if this.user.avatar}}{{this.user.avatar}}{{else}}/img/undraw_profile.svg{{/if}}"
+							class='w-10 h-10 rounded-full object-cover' onerror="this.src='/img/undraw_profile.svg'" />
+						<div class='flex-1'>
+							<h6 class='font-semibold mb-1'>
+								{{this.user.name}}
+							</h6>
+							<div class='text-yellow-500'>
+								{{formatAverageRating this.rating}}
+							</div>
 						</div>
+						<small class='text-gray-400'>
+							{{formatDate this.createdAt}}
+						</small>
 					</div>
-					<small class='text-gray-400'>
-						{{formatDate this.createdAt}}
-					</small>
+					<p class='text-gray-700'>
+						{{this.comment}}
+					</p>
 				</div>
-				<p class='text-gray-700'>
-					{{this.comment}}
-				</p>
-			</div>
-			{{/each}}
+				{{/each}}
 			{{else}}
-			<p class='text-gray-400'>
-				Chưa có đánh giá nào cho sản phẩm này.
-			</p>
+				<p class='text-gray-400'>
+					Chưa có đánh giá nào cho sản phẩm này.
+				</p>
 			{{/if}}
 		</div>
 	</div>

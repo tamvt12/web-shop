@@ -2,6 +2,7 @@ const Product = require('../models/Product')
 const Category = require('../models/Category')
 const Review = require('../models/Review')
 const Home = require('./HomeController')
+const Favorite = require('../models/Favorite')
 
 class ProductController {
   index = (req, res, next) => {
@@ -250,7 +251,7 @@ class ProductController {
 
   showDetail = async (req, res) => {
     try {
-      const productId = req.params.id
+      const productId = Number(req.params.id)
       const user_id = req.session.userId
 
       // Get product details
@@ -299,11 +300,11 @@ class ProductController {
           $lookup: {
             from: 'users',
             localField: 'user_id',
-            foreignField: '_id',
+            foreignField: 'id',
             as: 'user',
           },
         },
-        { $unwind: '$user' },
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
         {
           $project: {
             rating: 1,
@@ -315,7 +316,6 @@ class ProductController {
         },
         { $sort: { createdAt: -1 } },
       ])
-
       product.reviews = reviews
 
       // Get cart and order count
@@ -339,7 +339,6 @@ class ProductController {
       })
     } catch (error) {
       console.error('Error in showProduct:', error)
-      res.status(500).render('error', { message: 'Đã có lỗi xảy ra' })
     }
   }
 }
