@@ -4,14 +4,14 @@ const { checkLoggedIn } = require('../middleware/authMiddleware')
 const userController = require('../app/controllers/UserController')
 const FavoriteController = require('../app/controllers/FavoriteController')
 
-router.post('/wishlist/:productId', checkLoggedIn, FavoriteController.create)
-router.delete('/wishlist/:productId', checkLoggedIn, FavoriteController.destroy)
+router.post('/favorite/:productId', checkLoggedIn, FavoriteController.create)
+router.delete('/favorite/:productId', checkLoggedIn, FavoriteController.destroy)
 router.get(
-  '/wishlist/:productId',
+  '/favorite/:productId',
   checkLoggedIn,
   FavoriteController.checkFavorite,
 )
-router.get('/wishlist', checkLoggedIn, FavoriteController.userFavorite)
+router.get('/favorite', checkLoggedIn, FavoriteController.userFavorite)
 
 router.get('/login', userController.showLogin)
 router.get('/register', userController.showRegister)

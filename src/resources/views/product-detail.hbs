@@ -6,7 +6,7 @@
 	<span>
 		<i class='fas fa-angle-right'></i>
 	</span>
-	<a href="/store?category={{product.category._id}}" class='text-black hover:underline'>
+	<a href="/store?category={{product.category.id}}" class='text-black hover:underline'>
 		{{product.category.name}}
 	</a>
 	<span>
@@ -64,6 +64,9 @@
 				</div>
 				<div class="border-l pl-4">
 					<span class="text-gray-500">{{orderCount}} lượt mua</span>
+				</div>
+				<div class="border-l pl-4">
+					<span class="text-gray-500" id="favorite-count">{{favoriteCount}} lượt thích</span>
 				</div>
 				{{!-- <a href="#" class="flex items-center gap-1 ml-auto">
 					<i class="fas fa-exclamation-triangle text-[#FFC107]"></i> Báo cáo

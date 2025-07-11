@@ -15,6 +15,22 @@ class HomeController {
     return orderCount
   }
 
+  async countProductOrders(product_id) {
+    if (!product_id) {
+      return 0
+    }
+    const orderCount = await Order_Item.countDocuments({ product_id })
+    return orderCount
+  }
+
+  async countProductFavorites(product_id) {
+    if (!product_id) {
+      return 0
+    }
+    const favoriteCount = await Favorite.countDocuments({ product_id })
+    return favoriteCount
+  }
+
   async countUserCarts(user_id) {
     if (!user_id) {
       return 0

@@ -3,6 +3,7 @@ const Product = require('../models/Product')
 const User = require('../models/User')
 const Review = require('../models/Review')
 const { showCart } = require('./HomeController')
+const Home = require('./HomeController')
 
 class FavoriteController {
   index = async (req, res) => {
@@ -69,16 +70,17 @@ class FavoriteController {
   create = async (req, res) => {
     try {
       const userId = req.session.userId
-      const productId = req.params.productId
+      const product_id = req.params.productId
       const exists = await Favorite.findOne({
         user_id: userId,
-        product_id: productId,
+        product_id: product_id,
       })
       if (exists) {
         return res.status(400).json({ message: 'Đã có trong yêu thích' })
       }
-      await Favorite.create({ user_id: userId, product_id: productId })
-      res.json({ success: true })
+      await Favorite.create({ user_id: userId, product_id: product_id })
+      const favoriteCount = await Home.countProductFavorites(product_id)
+      res.json({ success: true, favoriteCount })
     } catch (err) {
       res.status(500).json({ message: 'Lỗi server' })
     }
@@ -87,9 +89,14 @@ class FavoriteController {
   destroy = async (req, res) => {
     try {
       const userId = req.session.userId
-      const productId = req.params.productId
-      await Favorite.deleteOne({ user_id: userId, product_id: productId })
-      res.json({ success: true })
+      const product_id = req.params.productId
+      await Favorite.deleteOne({ user_id: userId, product_id: product_id })
+      const favoriteCount = await Home.countProductFavorites(product_id)
+      console.log(
+        '🚀 ~ FavoriteController ~ destroy= ~ favoriteCount:',
+        favoriteCount,
+      )
+      res.json({ success: true, favoriteCount })
     } catch (err) {
       res.status(500).json({ message: 'Lỗi server' })
     }
@@ -183,7 +190,7 @@ class FavoriteController {
         product.reviewCount =
           ratingData.length > 0 ? ratingData[0].reviewCount : 0
       }
-      res.render('Favorite', {
+      res.render('favorite', {
         showCart: true,
         products,
         currentPage: page,

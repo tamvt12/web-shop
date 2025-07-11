@@ -251,11 +251,11 @@ class ProductController {
 
   showDetail = async (req, res) => {
     try {
-      const productId = Number(req.params.id)
+      const product_id = Number(req.params.id)
       const user_id = req.session.userId
 
       // Get product details
-      const product = await Product.findOne({ id: productId }).lean()
+      const product = await Product.findOne({ id: product_id }).lean()
 
       if (!product) {
         return res
@@ -280,7 +280,7 @@ class ProductController {
 
       // Get rating data
       const ratingData = await Review.aggregate([
-        { $match: { product_id: productId } },
+        { $match: { product_id: product_id } },
         {
           $group: {
             _id: '$product_id',
@@ -295,7 +295,7 @@ class ProductController {
 
       // Get reviews with user info
       const reviews = await Review.aggregate([
-        { $match: { product_id: productId } },
+        { $match: { product_id: product_id } },
         {
           $lookup: {
             from: 'users',
@@ -320,7 +320,8 @@ class ProductController {
 
       // Get cart and order count
       const cartCount = await Home.countUserCarts(user_id)
-      const orderCount = await Home.countUserOrders(user_id)
+      const orderCount = await Home.countProductOrders(product_id)
+      const favoriteCount = await Home.countProductFavorites(product_id)
       // Kiểm tra sản phẩm đã yêu thích chưa
       let isFavorited = false
       if (user_id) {
@@ -335,6 +336,7 @@ class ProductController {
         product,
         cartCount,
         orderCount,
+        favoriteCount,
         isFavorited,
       })
     } catch (error) {

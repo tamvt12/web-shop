@@ -72,11 +72,14 @@ $(document).ready(function () {
     if (!productId) return
     if (!isFavorited) {
       $.ajax({
-        url: '/wishlist/' + productId,
+        url: '/favorite/' + productId,
         type: 'POST',
         xhrFields: { withCredentials: true },
-        success: function () {
-          $icon.removeClass('far text-gray-600').addClass('fas text-red-500')
+        success: function (data) {
+          if (data.success) {
+            $icon.removeClass('far text-gray-600').addClass('fas text-red-500')
+            $('#favorite-count').text(data.favoriteCount + ' lượt thích')
+          }
         },
         error: function () {
           alert('Vui lòng đăng nhập để sử dụng tính năng này!')
@@ -84,11 +87,14 @@ $(document).ready(function () {
       })
     } else {
       $.ajax({
-        url: '/wishlist/' + productId,
+        url: '/favorite/' + productId,
         type: 'DELETE',
         xhrFields: { withCredentials: true },
-        success: function () {
-          $icon.removeClass('fas text-red-500').addClass('far text-gray-600')
+        success: function (data) {
+          if (data.success) {
+            $icon.removeClass('far text-gray-600').addClass('fas text-red-500')
+            $('#favorite-count').text(data.favoriteCount + ' lượt thích')
+          }
         },
         error: function () {
           alert('Vui lòng đăng nhập để sử dụng tính năng này!')
