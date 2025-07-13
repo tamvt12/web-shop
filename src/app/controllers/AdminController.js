@@ -37,6 +37,7 @@ class AdminController {
     }
 
     const orders = await Order.find({})
+      .sort({ created_at: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage)
       .lean()
@@ -128,6 +129,7 @@ class AdminController {
     }
 
     const cartItems = await Cart_Item.find({})
+      .sort({ created_at: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage)
       .lean()
@@ -229,6 +231,7 @@ class AdminController {
     }
 
     const reviews = await Review.find({})
+      .sort({ created_at: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage)
       .lean()

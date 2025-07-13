@@ -743,6 +743,7 @@ class HomeController {
         const statusOrder = {
           'Chờ xử lý': 1,
           'Đang giao': 2,
+          'Đã hủy': 3,
           'Đã hoàn thành': 3,
         }
         return statusOrder[a.status] - statusOrder[b.status]

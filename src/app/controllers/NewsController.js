@@ -34,6 +34,7 @@ class NewsController {
       }
 
       const newsList = await News.find({})
+        .sort({ created_at: -1 })
         .skip((page - 1) * perPage)
         .limit(perPage)
         .lean()
@@ -120,6 +121,7 @@ class NewsController {
           content,
           summary,
           image_url,
+          updated_at: Date.now,
         },
       )
 
@@ -152,7 +154,7 @@ class NewsController {
 
   showList = async (req, res) => {
     try {
-      const newsList = await News.find({}).sort({ createdAt: -1 }).lean()
+      const newsList = await News.find({}).sort({ created_at: -1 }).lean()
       for (let newsItem of newsList) {
         const user = await Users.findOne(
           { id: newsItem.author },
@@ -188,14 +190,14 @@ class NewsController {
       ).lean()
 
       const relatedNews = await News.find({ id: { $ne: news.id } })
-        .sort({ createdAt: -1 })
+        .sort({ created_at: -1 })
         .limit(3)
         .lean()
 
       const excludeIds = [news.id, ...relatedNews.map((n) => n.id)]
 
       const latestNews = await News.find({ id: { $nin: excludeIds } })
-        .sort({ createdAt: -1 })
+        .sort({ created_at: -1 })
         .limit(3)
         .lean()
 

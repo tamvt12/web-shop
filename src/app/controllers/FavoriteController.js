@@ -38,6 +38,7 @@ class FavoriteController {
       }
 
       const favorites = await Favorite.find({})
+        .sort({ created_at: -1 })
         .skip((page - 1) * perPage)
         .limit(perPage)
         .lean()
@@ -53,7 +54,9 @@ class FavoriteController {
         id: fav.id,
         productName: productMap[fav.product_id] || 'N/A',
         userName: userMap[fav.user_id] || 'N/A',
-        createdAt: fav.createdAt ? fav.createdAt.toLocaleString('vi-VN') : '',
+        created_at: fav.created_at
+          ? fav.created_at.toLocaleString('vi-VN')
+          : '',
       }))
       res.render('admin/favorite/list', {
         favorites: data,
@@ -92,10 +95,6 @@ class FavoriteController {
       const product_id = req.params.productId
       await Favorite.deleteOne({ user_id: userId, product_id: product_id })
       const favoriteCount = await Home.countProductFavorites(product_id)
-      console.log(
-        '🚀 ~ FavoriteController ~ destroy= ~ favoriteCount:',
-        favoriteCount,
-      )
       res.json({ success: true, favoriteCount })
     } catch (err) {
       res.status(500).json({ message: 'Lỗi server' })

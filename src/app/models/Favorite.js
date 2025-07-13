@@ -5,7 +5,7 @@ const Favorite = new mongoose.Schema({
   id: { type: Number, unique: true },
   user_id: { type: Number, required: true },
   product_id: { type: Number, required: true },
-  createdAt: { type: Date, default: Date.now },
+  created_at: { type: Date, default: Date.now },
 })
 Favorite.plugin(AutoIncrement, {
   inc_field: 'id',

@@ -39,6 +39,7 @@ function route(app) {
   app.post('/checkout', HomeController.checkOut)
   app.get('/order', HomeController.showOrder)
   app.post('/rating', UserController.rating)
+  app.post('/orders/:id/cancel', UserController.cancelOrder)
   app.get('/news', NewsController.showList)
   app.get('/news/:id', NewsController.showDetail)
 }

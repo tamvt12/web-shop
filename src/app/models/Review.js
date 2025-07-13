@@ -10,7 +10,7 @@ const Review = new Schema({
   rating: Number,
   comment: String,
   created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now },
+  updated_at: { type: Date },
 })
 
 Review.plugin(AutoIncrement, { inc_field: 'id', id: 'review_id_counter' })

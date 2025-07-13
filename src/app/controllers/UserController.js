@@ -2,6 +2,9 @@ const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Review = require('../models/Review')
+const Order = require('../models/Order')
+const Order_Item = require('../models/Order_Item')
+const Product = require('../models/Product')
 
 class UserController {
   index = async (req, res, next) => {
@@ -356,6 +359,88 @@ class UserController {
     } catch (error) {
       console.error('Error in rating:', error)
       res.json({ success: false })
+    }
+  }
+
+  cancelOrder = async (req, res) => {
+    const orderId = req.params.id
+    const userId = req.session.userId
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Bạn chưa đăng nhập',
+      })
+    }
+
+    try {
+      // Tìm đơn hàng và kiểm tra quyền sở hữu
+      const order = await Order.findOne({ id: orderId, user_id: userId })
+
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message:
+            'Không tìm thấy đơn hàng hoặc bạn không có quyền hủy đơn hàng này',
+        })
+      }
+
+      // Kiểm tra trạng thái đơn hàng
+      if (order.status !== 'Chờ xử lý') {
+        return res.status(400).json({
+          success: false,
+          message: 'Chỉ có thể hủy đơn hàng có trạng thái "Chờ xử lý"',
+        })
+      }
+
+      // Lấy danh sách sản phẩm trong đơn hàng để hoàn trả tồn kho
+      const orderItems = await Order_Item.find({ order_id: orderId })
+
+      // Hoàn trả tồn kho cho từng sản phẩm
+      for (const item of orderItems) {
+        const product = await Product.findOne({ id: item.product_id })
+        if (product) {
+          // Nếu có variant_type và sản phẩm có variants
+          if (item.variant_type && Array.isArray(product.variants)) {
+            const variantIndex = product.variants.findIndex(
+              (v) => v.type === item.variant_type,
+            )
+            if (variantIndex !== -1) {
+              const updateKey = `variants.${variantIndex}.stock`
+              await Product.findOneAndUpdate(
+                { id: item.product_id },
+                { $inc: { [updateKey]: item.quantity } },
+              )
+            }
+          } else {
+            // Nếu không có variant, hoàn trả stock tổng
+            await Product.findOneAndUpdate(
+              { id: item.product_id },
+              { $inc: { stock: item.quantity } },
+            )
+          }
+        }
+      }
+
+      // Cập nhật trạng thái đơn hàng thành "Đã hủy"
+      await Order.findOneAndUpdate(
+        { id: orderId },
+        {
+          status: 'Đã hủy',
+          updated_at: new Date(),
+        },
+      )
+
+      res.json({
+        success: true,
+        message: 'Đã hủy đơn hàng thành công',
+      })
+    } catch (error) {
+      console.error('Error canceling order:', error)
+      res.status(500).json({
+        success: false,
+        message: 'Có lỗi xảy ra khi hủy đơn hàng',
+      })
     }
   }
 }
