@@ -25,6 +25,9 @@
         id='dropdownMenu'
         class='hidden group-hover:block absolute right-0 mt-1 bg-white text-black shadow rounded w-40 z-50'
       >
+				<a href="#" onclick="togglePasswordModal(true)" class="block px-4 py-2 hover:bg-gray-100">
+					<i class="fas fa-key mr-2"></i> Đổi mật khẩu
+				</a>
         <a href='/logout' class='block px-4 py-2 hover:bg-gray-100'>
           <i class='fas fa-sign-out-alt mr-2'></i>
           Đăng xuất
@@ -36,3 +39,4 @@
 
 <!-- margin for fixed topbar -->
 <div class='h-16'></div>
+{{> profile}}

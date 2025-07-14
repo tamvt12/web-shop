@@ -127,7 +127,8 @@ class UserController {
         expiresIn: '1h',
       })
       req.session.userId = user.id
-      req.session.sessionUserCode = user.user_code
+      req.session.userID = user._id
+      req.session.userCode = user.user_code
       req.session.username = user.name
       req.session.fullName = user.fullName
       req.session.gender = user.gender

@@ -565,9 +565,9 @@ class HomeController {
 
       const cartCount = await this.countUserCarts(user_id)
       const orderCount = await this.countUserOrders(user_id)
-      const { cart_items } = await this.cart(user_id)
+      const { cart_items, total } = await this.cart(user_id)
 
-      res.json({ cart_items, cartCount, orderCount })
+      res.json({ cart_items, cartCount, orderCount, total })
     } catch (error) {
       console.error('Lỗi khi xóa sản phẩm từ giỏ hàng:', error)
       res.status(500).json({

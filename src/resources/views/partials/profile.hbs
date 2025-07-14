@@ -32,11 +32,19 @@
           </label>
           <input
             type='text'
-            id='id'
-            name='id'
+            id='user_code'
+            name='user_code'
             readonly
             value="{{sessionUserCode}}"
             class='mt-1 block w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-800'
+          />
+					<input
+            type='text'
+            id='id'
+            name='id'
+            readonly
+            value="{{sessionUserID}}"
+            class='hidden mt-1 w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-800'
           />
         </div>
 
@@ -275,6 +283,7 @@
 		if (!modal) return
 		if (show) {
 			modal.classList.remove('hidden')
+			document.getElementById('errorAlert').classList.add('hidden')
 		} else {
 			modal.classList.add('hidden')
 		}
