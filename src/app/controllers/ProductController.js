@@ -1,70 +1,24 @@
 const Product = require('../models/Product')
 const Category = require('../models/Category')
-const Review = require('../models/Review')
-const Home = require('./HomeController')
-const Favorite = require('../models/Favorite')
+const ProductService = require('../services/ProductService')
 
 class ProductController {
-  index = (req, res, next) => {
+  index = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
-    Product.countDocuments({})
-      .then(async (totalProducts) => {
-        const totalPages = Math.ceil(totalProducts / perPage)
-        const pages = []
-        const maxPagesToShow = 5
-        let startPage, endPage
-        if (totalPages <= maxPagesToShow) {
-          startPage = 1
-          endPage = totalPages
-        } else {
-          const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
-          const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
-          if (page <= maxPagesBeforeCurrent) {
-            startPage = 1
-            endPage = maxPagesToShow
-          } else if (page + maxPagesAfterCurrent >= totalPages) {
-            startPage = totalPages - maxPagesToShow + 1
-            endPage = totalPages
-          } else {
-            startPage = page - maxPagesBeforeCurrent
-            endPage = page + maxPagesAfterCurrent
-          }
-        }
-        for (let i = startPage; i <= endPage; i++) {
-          pages.push(i)
-        }
-
-        const products = await Product.find({})
-          .skip((page - 1) * perPage)
-          .limit(perPage)
-          .lean()
-        for (let product of products) {
-          const category = await Category.findOne(
-            { id: product.category_id },
-            {
-              name: 1,
-              _id: 0,
-            },
-          ).lean()
-          product.category_name = category ? category.name : ''
-          if (typeof product.image_url === 'string') {
-            const imageArray = product.image_url
-              .split(',')
-              .map((url) => url.trim())
-              .filter((url) => url !== '')
-            product.image_url = imageArray.length > 0 ? imageArray[0] : ''
-          }
-        }
-        res.render('admin/product/list', {
-          showAdmin: true,
-          products,
-          currentPage: page,
-          totalPages,
-          pages,
-        })
-      })
-      .catch(next)
+    const {
+      products,
+      currentPage,
+      totalPages,
+      pages,
+    } = await ProductService.showProduct(page, perPage)
+    res.render('admin/product/list', {
+      showAdmin: true,
+      products,
+      currentPage,
+      totalPages,
+      pages,
+    })
   }
 
   create = (req, res, next) => {
@@ -79,161 +33,39 @@ class ProductController {
       .catch(next)
   }
 
-  store = (req, res) => {
-    const { category_id, name, description, price, stock, image_url } = req.body
-    const variantTypes = req.body.variant_type || []
-    const variantPrices = req.body.variant_price || []
-    const variantStocks = req.body.variant_stock || []
-    let variants = []
-    if (Array.isArray(variantTypes)) {
-      for (let i = 0; i < variantTypes.length; i++) {
-        if (variantTypes[i] && variantPrices[i]) {
-          variants.push({
-            type: variantTypes[i],
-            price: variantPrices[i],
-            stock: variantStocks[i] || 0,
-          })
-        }
-      }
-    } else if (variantTypes && variantPrices) {
-      variants.push({
-        type: variantTypes,
-        price: variantPrices,
-        stock: variantStocks || 0,
-      })
-    }
-    try {
-      if (
-        category_id === '' &&
-        name === '' &&
-        description === '' &&
-        price === '' &&
-        stock === '' &&
-        image_url === ''
-      ) {
-        req.flash('error', 'Chưa nhập hết các mục!!!')
-        return res.redirect('/admin/product/add')
-      }
-
-      const product = new Product({
-        name,
-        description,
-        price,
-        stock,
-        category_id,
-        image_url,
-        variants,
-      })
-      product.save()
-      res.redirect('/admin/product/list')
-    } catch (error) {
-      req.flash('error', 'Thêm thất bại!!!')
+  store = async (req, res) => {
+    const result = await ProductService.createProduct(req.body)
+    if (result.error) {
+      req.flash('error', result.error)
       return res.redirect('/admin/product/add')
     }
+    res.redirect('/admin/product/list')
   }
 
   show = async (req, res) => {
-    try {
-      const product = await Product.findOne(
-        { id: req.params.id },
-        {
-          _id: 0,
-          __v: 0,
-        },
-      ).lean()
-      const category = await Category.findOne(
-        { id: product.category_id },
-        {
-          name: 1,
-          _id: 0,
-        },
-      ).lean()
-      product.category_name = category ? category.name : ''
-
-      // Convert image_url string to array
-      if (typeof product.image_url === 'string') {
-        const imageArray = product.image_url
-          .split(',')
-          .map((url) => url.trim())
-          .filter((url) => url !== '')
-        product.image_url = imageArray
-      }
-
-      const categories = await Category.find({}).lean()
-      res.render('admin/product/edit', {
-        product,
-        categories,
-        showAdmin: true,
-        messages: req.flash(),
-      })
-    } catch (error) {
+    const result = await ProductService.getProductWithCategory(req.params.id)
+    if (result.error) {
       req.flash('error', 'Failed to load product.')
-      res.redirect('/admin')
+      return res.redirect('/admin')
     }
+    const categories = await Category.find({}).lean()
+    res.render('admin/product/edit', {
+      product: result.product,
+      categories,
+      showAdmin: true,
+      messages: req.flash(),
+    })
   }
 
   update = async (req, res) => {
-    const { category_id, name, description, price, stock, image_url } = req.body
     const id = req.params.id
-    // Lấy variants từ form
-    const variantTypes = req.body.variant_type || []
-    const variantPrices = req.body.variant_price || []
-    const variantStocks = req.body.variant_stock || []
-    let variants = []
-    if (Array.isArray(variantTypes)) {
-      for (let i = 0; i < variantTypes.length; i++) {
-        if (variantTypes[i] && variantPrices[i]) {
-          variants.push({
-            type: variantTypes[i],
-            price: variantPrices[i],
-            stock: variantStocks[i] || 0,
-          })
-        }
-      }
-    } else if (variantTypes && variantPrices) {
-      variants.push({
-        type: variantTypes,
-        price: variantPrices,
-        stock: variantStocks || 0,
-      })
+    const result = await ProductService.updateProduct(id, req.body)
+    const referer = req.get('Referer')
+    if (result.error) {
+      req.flash('error', result.error)
+      return res.redirect(referer)
     }
-    try {
-      if (
-        category_id === '' &&
-        name === '' &&
-        description === '' &&
-        price === '' &&
-        stock === '' &&
-        image_url === ''
-      ) {
-        req.flash('error', 'Chưa nhập hết các mục!!!')
-        const referer = req.get('Referer')
-        res.redirect(referer)
-      }
-      const updatedProduct = await Product.findOneAndUpdate(
-        { id },
-        {
-          name,
-          description,
-          price,
-          stock,
-          category_id,
-          image_url,
-          variants,
-        },
-      )
-      if (updatedProduct) {
-        res.redirect('/admin/product/list')
-      } else {
-        req.flash('error', 'Cập nhập thất bại!!!')
-        const referer = req.get('Referer')
-        res.redirect(referer)
-      }
-    } catch (error) {
-      req.flash('error', 'Cập nhập thất bại!!!')
-      const referer = req.get('Referer')
-      res.redirect(referer)
-    }
+    res.redirect('/admin/product/list')
   }
 
   destroy = async (req, res) => {
@@ -250,97 +82,76 @@ class ProductController {
   }
 
   showDetail = async (req, res) => {
+    const product_id = Number(req.params.id)
+    const user_id = req.session.userId
+    const result = await ProductService.getProductDetail(product_id, user_id)
+    if (result.error) {
+      return res
+        .status(404)
+        .render('404', { message: 'Sản phẩm không tồn tại' })
+    }
+
+    res.render('product-detail', {
+      showCart: true,
+      ...result,
+    })
+  }
+
+  createFavorite = async (req, res) => {
     try {
-      const product_id = Number(req.params.id)
-      const user_id = req.session.userId
-
-      // Get product details
-      const product = await Product.findOne({ id: product_id }).lean()
-
-      if (!product) {
-        return res
-          .status(404)
-          .render('404', { message: 'Sản phẩm không tồn tại' })
+      const userId = req.session.userId
+      const product_id = req.params.productId
+      const result = await ProductService.createFavorite(userId, product_id)
+      if (result.error) {
+        return res.status(400).json({ message: result.error })
       }
+      res.json(result)
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
+    }
+  }
 
-      // Get category
-      const category = await Category.findOne({
-        id: product.category_id,
-      }).lean()
-      product.category = category
+  destroyFavorite = async (req, res) => {
+    try {
+      const userId = req.session.userId
+      const product_id = req.params.productId
+      const result = await ProductService.destroyFavorite(userId, product_id)
+      res.json(result)
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
+    }
+  }
 
-      // Convert image_url string to array
-      if (typeof product.image_url === 'string') {
-        const imageArray = product.image_url
-          .split(',')
-          .map((url) => url.trim())
-          .filter((url) => url !== '')
-        product.image_url = imageArray
+  checkFavorite = async (req, res) => {
+    try {
+      const userId = req.session.userId
+      const productId = req.params.productId
+      const result = await ProductService.checkFavorite(userId, productId)
+      res.json(result)
+    } catch (err) {
+      res.status(500).json({ message: 'Lỗi server' })
+    }
+  }
+
+  getProductForFavorite = async (req, res) => {
+    try {
+      const userId = req.session.userId
+      const { page: pageQuery, minPrice, maxPrice } = req.query
+      const result = await ProductService.getProductForFavorite(
+        userId,
+        pageQuery,
+        minPrice,
+        maxPrice,
+      )
+      if (result.redirect) {
+        return res.redirect(result.redirect)
       }
-
-      // Get rating data
-      const ratingData = await Review.aggregate([
-        { $match: { product_id: product_id } },
-        {
-          $group: {
-            _id: '$product_id',
-            averageRating: { $avg: '$rating' },
-            reviewCount: { $sum: 1 },
-          },
-        },
-      ])
-      product.rating = ratingData.length > 0 ? ratingData[0].averageRating : 0
-      product.reviewCount =
-        ratingData.length > 0 ? ratingData[0].reviewCount : 0
-
-      // Get reviews with user info
-      const reviews = await Review.aggregate([
-        { $match: { product_id: product_id } },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'user_id',
-            foreignField: 'id',
-            as: 'user',
-          },
-        },
-        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
-        {
-          $project: {
-            rating: 1,
-            comment: 1,
-            createdAt: 1,
-            'user.name': 1,
-            'user.avatar': 1,
-          },
-        },
-        { $sort: { createdAt: -1 } },
-      ])
-      product.reviews = reviews
-
-      // Get cart and order count
-      const cartCount = await Home.countUserCarts(user_id)
-      const orderCount = await Home.countProductOrders(product_id)
-      const favoriteCount = await Home.countProductFavorites(product_id)
-      // Kiểm tra sản phẩm đã yêu thích chưa
-      let isFavorited = false
-      if (user_id) {
-        const fav = await Favorite.findOne({
-          user_id: user_id,
-          product_id: product.id,
-        })
-        isFavorited = !!fav
-      }
-      res.render('product-detail', {
+      res.render('favorite', {
         showCart: true,
-        product,
-        cartCount,
-        orderCount,
-        favoriteCount,
-        isFavorited,
+        ...result,
       })
-    } catch (error) {
-      console.error('Error in showProduct:', error)
+    } catch (err) {
+      res.status(500).send('Lỗi lấy danh sách sản phẩm yêu thích')
     }
   }
 }

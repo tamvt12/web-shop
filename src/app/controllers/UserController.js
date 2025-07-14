@@ -1,55 +1,26 @@
-const User = require('../models/User')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const Review = require('../models/Review')
-const Order = require('../models/Order')
-const Order_Item = require('../models/Order_Item')
-const Product = require('../models/Product')
+const UserService = require('../services/UserService')
 
 class UserController {
   index = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
-    User.countDocuments({})
-      .then(async (totalUsers) => {
-        const totalPages = Math.ceil(totalUsers / perPage)
-        const pages = []
-        const maxPagesToShow = 5
-        let startPage, endPage
-        if (totalPages <= maxPagesToShow) {
-          startPage = 1
-          endPage = totalPages
-        } else {
-          const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
-          const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
-          if (page <= maxPagesBeforeCurrent) {
-            startPage = 1
-            endPage = maxPagesToShow
-          } else if (page + maxPagesAfterCurrent >= totalPages) {
-            startPage = totalPages - maxPagesToShow + 1
-            endPage = totalPages
-          } else {
-            startPage = page - maxPagesBeforeCurrent
-            endPage = page + maxPagesAfterCurrent
-          }
-        }
-        for (let i = startPage; i <= endPage; i++) {
-          pages.push(i)
-        }
-
-        const users = await User.find({})
-          .skip((page - 1) * perPage)
-          .limit(perPage)
-          .lean()
-        res.render('admin/user/list', {
-          showAdmin: true,
-          users,
-          currentPage: page,
-          totalPages,
-          pages,
-        })
+    try {
+      const {
+        users,
+        currentPage,
+        totalPages,
+        pages,
+      } = await UserService.getUsersPaginated(page, perPage)
+      res.render('admin/user/list', {
+        showAdmin: true,
+        users,
+        currentPage,
+        totalPages,
+        pages,
       })
-      .catch(next)
+    } catch (error) {
+      next(error)
+    }
   }
 
   showLogin = (req, res) => {
@@ -62,72 +33,38 @@ class UserController {
 
   register = async (req, res) => {
     const { name, email, password, repeatPassword } = req.body
-
     if (name === '' || email === '' || password === '') {
       req.flash('error', 'Chưa nhập name, email hoặc mật khẩu!!!')
       return res.redirect('/register')
     }
-
     if (password.length < 6) {
       req.flash('error', 'Mật khẩu phải có độ dài ít nhất 6 ký tự!!!')
       return res.redirect('/register')
     }
-
     if (password !== repeatPassword) {
       req.flash('error', 'Nhập lại mật khẩu không khớp!!!')
       return res.redirect('/register')
     }
-
     try {
-      const existingUser = await User.findOne({ email })
-
-      if (existingUser) {
-        req.flash('error', 'Email đã được sử dụng!!!')
-        return res.redirect('/register')
-      }
-      const hashedPassword = await bcrypt.hash(password, 10)
-      const user = new User({
-        name,
-        email,
-        password: hashedPassword,
-      })
-
-      await user.save()
+      await UserService.registerUser({ name, email, password })
       res.redirect('login')
     } catch (error) {
-      req.flash('error', 'Đăng ký tài khoản thất bại!!!')
+      req.flash('error', error.message || 'Đăng ký tài khoản thất bại!!!')
       return res.redirect('/register')
     }
   }
 
   login = async (req, res) => {
     const { email, password } = req.body
-
     if (email === '' || password === '') {
       req.flash('error', 'Chưa nhập email hoặc mật khẩu!!!')
       return res.redirect('/login')
     }
-
     try {
-      const user = await User.findOne({ email })
-
-      if (!user) {
-        req.flash('error', 'Tài khoản không tồn tại!!!')
-        return res.redirect('/login')
-      }
-
-      const isPasswordValid = await bcrypt.compare(password, user.password)
-
-      if (!isPasswordValid) {
-        req.flash('error', 'Sai mật khẩu!!!')
-        return res.redirect('/login')
-      }
-
-      const token = jwt.sign({ id: user.id }, 'your_secret_key', {
-        expiresIn: '1h',
-      })
+      const { user, token } = await UserService.loginUser({ email, password })
       req.session.userId = user.id
-      req.session.sessionUserCode = user.user_code
+      req.session.userID = user._id
+      req.session.userCode = user.user_code
       req.session.username = user.name
       req.session.fullName = user.fullName
       req.session.gender = user.gender
@@ -143,7 +80,7 @@ class UserController {
         res.redirect('/')
       }
     } catch (error) {
-      req.flash('error', 'Đăng nhập thất bại!!!')
+      req.flash('error', error.message || 'Đăng nhập thất bại!!!')
       return res.redirect('/login')
     }
   }
@@ -153,8 +90,7 @@ class UserController {
       if (err) {
         return res.redirect('/')
       }
-
-      res.clearCookie('connect.sid') // Clear the session cookie
+      res.clearCookie('connect.sid')
       res.redirect('/login')
     })
   }
@@ -162,7 +98,7 @@ class UserController {
   show = async (req, res) => {
     try {
       const role = ['admin', 'user']
-      const user = await User.findOne({ id: req.params.id }).lean()
+      const user = await UserService.getUserById(req.params.id)
       res.render('admin/user/edit', {
         user,
         role,
@@ -178,41 +114,33 @@ class UserController {
   update = async (req, res) => {
     const { id, phone, address, role, fullName, gender, birthDate } = req.body
     try {
-      if (phone && !this.isPhoneNumber(phone)) {
+      if (phone && !UserService.isPhoneNumber(phone)) {
         return res.json({
           success: false,
           message: 'Số điện thoại không hợp lệ.',
         })
       }
-
-      // Validate gender
-      if (gender && !['male', 'female', 'other', ''].includes(gender)) {
+      if (gender && !UserService.isValidGender(gender)) {
         return res.json({
           success: false,
           message: 'Giới tính không hợp lệ.',
         })
       }
-
-      // Validate birthDate format (YYYY-MM-DD)
-      if (birthDate && !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+      if (birthDate && !UserService.isValidBirthDate(birthDate)) {
         return res.json({
           success: false,
           message: 'Ngày sinh không đúng định dạng.',
         })
       }
-
-      const updateData = {}
-      if (phone !== undefined) updateData.phone = phone
-      if (address !== undefined) updateData.address = address
-      if (fullName !== undefined) updateData.fullName = fullName
-      if (gender !== undefined) updateData.gender = gender
-      if (birthDate !== undefined) updateData.birthDate = birthDate
-      if (role !== undefined) updateData.role = role
-
-      const updatedUser = await User.findByIdAndUpdate(id, updateData, {
-        new: true,
+      const updatedUser = await UserService.updateUser({
+        id,
+        phone,
+        address,
+        role,
+        fullName,
+        gender,
+        birthDate,
       })
-
       if (role) {
         if (updatedUser) {
           res.redirect('/admin/user/list')
@@ -228,7 +156,6 @@ class UserController {
           req.session.fullName = updatedUser.fullName
           req.session.gender = updatedUser.gender
           req.session.birthDate = updatedUser.birthDate
-
           return res.json({
             success: true,
             message: 'Cập nhật thành công.',
@@ -249,197 +176,38 @@ class UserController {
     }
   }
 
-  isPhoneNumber(phone) {
-    const phoneRegex = /^0[0-9]{9,10}$/
-    return phoneRegex.test(phone)
-  }
-
   changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body
     const userId = req.session.userId
-
     if (!userId) {
       return res.status(401).json({
         success: false,
         message: 'Bạn chưa đăng nhập',
       })
     }
-
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         success: false,
         message: 'Vui lòng điền đầy đủ thông tin',
       })
     }
-
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
         message: 'Mật khẩu mới phải có ít nhất 6 ký tự',
       })
     }
-
     try {
-      const user = await User.findOne({ id: userId })
-
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: 'Không tìm thấy người dùng',
-        })
-      }
-
-      // Verify current password
-      const isCurrentPasswordValid = await bcrypt.compare(
-        currentPassword,
-        user.password,
-      )
-
-      if (!isCurrentPasswordValid) {
-        return res.status(400).json({
-          success: false,
-          message: 'Mật khẩu hiện tại không đúng',
-        })
-      }
-
-      // Hash new password
-      const hashedNewPassword = await bcrypt.hash(newPassword, 10)
-
-      // Update password
-      user.password = hashedNewPassword
-      await user.save()
-
+      await UserService.changePassword({ userId, currentPassword, newPassword })
       return res.json({
         success: true,
         message: 'Đổi mật khẩu thành công',
       })
     } catch (error) {
       console.error('Error changing password:', error)
-      return res.status(500).json({
+      return res.status(400).json({
         success: false,
-        message: 'Có lỗi xảy ra khi đổi mật khẩu',
-      })
-    }
-  }
-
-  rating = async (req, res) => {
-    const { product_ids, order_id, rating, comment } = req.body
-    const user_id = req.session.userId
-
-    try {
-      await Promise.all(
-        product_ids.map(async (product_id) => {
-          const existingReview = await Review.findOne({
-            user_id: user_id,
-            product_id: product_id,
-            order_id: order_id,
-          })
-
-          if (existingReview) {
-            existingReview.rating = rating
-            existingReview.comment = comment
-            existingReview.updated_at = new Date()
-            await existingReview.save()
-          } else {
-            // Create new review
-            const newReview = new Review({
-              user_id,
-              product_id,
-              order_id,
-              rating,
-              comment,
-              created_at: new Date(),
-            })
-            await newReview.save()
-          }
-        }),
-      )
-
-      res.json({ success: true })
-    } catch (error) {
-      console.error('Error in rating:', error)
-      res.json({ success: false })
-    }
-  }
-
-  cancelOrder = async (req, res) => {
-    const orderId = req.params.id
-    const userId = req.session.userId
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Bạn chưa đăng nhập',
-      })
-    }
-
-    try {
-      // Tìm đơn hàng và kiểm tra quyền sở hữu
-      const order = await Order.findOne({ id: orderId, user_id: userId })
-
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message:
-            'Không tìm thấy đơn hàng hoặc bạn không có quyền hủy đơn hàng này',
-        })
-      }
-
-      // Kiểm tra trạng thái đơn hàng
-      if (order.status !== 'Chờ xử lý') {
-        return res.status(400).json({
-          success: false,
-          message: 'Chỉ có thể hủy đơn hàng có trạng thái "Chờ xử lý"',
-        })
-      }
-
-      // Lấy danh sách sản phẩm trong đơn hàng để hoàn trả tồn kho
-      const orderItems = await Order_Item.find({ order_id: orderId })
-
-      // Hoàn trả tồn kho cho từng sản phẩm
-      for (const item of orderItems) {
-        const product = await Product.findOne({ id: item.product_id })
-        if (product) {
-          // Nếu có variant_type và sản phẩm có variants
-          if (item.variant_type && Array.isArray(product.variants)) {
-            const variantIndex = product.variants.findIndex(
-              (v) => v.type === item.variant_type,
-            )
-            if (variantIndex !== -1) {
-              const updateKey = `variants.${variantIndex}.stock`
-              await Product.findOneAndUpdate(
-                { id: item.product_id },
-                { $inc: { [updateKey]: item.quantity } },
-              )
-            }
-          } else {
-            // Nếu không có variant, hoàn trả stock tổng
-            await Product.findOneAndUpdate(
-              { id: item.product_id },
-              { $inc: { stock: item.quantity } },
-            )
-          }
-        }
-      }
-
-      // Cập nhật trạng thái đơn hàng thành "Đã hủy"
-      await Order.findOneAndUpdate(
-        { id: orderId },
-        {
-          status: 'Đã hủy',
-          updated_at: new Date(),
-        },
-      )
-
-      res.json({
-        success: true,
-        message: 'Đã hủy đơn hàng thành công',
-      })
-    } catch (error) {
-      console.error('Error canceling order:', error)
-      res.status(500).json({
-        success: false,
-        message: 'Có lỗi xảy ra khi hủy đơn hàng',
+        message: error.message || 'Có lỗi xảy ra khi đổi mật khẩu',
       })
     }
   }

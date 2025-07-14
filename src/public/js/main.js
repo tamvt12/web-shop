@@ -21,11 +21,11 @@ $(document).ready(function () {
       success: function (data) {
         if (data.success) {
           $('#errorAlert').addClass('text-green-700 bg-green-100')
-          $('#errorAlert').removeClass('text-red-700 bg-red-100')
+          $('#errorAlert').removeClass('text-red-700 bg-red-100 hidden')
           $('#errorAlert').text(data.message).show()
         } else {
           $('#errorAlert').addClass('text-red-700 bg-red-100')
-          $('#errorAlert').removeClass('text-green-700 bg-green-100	')
+          $('#errorAlert').removeClass('text-green-700 bg-green-100	hidden')
           $('#errorAlert').text(data.message).show()
         }
       },
@@ -92,7 +92,7 @@ $(document).ready(function () {
         xhrFields: { withCredentials: true },
         success: function (data) {
           if (data.success) {
-            $icon.removeClass('far text-gray-600').addClass('fas text-red-500')
+            $icon.removeClass('fas text-red-500').addClass('far text-gray-600')
             $('#favorite-count').text(data.favoriteCount + ' lượt thích')
           }
         },
@@ -416,7 +416,7 @@ function loadCartItems(cartItems, total) {
       imageUrl = item.product.image_url
     }
     const itemTotal = price * item.quantity
-    total += itemTotal
+
     $('#cart-items').append(`
 			<tr class='cart-item border-t'>
 				<td class='p-2 border'>
@@ -486,9 +486,13 @@ function removeItem(itemId) {
     url: '/deleteCart/' + itemId,
     type: 'DELETE',
     success: function (response) {
-      loadCartItems(response.cart_items)
-      $('#cartCount').text(response.cartCount)
-      $('#orderCount').text(response.orderCount)
+      if (response.cartCount) {
+        loadCartItems(response.cart_items, response.total)
+        $('#cartCount').text(response.cartCount)
+        $('#orderCount').text(response.orderCount)
+      } else {
+        location.reload()
+      }
     },
     error: function (error) {
       console.error('Lỗi khi xóa sản phẩm:', error)

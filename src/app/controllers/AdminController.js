@@ -1,54 +1,20 @@
-const Cart_Item = require('../models/Cart_Item')
-const Order = require('../models/Order')
-const Order_Item = require('../models/Order_Item')
-const Product = require('../models/Product')
-const Review = require('../models/Review')
-const User = require('../models/User')
+const AdminService = require('../services/AdminService')
 
 class AdminController {
   showOrder = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
-    const totalOrders = await Order.countDocuments({})
-    const totalPages = Math.ceil(totalOrders / perPage)
+    const {
+      orders,
+      currentPage,
+      totalPages,
+      pages,
+    } = await AdminService.showOrder(page, perPage)
 
-    const pages = []
-    const maxPagesToShow = 5
-    let startPage, endPage
-    if (totalPages <= maxPagesToShow) {
-      startPage = 1
-      endPage = totalPages
-    } else {
-      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
-      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
-      if (page <= maxPagesBeforeCurrent) {
-        startPage = 1
-        endPage = maxPagesToShow
-      } else if (page + maxPagesAfterCurrent >= totalPages) {
-        startPage = totalPages - maxPagesToShow + 1
-        endPage = totalPages
-      } else {
-        startPage = page - maxPagesBeforeCurrent
-        endPage = page + maxPagesAfterCurrent
-      }
-    }
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i)
-    }
-
-    const orders = await Order.find({})
-      .sort({ created_at: -1 })
-      .skip((page - 1) * perPage)
-      .limit(perPage)
-      .lean()
-    for (let order of orders) {
-      const user = await User.findOne({ id: order.user_id })
-      order.username = user ? user.name : ''
-    }
     res.render('admin/order/list', {
       showAdmin: true,
       orders,
-      currentPage: page,
+      currentPage,
       totalPages,
       pages,
     })
@@ -56,12 +22,7 @@ class AdminController {
 
   editOrder = async (req, res) => {
     try {
-      const status = ['Chờ xử lý', 'Đang giao', 'Đã hoàn thành']
-      const order = await Order.findOne({ id: req.params.id }).lean()
-
-      const user = await User.findOne({ id: order.user_id })
-      order.username = user ? user.name : ''
-
+      const { order, status } = await AdminService.editOrder(req.params.id)
       res.render('admin/order/edit', {
         order,
         status,
@@ -78,12 +39,7 @@ class AdminController {
     const status = req.body.status
     const id = req.params.id
     try {
-      const updatedOrder = await Order.findOneAndUpdate(
-        { id },
-        {
-          status,
-        },
-      )
+      const updatedOrder = await AdminService.updateOrder(id, status)
       if (updatedOrder) {
         res.redirect('/admin/order/list')
       } else {
@@ -101,51 +57,17 @@ class AdminController {
   showCartItem = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
-    const totalCartItems = await Cart_Item.countDocuments({})
-    const totalPages = Math.ceil(totalCartItems / perPage)
-
-    const pages = []
-    const maxPagesToShow = 5
-    let startPage, endPage
-    if (totalPages <= maxPagesToShow) {
-      startPage = 1
-      endPage = totalPages
-    } else {
-      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
-      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
-      if (page <= maxPagesBeforeCurrent) {
-        startPage = 1
-        endPage = maxPagesToShow
-      } else if (page + maxPagesAfterCurrent >= totalPages) {
-        startPage = totalPages - maxPagesToShow + 1
-        endPage = totalPages
-      } else {
-        startPage = page - maxPagesBeforeCurrent
-        endPage = page + maxPagesAfterCurrent
-      }
-    }
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i)
-    }
-
-    const cartItems = await Cart_Item.find({})
-      .sort({ created_at: -1 })
-      .skip((page - 1) * perPage)
-      .limit(perPage)
-      .lean()
-
-    for (let cartItem of cartItems) {
-      const user = await User.findOne({ id: cartItem.user_id })
-      cartItem.username = user ? user.name : ''
-
-      const product = await Product.findOne({ id: cartItem.product_id })
-      cartItem.product_name = product ? product.name : ''
-    }
+    const {
+      cartItems,
+      currentPage,
+      totalPages,
+      pages,
+    } = await AdminService.showCartItem(page, perPage)
 
     res.render('admin/cart-item/list', {
       showAdmin: true,
       cartItems,
-      currentPage: page,
+      currentPage,
       totalPages,
       pages,
     })
@@ -154,47 +76,17 @@ class AdminController {
   showOrderItem = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
-    const totalOrderItems = await Order_Item.countDocuments({})
-    const totalPages = Math.ceil(totalOrderItems / perPage)
+    const {
+      orderItems,
+      currentPage,
+      totalPages,
+      pages,
+    } = await AdminService.showOrderItem(page, perPage)
 
-    const pages = []
-    const maxPagesToShow = 5
-    let startPage, endPage
-    if (totalPages <= maxPagesToShow) {
-      startPage = 1
-      endPage = totalPages
-    } else {
-      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
-      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
-      if (page <= maxPagesBeforeCurrent) {
-        startPage = 1
-        endPage = maxPagesToShow
-      } else if (page + maxPagesAfterCurrent >= totalPages) {
-        startPage = totalPages - maxPagesToShow + 1
-        endPage = totalPages
-      } else {
-        startPage = page - maxPagesBeforeCurrent
-        endPage = page + maxPagesAfterCurrent
-      }
-    }
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i)
-    }
-
-    const orderItems = await Order_Item.find({})
-      .skip((page - 1) * perPage)
-      .limit(perPage)
-      .lean()
-    for (let item of orderItems) {
-      const product = await Product.findOne({ id: item.product_id })
-      const order = await Order.findOne({ id: item.order_id })
-      item.product_name = product.name
-      item.order_code = order.order_code
-    }
     res.render('admin/order-item/list', {
       showAdmin: true,
       orderItems,
-      currentPage: page,
+      currentPage,
       totalPages,
       pages,
     })
@@ -203,49 +95,36 @@ class AdminController {
   showReview = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
-    const totalReviews = await Review.countDocuments({})
-    const totalPages = Math.ceil(totalReviews / perPage)
+    const {
+      reviews,
+      currentPage,
+      totalPages,
+      pages,
+    } = await AdminService.showReview(page, perPage)
 
-    const pages = []
-    const maxPagesToShow = 5
-    let startPage, endPage
-    if (totalPages <= maxPagesToShow) {
-      startPage = 1
-      endPage = totalPages
-    } else {
-      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
-      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
-      if (page <= maxPagesBeforeCurrent) {
-        startPage = 1
-        endPage = maxPagesToShow
-      } else if (page + maxPagesAfterCurrent >= totalPages) {
-        startPage = totalPages - maxPagesToShow + 1
-        endPage = totalPages
-      } else {
-        startPage = page - maxPagesBeforeCurrent
-        endPage = page + maxPagesAfterCurrent
-      }
-    }
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i)
-    }
-
-    const reviews = await Review.find({})
-      .sort({ created_at: -1 })
-      .skip((page - 1) * perPage)
-      .limit(perPage)
-      .lean()
-
-    for (let review of reviews) {
-      const product = await Product.findOne({ id: review.product_id }).lean()
-      const user = await User.findOne({ id: review.user_id })
-      review.username = user ? user.name : ''
-      review.product = product ? product.name : ''
-    }
     res.render('admin/review/list', {
       showAdmin: true,
       reviews,
-      currentPage: page,
+      currentPage,
+      totalPages,
+      pages,
+    })
+  }
+
+  showFavorite = async (req, res) => {
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    const {
+      favorites,
+      currentPage,
+      totalPages,
+      pages,
+    } = await AdminService.showFavorite(page, perPage)
+
+    res.render('admin/favorite/list', {
+      showAdmin: true,
+      favorites,
+      currentPage,
       totalPages,
       pages,
     })
@@ -264,6 +143,96 @@ class AdminController {
       res.json({
         success: false,
         message: 'Upload thất bại',
+      })
+    }
+  }
+
+  // CATEGORY CONTROLLER
+  categoryList = async (req, res, next) => {
+    const page = parseInt(req.query.page) || 1
+    const perPage = 15
+    try {
+      const {
+        categories,
+        currentPage,
+        totalPages,
+        pages,
+      } = await AdminService.getCategories(page, perPage)
+      res.render('admin/category/list', {
+        showAdmin: true,
+        categories,
+        currentPage,
+        totalPages,
+        pages,
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  categoryAdd = (req, res) => {
+    res.render('admin/category/add', {
+      showAdmin: true,
+      messages: req.flash(),
+    })
+  }
+
+  categoryStore = async (req, res) => {
+    const { name, image_url } = req.body
+    try {
+      await AdminService.createCategory({ name, image_url })
+      res.redirect('/admin/category/list')
+    } catch (error) {
+      req.flash('error', error.message || 'Thêm thất bại!!!')
+      res.redirect('/admin/category/add')
+    }
+  }
+
+  categoryEdit = async (req, res) => {
+    try {
+      const category = await AdminService.getCategoryById(req.params.id)
+      res.render('admin/category/edit', {
+        category,
+        showAdmin: true,
+        messages: req.flash(),
+      })
+    } catch (error) {
+      req.flash('error', 'Failed to load category.')
+      res.redirect('/admin')
+    }
+  }
+
+  categoryUpdate = async (req, res) => {
+    const { name, image_url } = req.body
+    const id = req.params.id
+    try {
+      const updatedCategory = await AdminService.updateCategory(id, {
+        name,
+        image_url,
+      })
+      if (updatedCategory) {
+        res.redirect('/admin/category/list')
+      } else {
+        req.flash('error', 'Cập nhập thất bại!!!')
+        const referer = req.get('Referer')
+        res.redirect(referer)
+      }
+    } catch (error) {
+      req.flash('error', error.message || 'Cập nhập thất bại!!!')
+      const referer = req.get('Referer')
+      res.redirect(referer)
+    }
+  }
+
+  categoryDestroy = async (req, res) => {
+    try {
+      const id = req.params.id
+      await Category.findOneAndDelete({ id })
+      res.json({ success: true, message: 'Xóa thành công' })
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Có lỗi xảy ra khi xóa',
       })
     }
   }

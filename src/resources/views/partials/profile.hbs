@@ -32,10 +32,18 @@
           </label>
           <input
             type='text'
+            id='user_code'
+            name='user_code'
+            readonly
+            value="{{sessionUserCode}}"
+            class='mt-1 block w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-800'
+          />
+					<input
+            type='text'
             id='id'
             name='id'
             readonly
-            value="{{sessionUserCode}}"
+            value="{{sessionUserID}}"
             class='mt-1 block w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-800'
           />
         </div>
@@ -274,6 +282,7 @@
 		const modal = document.getElementById('logoutModal')
 		if (!modal) return
 		if (show) {
+			document.getElementById('errorAlert').classList.add('hidden')
 			modal.classList.remove('hidden')
 		} else {
 			modal.classList.add('hidden')

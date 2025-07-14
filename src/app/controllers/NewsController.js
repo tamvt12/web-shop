@@ -1,59 +1,22 @@
-const News = require('../models/News')
-const Users = require('../models/User')
+const NewsService = require('../services/NewsService')
+
 class NewsController {
   // Get all news articles
-  index = async (req, res) => {
+  index = async (req, res, next) => {
     try {
       const page = parseInt(req.query.page) || 1
       const perPage = 15
-      const totalNews = await News.countDocuments({})
-      const totalPages = Math.ceil(totalNews / perPage)
-
-      const pages = []
-      const maxPagesToShow = 5
-      let startPage, endPage
-      if (totalPages <= maxPagesToShow) {
-        startPage = 1
-        endPage = totalPages
-      } else {
-        const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
-        const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
-        if (page <= maxPagesBeforeCurrent) {
-          startPage = 1
-          endPage = maxPagesToShow
-        } else if (page + maxPagesAfterCurrent >= totalPages) {
-          startPage = totalPages - maxPagesToShow + 1
-          endPage = totalPages
-        } else {
-          startPage = page - maxPagesBeforeCurrent
-          endPage = page + maxPagesAfterCurrent
-        }
-      }
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i)
-      }
-
-      const newsList = await News.find({})
-        .sort({ created_at: -1 })
-        .skip((page - 1) * perPage)
-        .limit(perPage)
-        .lean()
-
-      for (let newsItem of newsList) {
-        const user = await Users.findOne(
-          { id: newsItem.author },
-          {
-            name: 1,
-            _id: 0,
-          },
-        ).lean()
-        newsItem.user_name = user ? user.name : ''
-      }
+      const {
+        newsList,
+        currentPage,
+        totalPages,
+        pages,
+      } = await NewsService.getPaginatedNews(page, perPage)
 
       res.render('admin/news/list', {
         showAdmin: true,
         news: newsList,
-        currentPage: page,
+        currentPage,
         totalPages,
         pages,
       })
@@ -68,19 +31,16 @@ class NewsController {
   }
 
   // Store new article
-  store = (req, res) => {
+  store = async (req, res) => {
     const { title, content, summary, image_url } = req.body
-
     try {
-      const news = new News({
+      await NewsService.createNews({
         title,
         content,
         summary,
         image_url,
         author: req.session.userId,
       })
-
-      news.save()
       req.flash('success', 'Bài viết đã được tạo thành công!')
       res.redirect('/admin/news/list')
     } catch (error) {
@@ -92,13 +52,7 @@ class NewsController {
   // Show edit form
   edit = async (req, res) => {
     try {
-      const news = await News.findOne(
-        { id: req.params.id },
-        {
-          _id: 0,
-          __v: 0,
-        },
-      ).lean()
+      const news = await NewsService.getNewsById(req.params.id)
       res.render('admin/news/edit', {
         news,
         showAdmin: true,
@@ -114,17 +68,12 @@ class NewsController {
   update = async (req, res) => {
     const { title, content, summary, image_url } = req.body
     try {
-      const updatedNews = await News.findOneAndUpdate(
-        { id: req.params.id },
-        {
-          title,
-          content,
-          summary,
-          image_url,
-          updated_at: Date.now,
-        },
-      )
-
+      const updatedNews = await NewsService.updateNews(req.params.id, {
+        title,
+        content,
+        summary,
+        image_url,
+      })
       if (updatedNews) {
         res.redirect('/admin/news/list')
       } else {
@@ -142,7 +91,7 @@ class NewsController {
   destroy = async (req, res) => {
     try {
       const id = req.params.id
-      await News.findOneAndDelete({ id })
+      await NewsService.deleteNews(id)
       res.json({ success: true, message: 'Xóa thành công' })
     } catch (error) {
       res.status(500).json({
@@ -152,19 +101,9 @@ class NewsController {
     }
   }
 
-  showList = async (req, res) => {
+  showList = async (req, res, next) => {
     try {
-      const newsList = await News.find({}).sort({ created_at: -1 }).lean()
-      for (let newsItem of newsList) {
-        const user = await Users.findOne(
-          { id: newsItem.author },
-          {
-            name: 1,
-            _id: 0,
-          },
-        ).lean()
-        newsItem.user_name = user ? user.name : ''
-      }
+      const newsList = await NewsService.getAllNewsWithUser()
       res.render('news', { newsList })
     } catch (error) {
       next(error)
@@ -173,37 +112,15 @@ class NewsController {
 
   showDetail = async (req, res) => {
     try {
-      const news = await News.findOne({ id: req.params.id })
+      const news = await NewsService.getNewsById(req.params.id)
       if (!news) {
         return res.status(404).render('404')
       }
-
-      news.views = (news.views || 0) + 1
-      await news.save()
-
-      const user = await Users.findOne(
-        { id: news.author },
-        {
-          name: 1,
-          _id: 0,
-        },
-      ).lean()
-
-      const relatedNews = await News.find({ id: { $ne: news.id } })
-        .sort({ created_at: -1 })
-        .limit(3)
-        .lean()
-
+      await NewsService.incrementViews(news.id)
+      const plainNews = await NewsService.getNewsWithUserById(news.id)
+      const relatedNews = await NewsService.getRelatedNews(news.id, 3)
       const excludeIds = [news.id, ...relatedNews.map((n) => n.id)]
-
-      const latestNews = await News.find({ id: { $nin: excludeIds } })
-        .sort({ created_at: -1 })
-        .limit(3)
-        .lean()
-
-      const plainNews = news.toObject()
-      plainNews.user_name = user ? user.name : ''
-
+      const latestNews = await NewsService.getLatestNews(excludeIds, 3)
       res.render('news-detail', {
         new: plainNews,
         relatedNews,
