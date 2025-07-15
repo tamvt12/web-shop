@@ -64,7 +64,7 @@ class NewsController {
 
   // Show create form
   create = (req, res) => {
-    res.render('admin/news/add', { showAdmin: true })
+    res.render('admin/news/add', { showAdmin: true, messages: req.flash() })
   }
 
   // Store new article
@@ -72,6 +72,12 @@ class NewsController {
     const { title, content, summary, image_url } = req.body
 
     try {
+      if (!title || !content || !summary) {
+        req.flash('error', 'Chưa nhập hết các mục!!!')
+        const referer = req.get('Referer')
+        return res.redirect(referer)
+      }
+
       const news = new News({
         title,
         content,
@@ -114,6 +120,11 @@ class NewsController {
   update = async (req, res) => {
     const { title, content, summary, image_url } = req.body
     try {
+      if (!title || !content || !summary) {
+        req.flash('error', 'Chưa nhập hết các mục!!!')
+        const referer = req.get('Referer')
+        return res.redirect(referer)
+      }
       const updatedNews = await News.findOneAndUpdate(
         { id: req.params.id },
         {

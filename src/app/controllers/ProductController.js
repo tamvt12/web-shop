@@ -74,13 +74,14 @@ class ProductController {
         res.render('admin/product/add', {
           showAdmin: true,
           categories,
+          messages: req.flash(),
         })
       })
       .catch(next)
   }
 
   store = (req, res) => {
-    const { category_id, name, description, price, stock, image_url } = req.body
+    const { category_id, name, description, image_url } = req.body
     const variantTypes = req.body.variant_type || []
     const variantPrices = req.body.variant_price || []
     const variantStocks = req.body.variant_stock || []
@@ -103,14 +104,7 @@ class ProductController {
       })
     }
     try {
-      if (
-        category_id === '' &&
-        name === '' &&
-        description === '' &&
-        price === '' &&
-        stock === '' &&
-        image_url === ''
-      ) {
+      if (!category_id || !name || variants.length === 0) {
         req.flash('error', 'Chưa nhập hết các mục!!!')
         return res.redirect('/admin/product/add')
       }
@@ -118,8 +112,6 @@ class ProductController {
       const product = new Product({
         name,
         description,
-        price,
-        stock,
         category_id,
         image_url,
         variants,
@@ -173,7 +165,7 @@ class ProductController {
   }
 
   update = async (req, res) => {
-    const { category_id, name, description, price, stock, image_url } = req.body
+    const { category_id, name, description, image_url } = req.body
     const id = req.params.id
     // Lấy variants từ form
     const variantTypes = req.body.variant_type || []
@@ -198,14 +190,7 @@ class ProductController {
       })
     }
     try {
-      if (
-        category_id === '' &&
-        name === '' &&
-        description === '' &&
-        price === '' &&
-        stock === '' &&
-        image_url === ''
-      ) {
+      if (!category_id || !name || variants.length === 0) {
         req.flash('error', 'Chưa nhập hết các mục!!!')
         const referer = req.get('Referer')
         res.redirect(referer)
@@ -215,8 +200,6 @@ class ProductController {
         {
           name,
           description,
-          price,
-          stock,
           category_id,
           image_url,
           variants,

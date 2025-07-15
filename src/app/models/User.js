@@ -14,6 +14,8 @@ const User = new Schema({
   phone: { type: String, default: null, length: 10 },
   address: { type: String, default: null },
   user_code: { type: String, unique: true },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
 })
 
 User.plugin(AutoIncrement, { inc_field: 'id', id: 'user_id_counter' })
