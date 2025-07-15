@@ -1,4 +1,6 @@
 const UserService = require('../services/UserService')
+const crypto = require('crypto')
+const nodemailer = require('nodemailer')
 
 class UserController {
   index = async (req, res, next) => {
@@ -210,6 +212,89 @@ class UserController {
         message: error.message || 'Có lỗi xảy ra khi đổi mật khẩu',
       })
     }
+  }
+
+  showForgotPasswordForm = (req, res) => {
+    res.render('forgot-password', { showLogin: true, messages: req.flash() })
+  }
+
+  handleForgotPassword = async (req, res) => {
+    const { email } = req.body
+    const user = await UserService.getUserByEmail(email)
+    if (!user) {
+      req.flash('error', 'Email không tồn tại!')
+      return res.redirect('/forgot-password')
+    }
+    const token = crypto.randomBytes(32).toString('hex')
+    user.resetPasswordToken = token
+    user.resetPasswordExpires = Date.now() + 3600000 // 1h
+    await user.save()
+
+    // Cấu hình gửi email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'vutrongtam1999@gmail.com',
+        pass: 'jyrd meij amrt wwcg',
+      },
+    })
+
+    const resetUrl = `http://${req.headers.host}/reset-password/${token}`
+    await transporter.sendMail({
+      to: user.email,
+      subject: 'Đặt lại mật khẩu',
+      html: `<p>Bạn nhận được email này vì đã yêu cầu đặt lại mật khẩu.</p>
+             <p>Nhấn vào link sau để đặt lại mật khẩu: <a href="${resetUrl}">${resetUrl}</a></p>`,
+    })
+    req.flash('success', 'Đã gửi email đặt lại mật khẩu!')
+    res.redirect('/forgot-password')
+  }
+
+  showResetPasswordForm = async (req, res) => {
+    const { token } = req.params
+    const user = await UserService.getUserByResetPasswordToken(token)
+    if (!user) {
+      req.flash('error', 'Token không hợp lệ hoặc đã hết hạn.')
+      return res.redirect('/forgot-password')
+    }
+    res.render('reset-password', {
+      showLogin: true,
+      token,
+      messages: req.flash(),
+    })
+  }
+
+  handleResetPassword = async (req, res) => {
+    const { token } = req.params
+    const { password, confirmPassword } = req.body
+    if (password.length < 6) {
+      req.flash('error', 'Mật khẩu mới phải có ít nhất 6 ký tự')
+      return res.render('reset-password', {
+        showLogin: true,
+        token,
+        messages: req.flash(),
+      })
+    }
+    if (password !== confirmPassword) {
+      req.flash('error', 'Mật khẩu xác nhận không khớp.')
+      return res.render('reset-password', {
+        showLogin: true,
+        token,
+        messages: req.flash(),
+      })
+    }
+    const user = await UserService.getUserByResetPasswordToken(token)
+    if (!user) {
+      req.flash('error', 'Token không hợp lệ hoặc đã hết hạn.')
+      return res.redirect('/reset-password')
+    }
+    // Hash lại mật khẩu
+    const hashedPassword = await UserService.hashPassword(password)
+    user.password = hashedPassword
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpires = undefined
+    await user.save()
+    return res.redirect('/login')
   }
 }
 

@@ -10,5 +10,9 @@ router.post('/login', userController.login)
 router.get('/logout', userController.logout)
 router.post('/update', userController.update)
 router.post('/change-password', checkLoggedIn, userController.changePassword)
+router.get('/forgot-password', userController.showForgotPasswordForm)
+router.post('/forgot-password', userController.handleForgotPassword)
+router.get('/reset-password/:token', userController.showResetPasswordForm)
+router.post('/reset-password/:token', userController.handleResetPassword)
 
 module.exports = router

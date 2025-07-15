@@ -97,6 +97,23 @@ class UserService {
     await user.save()
     return true
   }
+
+  getUserByEmail = async (email) => {
+    return await User.findOne({ email })
+  }
+
+  // Tìm user theo token reset password còn hạn
+  getUserByResetPasswordToken = async (token) => {
+    return await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    })
+  }
+
+  // Hash mật khẩu mới
+  hashPassword = async (password) => {
+    return await bcrypt.hash(password, 10)
+  }
 }
 
 module.exports = new UserService()

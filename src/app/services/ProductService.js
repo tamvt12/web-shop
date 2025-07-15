@@ -45,8 +45,6 @@ class ProductService {
       category_id,
       name,
       description,
-      price,
-      stock,
       image_url,
       variant_type,
       variant_price,
@@ -73,22 +71,13 @@ class ProductService {
         stock: variantStocks || 0,
       })
     }
-    if (
-      category_id === '' &&
-      name === '' &&
-      description === '' &&
-      price === '' &&
-      stock === '' &&
-      image_url === ''
-    ) {
+    if (!category_id || !name || variants.length == 0) {
       return { error: 'Chưa nhập hết các mục!!!' }
     }
     try {
       const product = new Product({
         name,
         description,
-        price,
-        stock,
         category_id,
         image_url,
         variants,
@@ -105,8 +94,6 @@ class ProductService {
       category_id,
       name,
       description,
-      price,
-      stock,
       image_url,
       variant_type,
       variant_price,
@@ -133,14 +120,7 @@ class ProductService {
         stock: variantStocks || 0,
       })
     }
-    if (
-      category_id === '' &&
-      name === '' &&
-      description === '' &&
-      price === '' &&
-      stock === '' &&
-      image_url === ''
-    ) {
+    if (!category_id || !name || variants.length == 0) {
       return { error: 'Chưa nhập hết các mục!!!' }
     }
     try {
@@ -149,8 +129,6 @@ class ProductService {
         {
           name,
           description,
-          price,
-          stock,
           category_id,
           image_url,
           variants,

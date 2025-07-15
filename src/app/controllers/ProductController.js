@@ -28,6 +28,7 @@ class ProductController {
         res.render('admin/product/add', {
           showAdmin: true,
           categories,
+          messages: req.flash(),
         })
       })
       .catch(next)
