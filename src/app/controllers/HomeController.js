@@ -5,6 +5,9 @@ const Order_Item = require('../models/Order_Item')
 const Review = require('../models/Review')
 const Category = require('../models/Category')
 const Favorite = require('../models/Favorite')
+const fs = require('fs')
+const fsPromises = fs.promises
+const path = require('path')
 
 class HomeController {
   async countUserOrders(user_id) {
@@ -40,9 +43,27 @@ class HomeController {
   }
 
   home = async (req, res) => {
+    const imageDir = path.join(global.__basedir, 'public/img/slideshow')
     const user_id = req.session.userId
     const cartCount = await this.countUserCarts(user_id)
     const orderCount = await this.countUserOrders(user_id)
+
+    let slideshowImages = []
+
+    try {
+      const files = await fsPromises.readdir(imageDir)
+      const imageFiles = files.filter((file) =>
+        /\.(jpg|jpeg|png|gif|webp)$/i.test(file),
+      )
+      slideshowImages = imageFiles.map((file) => ({
+        image_url: `/img/slideshow/${file}`,
+        name: file,
+      }))
+      console.log('🚀 ~ HomeController ~ slideshowImages:', slideshowImages)
+    } catch (err) {
+      console.error('❌ Lỗi đọc ảnh slideshow:', err)
+    }
+    slideshowImages = [...slideshowImages, ...slideshowImages]
 
     // Lấy tất cả danh mục
     const categoriesRaw = await Category.find({}).lean()
@@ -89,6 +110,7 @@ class HomeController {
       categories,
       orderCount,
       cartCount,
+      slideshowImages,
     })
   }
 

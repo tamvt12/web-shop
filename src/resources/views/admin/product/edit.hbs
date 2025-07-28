@@ -14,7 +14,9 @@
       <!-- Danh mục -->
       <div>
         <label for="category_id" class="block text-custom-base text-black font-medium mb-1">
-          Tên danh mục
+          Tên danh mục<span class='text-red-500'>
+                *
+              </span>
         </label>
         <select
           name="category_id"
@@ -38,7 +40,9 @@
       <!-- Tên sản phẩm -->
       <div>
         <label for="name" class="block text-custom-base text-black font-medium mb-1">
-          Tên sản phẩm
+          Tên sản phẩm<span class='text-red-500'>
+                *
+              </span>
         </label>
         <input
           type="text"
@@ -67,7 +71,9 @@
       <!-- Giá sản phẩm -->
        <div id="variants-section">
         <label class="block text-custom-base text-black font-medium mb-1">
-          Phân loại sản phẩm
+          Phân loại sản phẩm<span class='text-red-500'>
+                *
+              </span>
         </label>
         <div id="variants-list">
           {{#if product.variants}}

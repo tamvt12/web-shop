@@ -90,6 +90,7 @@ app.use((err, req, res, next) => {
     message: err.message || 'Lỗi Server nội bộ',
   })
 })
+global.__basedir = __dirname
 
 route(app)
 app.use('*', (req, res) => {
