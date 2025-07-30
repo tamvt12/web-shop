@@ -5,6 +5,8 @@ const Review = require('../models/Review')
 const Order = require('../models/Order')
 const Order_Item = require('../models/Order_Item')
 const Product = require('../models/Product')
+const crypto = require('crypto')
+const nodemailer = require('nodemailer')
 
 class UserController {
   index = async (req, res, next) => {

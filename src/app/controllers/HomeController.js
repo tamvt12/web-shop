@@ -617,6 +617,27 @@ class HomeController {
     const user_id = req.session.userId
     // Lấy thông tin từ form
     const { name, phone, address, shipping, payment } = req.body
+    // Validate các trường bắt buộc
+    const missingFields = []
+    if (!name || name.trim() === '') missingFields.push('name')
+    if (!phone || phone.trim() === '') missingFields.push('phone')
+    if (!address || address.trim() === '') missingFields.push('address')
+    if (!shipping || shipping.trim() === '') missingFields.push('shipping')
+    if (!payment || payment.trim() === '') missingFields.push('payment')
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        error: `Vui lòng nhập đầy đủ các trường: ${missingFields.join(', ')}`,
+        missingFields
+      })
+    }
+    // Validate định dạng số điện thoại Việt Nam
+    const phoneRegex = /^(0|\+84)[3|5|7|8|9][0-9]{8}$/
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({
+        error: 'Số điện thoại không đúng định dạng Việt Nam',
+        field: 'phone'
+      })
+    }
     try {
       // Lấy tất cả item trong giỏ hàng của user
       const cartItems = await Cart_Item.find({ user_id }).lean()
