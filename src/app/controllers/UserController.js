@@ -12,46 +12,57 @@ class UserController {
   index = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
-    User.countDocuments({})
-      .then(async (totalUsers) => {
-        const totalPages = Math.ceil(totalUsers / perPage)
-        const pages = []
-        const maxPagesToShow = 5
-        let startPage, endPage
-        if (totalPages <= maxPagesToShow) {
+    const search = req.query.search ? req.query.search.trim() : ''
+    let query = {}
+    if (search) {
+      query = {
+        $or: [
+          { user_code: { $regex: search, $options: 'i' } },
+          { name: { $regex: search, $options: 'i' } }
+        ]
+      }
+    }
+    try {
+      const totalUsers = await User.countDocuments(query)
+      const totalPages = Math.ceil(totalUsers / perPage)
+      const pages = []
+      const maxPagesToShow = 5
+      let startPage, endPage
+      if (totalPages <= maxPagesToShow) {
+        startPage = 1
+        endPage = totalPages
+      } else {
+        const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
+        const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
+        if (page <= maxPagesBeforeCurrent) {
           startPage = 1
+          endPage = maxPagesToShow
+        } else if (page + maxPagesAfterCurrent >= totalPages) {
+          startPage = totalPages - maxPagesToShow + 1
           endPage = totalPages
         } else {
-          const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2)
-          const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1
-          if (page <= maxPagesBeforeCurrent) {
-            startPage = 1
-            endPage = maxPagesToShow
-          } else if (page + maxPagesAfterCurrent >= totalPages) {
-            startPage = totalPages - maxPagesToShow + 1
-            endPage = totalPages
-          } else {
-            startPage = page - maxPagesBeforeCurrent
-            endPage = page + maxPagesAfterCurrent
-          }
+          startPage = page - maxPagesBeforeCurrent
+          endPage = page + maxPagesAfterCurrent
         }
-        for (let i = startPage; i <= endPage; i++) {
-          pages.push(i)
-        }
-
-        const users = await User.find({})
-          .skip((page - 1) * perPage)
-          .limit(perPage)
-          .lean()
-        res.render('admin/user/list', {
-          showAdmin: true,
-          users,
-          currentPage: page,
-          totalPages,
-          pages,
-        })
+      }
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i)
+      }
+      const users = await User.find(query)
+        .skip((page - 1) * perPage)
+        .limit(perPage)
+        .lean()
+      res.render('admin/user/list', {
+        showAdmin: true,
+        users,
+        currentPage: page,
+        totalPages,
+        pages,
+        search,
       })
-      .catch(next)
+    } catch (err) {
+      next(err)
+    }
   }
 
   showLogin = (req, res) => {

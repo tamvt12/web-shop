@@ -32,6 +32,7 @@
               name='name'
               placeholder='Nhập tên'
               class='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1'
+							onblur="this.value = this.value.trim()"
             />
           </div>
 
@@ -41,6 +42,7 @@
               name='email'
               placeholder='Nhập email'
               class='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1'
+							onblur="this.value = this.value.trim()"
             />
           </div>
 
@@ -50,12 +52,14 @@
               name='password'
               placeholder='Nhặp mật khẩu'
               class='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1'
+							onblur="this.value = this.value.trim()"
             />
             <input
               type='password'
               name='repeatPassword'
               placeholder='Nhập lại mật khẩu'
               class='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1'
+							onblur="this.value = this.value.trim()"
             />
           </div>
 

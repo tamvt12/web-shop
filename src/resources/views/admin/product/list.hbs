@@ -1,4 +1,37 @@
 <div class='container mx-auto p-5 bg-white'>
+  <!-- Search Form -->
+  <div class='mb-6'>
+    <form method='GET' action='/admin/product/list' class='flex gap-4 items-end'>
+      <div class='flex-1'>
+        <input
+          type='text'
+          id='search'
+          name='search'
+          value='{{search}}'
+          placeholder='Nhập tên sản phẩm'
+          class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent'
+          onblur="this.value = this.value.trim()"
+        />
+      </div>
+      <div class='flex gap-2'>
+        <button
+          type='submit'
+          class='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+        >
+          Tìm kiếm
+        </button>
+        {{#if search}}
+          <a
+            href='/admin/product/list'
+            class='px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2'
+          >
+            Xóa tìm kiếm
+          </a>
+        {{/if}}
+      </div>
+    </form>
+  </div>
+
   <div class='overflow-x-auto'>
     <table class='min-w-full table-fixed border-collapse'>
       <thead>
@@ -83,7 +116,7 @@
                   href="/admin/product/edit/{{this.id}}"
                   class='bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs'
                 >
-                  Edit
+                  Sửa
                 </a>
                 <button
                   type='button'

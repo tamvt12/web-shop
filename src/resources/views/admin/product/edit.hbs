@@ -51,6 +51,7 @@
           class="w-full border rounded px-3 py-2"
           placeholder="Nhập tên sản phẩm"
           value="{{product.name}}"
+					onblur="this.value = this.value.trim()"
         />
       </div>
 
@@ -65,6 +66,7 @@
           class="w-full border rounded px-3 py-2"
           rows="3"
           placeholder="Nhập mô tả sản phẩm"
+					onblur="this.value = this.value.trim()"
         >{{product.description}}</textarea>
       </div>
 
@@ -79,7 +81,7 @@
           {{#if product.variants}}
             {{#each product.variants}}
               <div class="flex space-x-2 mb-2 variant-row">
-                <input type="text" name="variant_type[]" class="border rounded px-2 py-1" placeholder="Tên loại (VD: Size M, Màu Đỏ)" value="{{this.type}}" />
+                <input type="text" name="variant_type[]" class="border rounded px-2 py-1" placeholder="Tên loại (VD: Size M, Màu Đỏ)" value="{{this.type}}" onblur="this.value = this.value.trim()"/>
                 <input type="number" name="variant_price[]" class="border rounded px-2 py-1" placeholder="Giá cho loại này" value="{{this.price}}" />
                 <input type="number" name="variant_stock[]" class="border rounded px-2 py-1" placeholder="Tồn kho loại này" value="{{this.stock}}" />
                 <button type="button" class="remove-variant bg-red-500 text-white px-2 rounded">X</button>

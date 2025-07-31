@@ -55,6 +55,7 @@
           id='name'
           class='w-full border rounded px-3 py-2'
           placeholder='Nhập tên sản phẩm'
+					onblur="this.value = this.value.trim()"
         />
       </div>
 
@@ -72,6 +73,7 @@
           class='w-full border rounded px-3 py-2'
           rows='3'
           placeholder='Nhập mô tả sản phẩm'
+					onblur="this.value = this.value.trim()"
         ></textarea>
       </div>
 
@@ -90,6 +92,7 @@
               name='variant_type[]'
               class='border rounded px-2 py-1'
               placeholder='Tên loại (VD: Size M, Màu Đỏ)'
+							onblur="this.value = this.value.trim()"
             />
             <input
               type='number'

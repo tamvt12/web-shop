@@ -8,7 +8,14 @@ class ProductController {
   index = (req, res, next) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
-    Product.countDocuments({})
+    const search = req.query.search || ''
+
+    const query = {}
+    if (search) {
+      query.name = { $regex: new RegExp(search, 'i') }
+    }
+
+    Product.countDocuments(query)
       .then(async (totalProducts) => {
         const totalPages = Math.ceil(totalProducts / perPage)
         const pages = []
@@ -35,7 +42,7 @@ class ProductController {
           pages.push(i)
         }
 
-        const products = await Product.find({})
+        const products = await Product.find(query)
           .skip((page - 1) * perPage)
           .limit(perPage)
           .lean()
@@ -62,6 +69,7 @@ class ProductController {
           currentPage: page,
           totalPages,
           pages,
+          search,
         })
       })
       .catch(next)

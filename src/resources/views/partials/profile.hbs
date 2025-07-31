@@ -89,6 +89,7 @@
             name='fullName'
             value="{{sessionFullName}}"
             class='mt-1 block w-full border border-gray-300 rounded px-3 py-2'
+						onblur="this.value = this.value.trim()"
           />
         </div>
 
@@ -134,6 +135,7 @@
             name='phone'
             value="{{sessionPhone}}"
             class='mt-1 block w-full border border-gray-300 rounded px-3 py-2'
+						onblur="this.value = this.value.trim()"
           />
         </div>
 
@@ -150,6 +152,7 @@
             name='address'
             value="{{sessionAddress}}"
             class='mt-1 block w-full border border-gray-300 rounded px-3 py-2'
+						onblur="this.value = this.value.trim()"
           />
         </div>
       </form>

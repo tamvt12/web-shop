@@ -35,6 +35,7 @@
 							<div class="relative">
 								<input type="text" name="search" value="{{search}}" placeholder="Tìm kiếm"
 									class="w-full px-4 py-2 rounded-md border-custom text-black bg-white focus:outline-none focus:ring"
+									onblur="this.value = this.value.trim()"
 								/>
 								<button type="submit" class="absolute right-0 top-0 w-12 h-full text-white bg-btn border-r rounded-r">
 									<i class="fas fa-search"></i>
@@ -122,6 +123,7 @@
 			<div class="relative">
 				<input type="text" name="search" value="{{search}}" placeholder="Search for..."
 					class="w-full px-4 py-2 rounded-md border-custom text-black bg-white focus:outline-none focus:ring"
+					onblur="this.value = this.value.trim()"
 				/>
 				<button type="submit" class="absolute right-0 top-0 w-12 h-full text-white bg-btn border-r rounded-r">
 					<i class="fas fa-search"></i>

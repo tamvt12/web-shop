@@ -30,6 +30,7 @@
         name='title'
         required
         class='w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+				onblur="this.value = this.value.trim()"
       />
     </div>
 
@@ -49,6 +50,7 @@
         rows='3'
         required
         class='w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+				onblur="this.value = this.value.trim()"
       ></textarea>
     </div>
 
@@ -62,7 +64,7 @@
           *
         </span>
       </label>
-      <textarea id='editor' name='content'></textarea>
+      <textarea id='editor' name='content' onblur="this.value = this.value.trim()"></textarea>
     </div>
 
     <div class='mb-4'>
