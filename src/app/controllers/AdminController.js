@@ -1,6 +1,189 @@
+const Order = require('../models/Order')
+const Order_Item = require('../models/Order_Item')
+const Product = require('../models/Product')
+const User = require('../models/User')
 const AdminService = require('../services/AdminService')
 
 class AdminController {
+
+	dashboard = async (req, res) => {
+    try {
+			const currentYear = new Date().getFullYear()
+		const startYear = 2020
+      // Lấy tháng từ query parameter, mặc định là tháng hiện tại
+      const selectedMonth = req.query.month || new Date().getMonth() + 1
+      const selectedYear = req.query.year || new Date().getFullYear()
+
+      // Tạo date range cho tháng được chọn
+      const startDate = new Date(selectedYear, selectedMonth - 1, 1)
+      const endDate = new Date(selectedYear, selectedMonth, 0, 23, 59, 59)
+
+      // Thống kê doanh số theo tháng
+      const monthlyStats = await Order.aggregate([
+        {
+          $match: {
+            created_at: { $gte: startDate, $lte: endDate },
+            status: 'Đã hoàn thành'
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: '$total' },
+            totalOrders: { $sum: 1 }
+          }
+        }
+      ])
+
+      // Thống kê doanh số theo ngày trong tháng
+      const dailyStats = await Order.aggregate([
+        {
+          $match: {
+            created_at: { $gte: startDate, $lte: endDate },
+            status: 'Đã hoàn thành'
+          }
+        },
+        {
+          $group: {
+            _id: { $dayOfMonth: '$created_at' },
+            revenue: { $sum: '$total' },
+            orders: { $sum: 1 }
+          }
+        },
+        {
+          $sort: { '_id': 1 }
+        }
+      ])
+
+      // Sản phẩm bán chạy trong tháng
+      const topProducts = await Order_Item.aggregate([
+        {
+          $lookup: {
+            from: 'orders',
+            localField: 'order_id',
+            foreignField: 'id',
+            as: 'order'
+          }
+        },
+        {
+          $unwind: '$order'
+        },
+        {
+          $match: {
+            'order.created_at': { $gte: startDate, $lte: endDate },
+            'order.status': 'Đã hoàn thành'
+          }
+        },
+        {
+          $lookup: {
+            from: 'products',
+            localField: 'product_id',
+            foreignField: 'id',
+            as: 'product'
+          }
+        },
+        {
+          $unwind: '$product'
+        },
+        {
+          $group: {
+            _id: '$product_id',
+            productName: { $first: '$product.name' },
+            productImage: { $first: '$product.image_url' },
+            totalQuantity: { $sum: '$quantity' },
+            totalRevenue: { $sum: { $multiply: ['$price', '$quantity'] } }
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        },
+        {
+          $limit: 10
+        }
+      ])
+
+      // Thống kê tổng quan
+      const totalUsers = await User.countDocuments({})
+      const totalProducts = await Product.countDocuments({})
+      const totalOrders = await Order.countDocuments({})
+      const totalRevenue = await Order.aggregate([
+        {
+          $match: { status: 'Đã hoàn thành' }
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$total' }
+          }
+        }
+      ])
+
+      // Chuẩn bị dữ liệu cho chart
+      const chartData = {
+        labels: [],
+        revenue: [],
+        orders: []
+      }
+
+      // Tạo dữ liệu cho tất cả các ngày trong tháng
+      const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate()
+      for (let day = 1; day <= daysInMonth; day++) {
+        chartData.labels.push(day)
+        const dayData = dailyStats.find(d => d._id === day)
+        const revenue = dayData ? (typeof dayData.revenue === 'object' ? parseFloat(dayData.revenue.toString()) : parseFloat(dayData.revenue)) : 0
+        chartData.revenue.push(revenue)
+        chartData.orders.push(dayData ? dayData.orders : 0)
+      }
+
+      // Xử lý dữ liệu Decimal128
+      const processedMonthlyStats = monthlyStats[0] || { totalRevenue: 0, totalOrders: 0 }
+      if (processedMonthlyStats.totalRevenue && typeof processedMonthlyStats.totalRevenue === 'object') {
+        processedMonthlyStats.totalRevenue = parseFloat(processedMonthlyStats.totalRevenue.toString())
+      }
+
+      const processedTotalRevenue = totalRevenue[0]?.total || 0
+      const finalTotalRevenue = typeof processedTotalRevenue === 'object' ? parseFloat(processedTotalRevenue.toString()) : processedTotalRevenue
+
+            // Xử lý dữ liệu sản phẩm bán chạy
+      const processedTopProducts = topProducts.map(product => {
+        // Xử lý ảnh sản phẩm - lấy ảnh đầu tiên nếu có nhiều ảnh
+        let productImage = product.productImage
+        if (typeof productImage === 'string') {
+          const imageArray = productImage
+            .split(',')
+            .map((url) => url.trim())
+            .filter((url) => url !== '')
+          productImage = imageArray.length > 0 ? imageArray[0] : ''
+        }
+
+        return {
+          ...product,
+          productImage: productImage,
+          totalRevenue: typeof product.totalRevenue === 'object' ? parseFloat(product.totalRevenue.toString()) : product.totalRevenue
+        }
+      })
+
+      res.render('admin/dashboard', {
+        showAdmin: true,
+        selectedMonth: parseInt(selectedMonth),
+        selectedYear: parseInt(selectedYear),
+				startYear,
+				currentYear,
+        monthlyStats: processedMonthlyStats,
+        chartData,
+        topProducts: processedTopProducts,
+        totalUsers,
+        totalProducts,
+        totalOrders,
+        totalRevenue: finalTotalRevenue
+      })
+    } catch (error) {
+      console.error('Dashboard error:', error)
+      req.flash('error', 'Có lỗi xảy ra khi tải dashboard')
+      res.redirect('/admin')
+    }
+  }
+
   showOrder = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15

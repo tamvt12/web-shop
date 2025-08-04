@@ -6,15 +6,23 @@ const AdminService = require('./AdminService')
 const { getFirstImage, getProductRating } = require('../helpers/dataHelpers')
 
 class ProductService {
-  showProduct = async (page = 1, perPage = 15) => {
-    const totalProducts = await Product.countDocuments({})
+  showProduct = async (page = 1, perPage = 15, search = '') => {
+		let query = {}
+    if (search) {
+      query = {
+        $or: [
+          { name: { $regex: search, $options: 'i' } }
+        ]
+      }
+    }
+    const totalProducts = await Product.countDocuments(query)
     const { totalPages, pages, skip } = AdminService.getPagination(
       totalProducts,
       page,
       perPage,
     )
 
-    const products = await Product.find({}).skip(skip).limit(perPage).lean()
+    const products = await Product.find(query).skip(skip).limit(perPage).lean()
     for (let product of products) {
       const category = await Category.findOne(
         { id: product.category_id },

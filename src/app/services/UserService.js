@@ -4,14 +4,23 @@ const jwt = require('jsonwebtoken')
 const AdminService = require('./AdminService')
 
 class UserService {
-  getUsersPaginated = async (page = 1, perPage = 15) => {
-    const totalUsers = await User.countDocuments({})
+  getUsersPaginated = async (page = 1, perPage = 15, search = '') => {
+		let query = {}
+    if (search) {
+      query = {
+        $or: [
+          { user_code: { $regex: search, $options: 'i' } },
+          { name: { $regex: search, $options: 'i' } }
+        ]
+      }
+    }
+    const totalUsers = await User.countDocuments(query)
     const { totalPages, pages, skip } = AdminService.getPagination(
       totalUsers,
       page,
       perPage,
     )
-    const users = await User.find({}).skip(skip).limit(perPage).lean()
+    const users = await User.find(query).skip(skip).limit(perPage).lean()
     return { users, currentPage: page, totalPages, pages }
   }
 

@@ -6,19 +6,21 @@ class UserController {
   index = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
+		const search = req.query.search ? req.query.search.trim() : ''
     try {
       const {
         users,
         currentPage,
         totalPages,
         pages,
-      } = await UserService.getUsersPaginated(page, perPage)
+      } = await UserService.getUsersPaginated(page, perPage, search)
       res.render('admin/user/list', {
         showAdmin: true,
         users,
         currentPage,
         totalPages,
         pages,
+				search,
       })
     } catch (error) {
       next(error)
@@ -77,7 +79,7 @@ class UserController {
       req.session.token = token
       req.session.role = user.role
       if (user.role === 'admin') {
-        res.redirect('/admin/order/list')
+        res.redirect('/admin/dashboard')
       } else {
         res.redirect('/')
       }

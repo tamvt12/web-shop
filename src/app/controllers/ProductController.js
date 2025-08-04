@@ -6,18 +6,20 @@ class ProductController {
   index = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const perPage = 15
+		const search = req.query.search ? req.query.search.trim() : ''
     const {
       products,
       currentPage,
       totalPages,
       pages,
-    } = await ProductService.showProduct(page, perPage)
+    } = await ProductService.showProduct(page, perPage, search)
     res.render('admin/product/list', {
       showAdmin: true,
       products,
       currentPage,
       totalPages,
       pages,
+			search
     })
   }
 

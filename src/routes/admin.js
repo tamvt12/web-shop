@@ -7,6 +7,12 @@ const UserController = require('../app/controllers/UserController')
 const NewsController = require('../app/controllers/NewsController')
 const ProductController = require('../app/controllers/ProductController')
 
+router.get('/', checkLoggedIn, checkAdmin, (req, res) => {
+	res.redirect('/admin/dashboard')
+})
+
+router.get('/dashboard', AdminController.dashboard)
+
 //đơn hàng
 router.get('/order/list', AdminController.showOrder)
 router.get('/order/edit/:id', AdminController.editOrder)
