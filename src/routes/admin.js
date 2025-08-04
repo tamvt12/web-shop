@@ -5,6 +5,7 @@ const FavoriteController = require('../app/controllers/FavoriteController')
 const { upload } = require('../config/upload')
 const UserController = require('../app/controllers/UserController')
 
+router.get('/dashboard', AdminController.dashboard)
 router.get('/order/list', AdminController.showOrder)
 router.get('/order/edit/:id', AdminController.editOrder)
 router.post('/order/edit/:id', AdminController.updateOrder)

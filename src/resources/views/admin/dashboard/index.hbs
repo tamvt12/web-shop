@@ -1,0 +1,263 @@
+{{!-- Dashboard --}}
+<div class="container mx-auto px-4 py-6">
+  <!-- Page Heading -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Trang chủ</h1>
+    <div class="flex items-center space-x-2">
+      <form class="flex items-center space-x-2" method="GET" action="/admin/dashboard">
+        <select name="month" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+					{{#range 1 12}}
+						<option value="{{this}}" {{#if (eq ../selectedMonth this)}}selected{{/if}}>Tháng {{this}}</option>
+					{{/range}}
+				</select>
+				<select name="year" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+					{{#range startYear currentYear}}
+						<option value="{{this}}" {{#if (eq ../selectedYear this)}}selected{{/if}}>{{this}}</option>
+					{{/range}}
+				</select>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          Xem thống kê
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Tổng doanh thu -->
+    <div class="bg-white rounded-lg shadow-md border-l-4 border-blue-500 p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">
+            Tổng doanh thu ({{selectedMonth}}/{{selectedYear}})
+          </p>
+          <p class="text-2xl font-bold text-gray-800 mt-2">
+            {{formatCurrency monthlyStats.totalRevenue}}
+          </p>
+        </div>
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-calendar text-blue-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tổng đơn hàng -->
+    <div class="bg-white rounded-lg shadow-md border-l-4 border-green-500 p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-green-600 uppercase tracking-wide">
+            Tổng Đơn hàng ({{selectedMonth}}/{{selectedYear}})
+          </p>
+          <p class="text-2xl font-bold text-gray-800 mt-2">
+            {{monthlyStats.totalOrders}}
+          </p>
+        </div>
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tổng người dùng -->
+    <div class="bg-white rounded-lg shadow-md border-l-4 border-cyan-500 p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-cyan-600 uppercase tracking-wide">
+            Tổng người dùng
+          </p>
+          <p class="text-2xl font-bold text-gray-800 mt-2">
+            {{totalUsers}}
+          </p>
+        </div>
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-cyan-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-users text-cyan-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tổng sản phẩm -->
+    <div class="bg-white rounded-lg shadow-md border-l-4 border-yellow-500 p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-yellow-600 uppercase tracking-wide">
+            Tổng sản phẩm
+          </p>
+          <p class="text-2xl font-bold text-gray-800 mt-2">
+            {{totalProducts}}
+          </p>
+        </div>
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-box text-yellow-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class=" gap-6 mb-8">
+    <!-- Biểu đồ doanh thu & đơn hàng -->
+    <div class=" bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h6 class="text-lg font-semibold text-gray-800">Biểu đồ doanh thu theo ngày ({{selectedMonth}}/{{selectedYear}})</h6>
+      </div>
+      <div class="relative h-80">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h6 class="text-lg font-semibold text-gray-800">Top 10 sản phẩm bán chạy ({{selectedMonth}}/{{selectedYear}})</h6>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hình ảnh</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên sản phẩm</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số lượng bán</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doanh thu</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {{#each topProducts}}
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{add @index 1}}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{#if this.productImage}}
+                <img src="{{this.productImage}}" alt="{{this.productName}}" class="w-12 h-12 object-cover rounded-lg">
+              {{else}}
+                <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-image text-gray-400"></i>
+                </div>
+              {{/if}}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{this.productName}}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{this.totalQuantity}}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{formatCurrency this.totalRevenue}}</td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Không có dữ liệu</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+	// Biểu đồ doanh thu & đơn hàng
+	var ctx = document.getElementById("revenueChart");
+	var myCombinedBarChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: [{{#each chartData.labels}}"{{this}}"{{#unless @last}},{{/unless}}{{/each}}],
+			datasets: [
+				{
+					label: "Doanh thu (đ)",
+					backgroundColor: "rgba(59, 130, 246, 0.6)", // xanh dương
+					borderColor: "rgba(59, 130, 246, 1)",
+					borderWidth: 1,
+					yAxisID: 'y1',
+					data: [{{#each chartData.revenue}}{{this}}{{#unless @last}},{{/unless}}{{/each}}]
+				},
+				{
+					label: "Số đơn hàng",
+					backgroundColor: "rgba(234, 88, 12, 0.6)", // cam
+					borderColor: "rgba(234, 88, 12, 1)",
+					borderWidth: 1,
+					yAxisID: 'y2',
+					data: [{{#each chartData.orders}}{{this}}{{#unless @last}},{{/unless}}{{/each}}]
+				}
+			]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			layout: {
+				padding: { left: 10, right: 25, top: 25, bottom: 0 }
+			},
+			scales: {
+				x: {
+					offset: false,
+					ticks: {
+						autoSkip: false,
+						maxRotation: 0,
+						minRotation: 0,
+						callback: function(value, index, ticks) {
+							return this.getLabelForValue(value);
+						}
+					},
+					grid: { display: false }
+				},
+				y1: {
+					type: 'linear',
+					position: 'left',
+					beginAtZero: true,
+					ticks: {
+						callback: function(value) {
+							return number_format(value) + ' đ';
+						}
+					},
+					grid: {
+						color: "rgb(229, 231, 235)",
+						drawBorder: false
+					}
+				},
+				y2: {
+					type: 'linear',
+					position: 'right',
+					beginAtZero: true,
+					grid: { drawOnChartArea: false },
+					ticks: {
+						stepSize: 1,
+						callback: function(value) {
+							return value + ' đơn';
+						}
+					}
+				}
+			},
+			plugins: {
+				legend: {
+					position: 'top'
+				},
+				tooltip: {
+					mode: 'index',
+					intersect: false,
+					callbacks: {
+						label: function(context) {
+							if (context.dataset.label.includes("Doanh thu")) {
+								return context.dataset.label + ': ' + number_format(context.parsed.y) + ' đ';
+							} else {
+								return context.dataset.label + ': ' + context.parsed.y + ' đơn';
+							}
+						}
+					}
+				}
+			}
+		}
+	});
+
+	// Hàm format số
+	function number_format(number, decimals = 0, dec_point = ',', thousands_sep = '.') {
+  number = Number(number) || 0;
+  return number.toLocaleString('vi-VN', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+</script>

@@ -41,6 +41,7 @@ const hbs = engine.create({
       return JSON.stringify(context, null, 2)
     },
     length: helpers.length,
+    range: helpers.range,
   },
   extname: '.hbs',
 })

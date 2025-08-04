@@ -110,6 +110,14 @@ function length(array) {
   return 0
 }
 
+function range(start, end, options) {
+  let result = ''
+  for (let i = start; i <= end; i++) {
+    result += options.fn(i)
+  }
+  return result
+}
+
 module.exports = {
   formatCurrency,
   ifCond,
@@ -131,4 +139,5 @@ module.exports = {
   },
   array,
   length,
+  range,
 }
